@@ -7,6 +7,7 @@ grafana:
 ##### prometheus-operator #####
 prometheusOperator:
   priorityClassName: addons-critical
+  createCustomResource: false
 prometheus:
   podDisruptionBudget:
     enabled: true
