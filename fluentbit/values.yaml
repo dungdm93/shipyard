@@ -10,7 +10,8 @@ input:
     enabled: true
 
 filter:
-  mergeLogKey: payload
+  mergeJSONLog: true
+  mergeLogKey:  payload
 
 extraEntries:
   input:
