@@ -81,7 +81,7 @@ spec:
   externalConfig:
     policies: []
     auth: []
-    secrets: []
-    plugins: []
     audit: []
+    plugins: []
+    secrets: []
     startupSecrets: []
