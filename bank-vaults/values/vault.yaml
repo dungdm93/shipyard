@@ -24,6 +24,7 @@ spec:
     bankVaults: {}
     prometheusExporter: {}
 
+  podAntiAffinity: # topologyKey used by podAntiAffinity
   nodeAffinity: {}
   nodeSelector: {}
   tolerations: []
@@ -35,10 +36,19 @@ spec:
     annotations:
     spec: {}
 
+  envsConfig: []
   vaultEnvsConfig: []
+  credentialsConfig: {}
   volumes: []
   volumeMounts: []
   volumeClaimTemplates: []
+
+  ########## Etcd configuration ##########
+  # See: https://github.com/banzaicloud/bank-vaults/blob/master/operator/deploy/cr-etcd-ha.yaml
+  # etcdSize: 1
+  # etcdPVCSpec:
+  # etcdAnnotations:
+  # etcdPodAnnotations:
 
   ########## Vault configuration ##########
   statsdDisabled: false
