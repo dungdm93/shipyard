@@ -1,0 +1,3 @@
+fullnameOverride: bank-vault-operator
+
+priorityClassName: "addons-critical"

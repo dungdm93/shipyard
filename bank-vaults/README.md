@@ -11,3 +11,15 @@
 **Vault** by HashiCorp manage secrets and protect sensitive data.
 
 **bank-vaults** by BanzaiCloud
+
+## 1. Deployment
+### 1.1 Installation `Vault Operator`
+```bash
+helm repo add banzaicloud https://kubernetes-charts.banzaicloud.com
+helm repo update
+
+helm install banzaicloud/vault-operator \
+    --name=bank-vault-operator \
+    --namespace=bank-vault \
+    --values=values/vault-operator.yaml
+```
