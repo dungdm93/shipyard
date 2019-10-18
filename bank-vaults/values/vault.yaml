@@ -1,0 +1,56 @@
+apiVersion: vault.banzaicloud.com/v1alpha1
+kind: Vault
+metadata:
+  name: bank-vault
+spec:
+  size: 3
+  image: vault:1.2.3
+  bankVaultsImage: banzaicloud/bank-vaults:0.5.3
+
+  ########## Kubernetes configuration ##########
+  annotations: {}                 # Common annotations for all created resources
+  vaultAnnotations: {}            # Vault Pods, Services and TLS Secret annotations
+  vaultConfigurerAnnotations: {}  # VaultConfigurer Pods and Services annotations
+  vaultLabels: {}                 # Vault Pods, Services and TLS Secret labels
+  vaultConfigurerLabels: {}       # VaultConfigurer Pods and Services labels
+
+  nodeAffinity: {}
+  nodeSelector: {}
+  tolerations: []
+
+  serviceAccount: vault
+
+  serviceType: ClusterIP
+  ingress:
+    annotations:
+    spec: {}
+
+  vaultEnvsConfig: []
+  volumes: []
+  volumeMounts: []
+
+  ########## Vault configuration ##########
+  caNamespaces: []
+
+  # A YAML representation of a final vault config file.
+  # See https://www.vaultproject.io/docs/configuration/ for more information.
+  # Use "${ .Env.VARIABLE_NAME }" for environment interpolation
+  config: {}
+
+  # Describe where you would like to store the Vault unseal keys and root token.
+  unsealConfig:
+    options:
+      # The preFlightChecks flag enables unseal and root token storage tests
+      # This is true by default
+      preFlightChecks: true
+    kubernetes:
+      secretNamespace: bank-vault
+
+  # See https://github.com/banzaicloud/bank-vaults/blob/master/docs/cli-tool/README.md#example-external-vault-configuration
+  externalConfig:
+    policies: []
+    auth: []
+    secrets: []
+    plugins: []
+    audit: []
+    startupSecrets: []
