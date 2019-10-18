@@ -14,6 +14,11 @@ spec:
   vaultLabels: {}                 # Vault Pods, Services and TLS Secret labels
   vaultConfigurerLabels: {}       # VaultConfigurer Pods and Services labels
 
+  resources:
+    vault: {}
+    bankVaults: {}
+    prometheusExporter: {}
+
   nodeAffinity: {}
   nodeSelector: {}
   tolerations: []
