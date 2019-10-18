@@ -50,6 +50,12 @@ spec:
   # etcdAnnotations:
   # etcdPodAnnotations:
 
+  ########## Fluentd configuration ##########
+  # See: https://github.com/banzaicloud/bank-vaults/blob/master/operator/deploy/cr-audit.yaml
+  # fluentdEnabled: true
+  # fluentdImage: banzaicloud/fluentd-s3:latest
+  # fluentdConfig:
+
   ########## Vault configuration ##########
   statsdDisabled: false
   caNamespaces: []
