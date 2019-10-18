@@ -36,6 +36,7 @@ spec:
   volumeClaimTemplates: []
 
   ########## Vault configuration ##########
+  statsdDisabled: false
   caNamespaces: []
 
   # A YAML representation of a final vault config file.
