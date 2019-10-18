@@ -33,6 +33,7 @@ spec:
   vaultEnvsConfig: []
   volumes: []
   volumeMounts: []
+  volumeClaimTemplates: []
 
   ########## Vault configuration ##########
   caNamespaces: []
