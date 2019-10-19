@@ -8,25 +8,64 @@ spec:
   bankVaultsImage: banzaicloud/bank-vaults:0.5.3
 
   ########## Kubernetes configuration ##########
+  ##### Pod metadata
   annotations: {}                 # Common annotations for all created resources
   vaultAnnotations: {}            # Vault Pods, Services and TLS Secret annotations
   vaultConfigurerAnnotations: {}  # VaultConfigurer Pods and Services annotations
   vaultLabels: {}                 # Vault Pods, Services and TLS Secret labels
   vaultConfigurerLabels: {}       # VaultConfigurer Pods and Services labels
 
+  ##### Pod spec for fine-grained configurations.
+  ### NOTE: It take lower priority and can be merge or override by other (bellow) configs
+  # # VaultPodSpec is a Kubernetes Pod specification snippet (`spec:` block) that will be merged into
+  # # the operator generated Vault Pod specification.
+  # # default:
+  # vaultPodSpec:
+  #   enableServiceLinks: false
+  #   priorityClassName: high-priority
+  # # VaultConfigurerPodSpec is a Kubernetes Pod specification snippet (`spec:` block) that will be merged into
+  # # the operator generated VaultConfigurer Pod specification.
+  # # default:
+  # vaultConfigurerPodSpec:
+  #   enableServiceLinks: false
+  #   priorityClassName: high-priority
+
+  # EnvsConfig is a list of environment variable passed into `bank-vaults` container in both Vault and VaultConfigurer pods.
+  # default:
+  envsConfig: []
+  # VaultEnvsConfig is a list of environment variable passed into `vault` container and `config-templating` initContainer in Vault pod.
+  # default:
+  vaultEnvsConfig: []
+  # Volumes define some extra Kubernetes Volumes for the Vault Pods.
+  # default:
+  volumes: []
+  # VolumeClaimTemplates define some extra Kubernetes PersistentVolumeClaim templates for the Vault Statefulset.
+  # default:
+  # TODO: N/A in bank-vaults 0.5.3
+  volumeClaimTemplates: []
+  # VolumeMounts define extra Volume mounts for `vault` container and `config-templating` initContainer in Vault pod.
+  # default:
+  volumeMounts: []
+  # BankVaultsVolumeMounts define extra Volume mounts for the `bank-vaults` Sidecar container.
+  # default:
+  # TODO: N/A in bank-vaults 0.5.3
+  bankVaultsVolumeMounts: []
+
   serviceAccount: vault
-  securityContext:
-  vaultPodSpec:
-    # priorityClassName: high-priority
-  vaultConfigurerPodSpec:
-    # priorityClassName: high-priority
 
-  resources:
-    vault: {}
-    bankVaults: {}
-    prometheusExporter: {}
+  # # Resources defines the resource limits for all the resources created by the operator.
+  # # default:
+  # resources:
+  #   vault: {}
+  #   bankVaults: {}
+  #   prometheusExporter: {}
+  #   etcd: {}
 
-  podAntiAffinity: # topologyKey used by podAntiAffinity
+  # # SecurityContext is a Kubernetes **PodSecurityContext** that will be applied
+  # # to all Pods (Vault + VaultConfigurer) created by the operator.
+  # securityContext:
+
+  podAntiAffinity: # **topologyKey** used by podAntiAffinity
   nodeAffinity: {}
   nodeSelector: {}
   tolerations: []
@@ -35,13 +74,6 @@ spec:
   ingress:
     annotations:
     spec: {}
-
-  envsConfig: []
-  vaultEnvsConfig: []
-  volumes: []
-  volumeMounts: []
-  bankVaultsVolumeMounts: []
-  volumeClaimTemplates: []
 
   ########## Vault configuration ##########
   caNamespaces: []
