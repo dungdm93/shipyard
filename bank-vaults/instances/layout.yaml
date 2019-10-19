@@ -76,17 +76,34 @@ spec:
     spec: {}
 
   ########## Vault configuration ##########
-  caNamespaces: []
-  credentialsConfig: {}
+  # # CANamespaces define a list of namespaces where the generated CA certificate for Vault should be distributed,
+  # # use ["*"] for all namespaces.
+  # # default:
+  # caNamespaces: []
+
+  # # CredentialsConfig defines a external Secret for Vault and how it should be mounted to the Vault Pod
+  # # for example accessing Cloud resources.
+  # # default:
+  # credentialsConfig:
+  #   env:        string
+  #   path:       string
+  #   secretName: string
+
   # # Optionally Watch for the cert-manager managed secret and trigger restart of Vault when the secret change
   # watchedSecretsLabels:
   # - certmanager.k8s.io/certificate-name: <cert-manager-tls-secret-name>
-  tlsExpiryThreshold: 168h
-  serviceMonitorEnabled: false
+
+  # # TLSExpiryThreshold is the Vault TLS certificate expiration threshold in Go's Duration format.
+  # # default: 168h
+  # tlsExpiryThreshold: 168h
+
+  # # ServiceMonitorEnabled enables the creation of Prometheus Operator specific ServiceMonitor for Vault.
+  # # default: false
+  # serviceMonitorEnabled: false
 
   # A YAML representation of a final vault config file.
-  # See https://www.vaultproject.io/docs/configuration/ for more information.
-  # Use "${ .Env.VARIABLE_NAME }" for environment interpolation
+  # See https://www.vaultproject.io/docs/configuration/ for more details.
+  # Use "${.Env.VARIABLE_NAME}" for environment interpolation
   config: {}
 
   # UnsealConfig defines where the Vault cluster's unseal keys and root token should be stored after initialization.
