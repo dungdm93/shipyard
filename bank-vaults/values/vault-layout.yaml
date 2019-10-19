@@ -3,7 +3,7 @@ kind: Vault
 metadata:
   name: bank-vault
 spec:
-  size: 3
+  size: 1
   image: vault:1.2.3
   bankVaultsImage: banzaicloud/bank-vaults:0.5.3
 
@@ -14,6 +14,8 @@ spec:
   vaultLabels: {}                 # Vault Pods, Services and TLS Secret labels
   vaultConfigurerLabels: {}       # VaultConfigurer Pods and Services labels
 
+  serviceAccount: vault
+  securityContext:
   vaultPodSpec:
     # priorityClassName: high-priority
   vaultConfigurerPodSpec:
@@ -29,8 +31,6 @@ spec:
   nodeSelector: {}
   tolerations: []
 
-  serviceAccount: vault
-
   serviceType: ClusterIP
   ingress:
     annotations:
@@ -38,37 +38,28 @@ spec:
 
   envsConfig: []
   vaultEnvsConfig: []
-  credentialsConfig: {}
   volumes: []
   volumeMounts: []
+  bankVaultsVolumeMounts: []
   volumeClaimTemplates: []
 
-  ########## Etcd configuration ##########
-  # See: https://github.com/banzaicloud/bank-vaults/blob/master/operator/deploy/cr-etcd-ha.yaml
-  # etcdSize: 1
-  # etcdPVCSpec:
-  # etcdAnnotations:
-  # etcdPodAnnotations:
-
-  ########## Fluentd configuration ##########
-  # See: https://github.com/banzaicloud/bank-vaults/blob/master/operator/deploy/cr-audit.yaml
-  # fluentdEnabled: true
-  # fluentdImage: banzaicloud/fluentd-s3:latest
-  # fluentdConfig:
-
   ########## Vault configuration ##########
-  statsdDisabled: false
   caNamespaces: []
+  credentialsConfig: {}
   # # Optionally Watch for the cert-manager managed secret and trigger restart of Vault when the secret change
   # watchedSecretsLabels:
   # - certmanager.k8s.io/certificate-name: <cert-manager-tls-secret-name>
+  tlsExpiryThreshold: 168h
+  serviceMonitorEnabled: false
 
   # A YAML representation of a final vault config file.
   # See https://www.vaultproject.io/docs/configuration/ for more information.
   # Use "${ .Env.VARIABLE_NAME }" for environment interpolation
   config: {}
 
-  # Describe where you would like to store the Vault unseal keys and root token.
+  # UnsealConfig defines where the Vault cluster's unseal keys and root token should be stored after initialization.
+  # See the type's documentation for more details. Only one method may be specified.
+  # default: Kubernetes Secret based unsealing
   unsealConfig:
     options:
       # The preFlightChecks flag enables unseal and root token storage tests
@@ -77,11 +68,43 @@ spec:
     kubernetes:
       secretNamespace: bank-vault
 
+  # ExternalConfig is higher level configuration block which instructs the Bank Vaults Configurer to configure Vault
+  # through its API, thus allows setting up:
+  # - Secret Engines
+  # - Auth Methods
+  # - Autid Devices
+  # - Plugin Backends
+  # - Policies
+  # - Startup Secrets (Bank Vaults feature)
+  # A documented example: https://github.com/banzaicloud/bank-vaults/blob/master/vault-config.yml
   # See https://github.com/banzaicloud/bank-vaults/blob/master/docs/cli-tool/README.md#example-external-vault-configuration
+  # default:
   externalConfig:
-    policies: []
-    auth: []
-    audit: []
-    plugins: []
-    secrets: []
-    startupSecrets: []
+    # policies: []
+    # auth: []
+    # audit: []
+    # plugins: []
+    # secrets: []
+    # startupSecrets: []
+
+
+
+  ########## Etcd configuration ##########
+  # See: https://github.com/banzaicloud/bank-vaults/blob/master/operator/deploy/cr-etcd-ha.yaml
+  # etcdSize: 1
+  # etcdVersion: 3.1.15
+  # etcdRepository:
+  # etcdPodBusyBoxImage:
+  # etcdAnnotations:
+  # etcdPodAnnotations:
+  # etcdPVCSpec:
+
+  ########## StatsD configuration ##########
+  # statsdDisabled: false
+  # statsdImage: prom/statsd-exporter:latest
+
+  ########## Fluentd configuration ##########
+  # See: https://github.com/banzaicloud/bank-vaults/blob/master/operator/deploy/cr-audit.yaml
+  # fluentdEnabled: false
+  # fluentdImage: banzaicloud/fluentd-s3:latest
+  # fluentdConfig:
