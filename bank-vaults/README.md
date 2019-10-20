@@ -21,5 +21,7 @@ helm repo update
 helm install banzaicloud/vault-operator \
     --name=bank-vault-operator \
     --namespace=bank-vault \
-    --values=values/vault-operator.yaml
+    --values=operator/values.yaml
 ```
+
+### 1.2 Installation `Vault` instance
