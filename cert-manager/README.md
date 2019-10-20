@@ -29,7 +29,7 @@ helm repo update
 helm install \
   --name cert-manager \
   --namespace cert-manager \
-  --version v0.10.0 \
+  --version v0.10.1 \
   --values values.yaml \
   jetstack/cert-manager
 ## or ##
