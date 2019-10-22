@@ -20,7 +20,7 @@ helm repo update
 
 helm install banzaicloud/vault-operator \
     --name=bank-vault-operator \
-    --namespace=bank-vault \
+    --namespace=vault-secret \
     --values=operator/values.yaml
 ```
 
