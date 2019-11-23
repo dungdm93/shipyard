@@ -93,11 +93,12 @@ The default installation is intended to suit monitoring a kubernetes cluster the
 ### 2.2 Installation
 * Install CRDs
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/alertmanager.crd.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/prometheus.crd.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/prometheusrule.crd.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/servicemonitor.crd.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/podmonitor.crd.yaml
+export CRD_BASE_URL=https://github.com/coreos/prometheus-operator/raw/v0.34.0/example/prometheus-operator-crd
+kubectl apply -f "${CRD_BASE_URL}/prometheus.crd.yaml"
+kubectl apply -f "${CRD_BASE_URL}/alertmanager.crd.yaml"
+kubectl apply -f "${CRD_BASE_URL}/servicemonitor.crd.yaml"
+kubectl apply -f "${CRD_BASE_URL}/podmonitor.crd.yaml"
+kubectl apply -f "${CRD_BASE_URL}/prometheusrule.crd.yaml"
 ```
 * Install Operator++
 ```bash
