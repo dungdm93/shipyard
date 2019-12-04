@@ -8,8 +8,8 @@ cleanup-apt() {
 
 cleanup-conda() {
     conda clean --all --yes
-    find $CONDA_DIR -type f -name '*.py[co]'    -delete \
-                 -o -type d -name '__pycache__' -delete
+    # find $CONDA_DIR -type f -name '*.py[co]'    -delete \
+    #              -o -type d -name '__pycache__' -delete
     rm -rfv $CONDA_DIR/share/jupyter/lab/staging
 }
 
@@ -26,7 +26,7 @@ cleanup-home() {
 
 for type in "$@"; do
     case $type in
-        apt) 
+        apt)
             cleanup-apt
             ;;
         conda)
