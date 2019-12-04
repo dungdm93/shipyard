@@ -8,7 +8,8 @@
 resource "google_project_iam_member" "devops" {
   for_each = toset([
     "roles/editor",
-    "roles/container.clusterAdmin"
+    "roles/storage.admin",
+    "roles/container.clusterAdmin",
   ])
   role   = each.value
   member = "group:dataops@teko.vn"

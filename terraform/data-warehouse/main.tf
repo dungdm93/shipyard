@@ -1,10 +1,10 @@
-variable "credentials" {
-  description = "Either the path to or contents of a ServiceAccount key file in JSON format"
+variable "region" {
+  description = "Region for DWH cluster"
   type        = string
+  default     = "asia-southeast1"
 }
 
 provider "google" {
-  credentials = "${var.credentials}"
   project     = "teko-warehouse"
   version     = "~> 3.0.0-beta.1"
 }
