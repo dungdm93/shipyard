@@ -7,4 +7,5 @@ variable "region" {
 provider "google" {
   project = "teko-warehouse"
   version = "~> 3.0.0-beta.1"
+  region  = var.region
 }

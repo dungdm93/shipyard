@@ -1,6 +1,9 @@
 resource "google_container_cluster" "teko-warehouse" {
-  name     = "teko-warehouse"
-  location = "${var.region}-a"
+  name = "teko-warehouse"
+
+  # Used to bootstrap cluster, after that, remove immediately
+  initial_node_count       = 1
+  remove_default_node_pool = true
 
   network = google_compute_network.teko-warehouse-net.self_link
   private_cluster_config {
