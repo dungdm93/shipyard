@@ -5,7 +5,7 @@
 # ref: https://cloud.google.com/iam/docs/understanding-roles#predefined_roles
 # ref: https://www.terraform.io/docs/providers/google/r/google_project_iam.html
 
-resource "google_project_iam_member" "devops" {
+resource "google_project_iam_member" "dataops" {
   for_each = toset([
     "roles/editor",
     "roles/storage.admin",
