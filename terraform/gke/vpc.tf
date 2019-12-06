@@ -4,6 +4,59 @@ resource "google_compute_network" "teko-warehouse-net" {
   routing_mode            = "REGIONAL"
 }
 
+resource "google_compute_firewall" "teko-warehouse-firewall-allow-icmp" {
+  name     = "${google_compute_network.teko-warehouse-net.name}-allow-icmp"
+  network  = google_compute_network.teko-warehouse-net.name
+  priority = 65534
+
+  allow {
+    protocol = "icmp"
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  # targets = all
+}
+
+resource "google_compute_firewall" "teko-warehouse-firewall-allow-internal" {
+  name     = "${google_compute_network.teko-warehouse-net.name}-allow-internal"
+  network  = google_compute_network.teko-warehouse-net.name
+  priority = 65534
+
+  # tcp, udp, icmp, esp, ah, sctp
+  allow { protocol = "all" }
+
+  source_ranges = ["10.128.0.0/9"]
+  # targets = all
+}
+
+resource "google_compute_firewall" "teko-warehouse-firewall-allow-rdp" {
+  name     = "${google_compute_network.teko-warehouse-net.name}-allow-rdp"
+  network  = google_compute_network.teko-warehouse-net.name
+  priority = 65534
+
+  allow {
+    protocol = "tcp"
+    ports    = ["3389"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  # targets = all
+}
+
+resource "google_compute_firewall" "teko-warehouse-firewall-allow-ssh" {
+  name     = "${google_compute_network.teko-warehouse-net.name}-allow-ssh"
+  network  = google_compute_network.teko-warehouse-net.name
+  priority = 65534
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  # targets = all
+}
+
 resource "google_compute_address" "teko-warehouse-gw-ip" {
   name   = "teko-warehouse-gw-ip"
   region = var.region
