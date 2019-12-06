@@ -50,6 +50,7 @@ resource "google_container_node_pool" "teko-warehouse-storage" {
   node_config {
     preemptible  = false
     machine_type = "n1-standard-8"
+    tags         = ["teko-warehouse", "storage"]
 
     labels = {
       "machine.teko.vn/tier" = "storage"
@@ -75,6 +76,7 @@ resource "google_container_node_pool" "teko-warehouse-compute" {
   node_config {
     preemptible  = true
     machine_type = "n1-standard-8"
+    tags         = ["teko-warehouse", "compute"]
 
     labels = {
       "machine.teko.vn/tier" = "compute"

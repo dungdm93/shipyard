@@ -34,3 +34,18 @@ resource "google_compute_router_nat" "teko-warehouse-nat" {
     filter = "ALL"
   }
 }
+
+# Other solution: Using ConfigConnector
+# https://cloud.google.com/config-connector/docs/
+resource "google_compute_firewall" "teko-warehouse-cert-manager" {
+  name    = "teko-warehouse-cert-manager"
+  network = google_compute_network.teko-warehouse-net.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["6443"]
+  }
+
+  source_ranges = [google_container_cluster.teko-warehouse.private_cluster_config[0].master_ipv4_cidr_block]
+  target_tags   = ["teko-warehouse"]
+}
