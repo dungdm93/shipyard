@@ -1,0 +1,25 @@
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: ca-issuer
+spec:
+  ca:
+    secretName: ca-key-pair
+---
+##### Example #####
+# apiVersion: certmanager.k8s.io/v1alpha1
+# kind: Certificate
+# metadata:
+#   name: example-com
+# spec:
+#   secretName: example-com-tls
+#   issuerRef:
+#     name: ca-issuer
+#     kind: Issuer
+#   commonName: example.com
+#   organization:
+#   - Example CA
+#   dnsNames:
+#   - example.com
+#   - www.example.com

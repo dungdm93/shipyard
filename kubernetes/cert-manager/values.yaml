@@ -1,0 +1,18 @@
+extraArgs: ["--enable-certificate-owner-ref"]
+ingressShim:
+  defaultIssuerKind: ClusterIssuer
+  defaultIssuerName: letsencrypt
+prometheus:
+  servicemonitor:
+    enabled: true
+
+resources: &resources
+  requests:
+    cpu: 10m
+    memory: 32Mi
+
+webhook:
+  resources: *resources
+
+cainjector:
+  resources: *resources
