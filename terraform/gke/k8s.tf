@@ -1,9 +1,14 @@
+data "google_container_engine_versions" "_" {
+  version_prefix = "1.14."
+}
+
 resource "google_container_cluster" "teko-warehouse" {
   name = "teko-warehouse"
 
   # Used to bootstrap cluster, after that, remove immediately
   initial_node_count       = 1
   remove_default_node_pool = true
+  min_master_version       = data.google_container_engine_versions._.latest_master_version
 
   network = google_compute_network.teko-warehouse-net.self_link
   private_cluster_config {
