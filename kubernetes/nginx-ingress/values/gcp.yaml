@@ -2,10 +2,9 @@ controller:
   service:
     enabled: true
     type: LoadBalancer
-    loadBalancerIP: 11.22.33.44 # Your reserve static IP
+    loadBalancerIP: 35.240.252.23 # teko-warehouse-gw-ip
     annotations:
       # TODO: Create container-native load balancing
       # But now it only supports gce-ingress.
       # See: https://cloud.google.com/kubernetes-engine/docs/how-to/container-native-load-balancing
-      # cloud.google.com/neg: '{"ingress": true}'
       cloud.google.com/neg: '{"ingress": true}'

@@ -1,0 +1,24 @@
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    # The ACME server URL
+    #  Staging:    https://acme-staging-v02.api.letsencrypt.org/directory
+    #              https://acme-staging.api.letsencrypt.org/directory
+    #  Production: https://acme-v02.api.letsencrypt.org/directory
+    #              https://acme-v01.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: devops@kites.rocks
+    privateKeySecretRef:
+      name: letsencrypt
+    solvers:
+    - http01: # https://cert-manager.io/docs/configuration/acme/http01/
+        ingress: {}
+          # class: nginx
+    # - dns01: {...} # https://cert-manager.io/docs/configuration/acme/dns01/
+
+# ref: https://cert-manager.io/docs/concepts/issuer/
+# ref: https://cert-manager.io/docs/configuration/
