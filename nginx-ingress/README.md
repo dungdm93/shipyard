@@ -10,19 +10,18 @@
 ## 1. Deployment
 ### 1.1. Info
 * Kubernetes: v1.13+
-* Helm: v2.x
-* nginx-ingress: v0.25
-  + Helm chart: v1.20
+* Helm: v3.x
+* nginx-ingress: v0.26
+  + Helm chart: v1.26
 
 ### 1.2 Installation
 ```bash
-helm install stable/nginx-ingress \
-    --name=tinker \
-    --namespace=nginx-ingress \
-    --values=values/cloud-generic.yaml
-## or ##
-helm upgrade tinker stable/nginx-ingress \
-    --values=values/cloud-generic.yaml
+kubectl create ns nginx-ingress
+
+helm upgrade --install \
+    tinker stable/nginx-ingress \
+  --namespace=nginx-ingress \
+  --values=values/cloud-generic.yaml
 ```
 And choose additional values for your environment, e.g: [GCP](values/gcp.yaml) or [BareMetal](values/baremetal.yaml)
 
