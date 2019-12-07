@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: pod-limits
+spec:
+  limits:
+  - type: Pod
+    max:
+      cpu:               2
+      memory:            4Gi
+      ephemeral-storage: 8Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: container-limits
+spec:
+  limits:
+  - type: Container
+    min:
+      cpu:               50m
+      memory:            64Mi
+      ephemeral-storage: 128Mi
+    max:
+      cpu:               1
+      memory:            2Gi
+      ephemeral-storage: 4Gi
+    default:
+      cpu:               100m
+      memory:            128Mi
+      ephemeral-storage: 256Mi
+    defaultRequest:
+      cpu:               100m
+      memory:            128Mi
+      ephemeral-storage: 256Mi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: storage-limits
+spec:
+  limits:
+  - type: PersistentVolumeClaim
+    min:
+      storage: 1Gi
+    max:
+      storage: 64Gi
+
+# TODO: following resources are not limited yet
+# * Block I/O and Bandwidth:   Device  read/write iops/bps
+# * Network I/O and Bandwidth: Network incoming/outgoing iops/bps
+# * ulimit/rlimit: PIDs, nofile, ...

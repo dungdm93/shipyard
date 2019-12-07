@@ -1,0 +1,6 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: addons-critical
+description: Used for addon critical pods
+value: 1000000000 # 1 billion

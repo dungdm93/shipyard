@@ -1,0 +1,52 @@
+# docs:
+# * https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+# * https://kubernetes.io/docs/concepts/policy/resource-quotas/
+# * https://docs.okd.io/3.11/admin_guide/quota.html
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resource-quota
+spec:
+  hard:
+    requests.cpu:    2
+    requests.memory: 4Gi
+    limits.cpu:      8
+    limits.memory:   16Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: storage-resource-quota
+spec:
+  hard:
+    persistentvolumeclaims:     0   # Disable for now
+    requests.storage:           128Gi
+    requests.ephemeral-storage: 8Gi
+    limits.ephemeral-storage:   32Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: object-count-quota
+spec:
+  hard:
+    # Disallow old API
+    count/replicationcontrollers: 0
+    # TODO: bellow configs are not working
+    # count/deployments.extensions: 0
+    # count/replicaset.extensions:  0
+    # count/statefulset.extensions: 0
+    # count/daemonset.extensions:   0
+    # count/ingress.extensions:     0
+
+    # Disallow unsafe API
+    # count/cronjobs.batch:         0
+    # TODO: count/services.xxx is not working
+    services.loadbalancers:       0
+    services.nodeports:           0
+
+    # Restrict number of resources
+    # count/*:          512   # TODO: Invalid
+    count/pods:       128
+    count/secrets:    64
+    count/configmaps: 64
