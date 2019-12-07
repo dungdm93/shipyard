@@ -75,3 +75,4 @@ ref:
   * [gcs](https://github.com/hayorov/helm-gcs)
   * [git](https://github.com/aslafy-z/helm-git)
   * [2to3](https://github.com/helm/helm-2to3)
+  * [diff](https://github.com/databus23/helm-diff)
