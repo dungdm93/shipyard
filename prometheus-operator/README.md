@@ -15,10 +15,10 @@
 ## 2. Deployment
 ### 2.1 Info
 * Kubernetes: v1.13+
-* Helm: v2.x
+* Helm: v3.x
 * Prometheus: v2.12
-* Prometheus Operator: v0.32
-  + Helm chart: v6.11
+* Prometheus Operator: v0.34
+  + Helm chart: v8.3
 
 ### 2.2 Components
 The default installation is intended to suit monitoring a kubernetes cluster the chart is deployed onto. It closely matches the kube-prometheus project. With the installation, the chart also includes dashboards and alerts.
@@ -102,13 +102,10 @@ kubectl apply -f "${CRD_BASE_URL}/prometheusrule.crd.yaml"
 ```
 * Install Operator++
 ```bash
-helm install stable/prometheus-operator \
-    --name=argus \
-    --namespace=kube-observability \
-    --values=values.yaml
-### or ###
-helm upgrade argus stable/prometheus-operator \
-    --values=values.yaml
+helm upgrade --install \
+    argus stable/prometheus-operator \
+  --namespace=kube-observability \
+  --values=values.yaml
 ```
 
 * Delete CRDs
