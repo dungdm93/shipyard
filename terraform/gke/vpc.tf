@@ -90,13 +90,15 @@ resource "google_compute_router_nat" "teko-warehouse-nat" {
 
 # Other solution: Using ConfigConnector
 # https://cloud.google.com/config-connector/docs/
-resource "google_compute_firewall" "teko-warehouse-cert-manager" {
-  name    = "teko-warehouse-cert-manager"
+resource "google_compute_firewall" "teko-warehouse-allow-k8s-webhooks" {
+  name    = "${google_compute_network.teko-warehouse-net.name}-allow-k8s-webhooks"
   network = google_compute_network.teko-warehouse-net.name
 
   allow {
     protocol = "tcp"
-    ports    = ["6443"]
+    # Well-known ports:
+    # cert-manager:        6443
+    # prometheus-operator: 8443
   }
 
   source_ranges = [google_container_cluster.teko-warehouse.private_cluster_config[0].master_ipv4_cidr_block]
