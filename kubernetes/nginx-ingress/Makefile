@@ -1,6 +1,8 @@
+RELEASE := tinker
+NAMESPACE := nginx-ingress
 ENVIRONMENT := gcp
-ifneq ($(ENVIRONMENT),)
-	EXTRA_ARGS := "--values=values/$(ENVIRONMENT).yaml"
+ifneq (${ENVIRONMENT},)
+	EXTRA_ARGS := --values=values/${ENVIRONMENT}.yaml
 endif
 
 repo:
@@ -10,17 +12,17 @@ repo:
 	fi;
 
 apply:	repo
-	@if ! kubectl get ns nginx-ingress > /dev/null 2>&1; then \
-		kubectl create ns nginx-ingress; \
+	@if ! kubectl get ns ${NAMESPACE} > /dev/null 2>&1; then \
+		kubectl create ns ${NAMESPACE}; \
 	fi;
 
 	helm upgrade --install \
-		tinker stable/nginx-ingress \
-		--namespace=nginx-ingress \
-		--values=values/cloud-generic.yaml $(EXTRA_ARGS)
+		${RELEASE} stable/nginx-ingress \
+		--namespace=${NAMESPACE} \
+		--values=values/cloud-generic.yaml ${EXTRA_ARGS}
 
 diff:
 	helm diff upgrade \
-		tinker stable/nginx-ingress \
-		--namespace=nginx-ingress \
-		--values=values/cloud-generic.yaml $(EXTRA_ARGS)
+		${RELEASE} stable/nginx-ingress \
+		--namespace=${NAMESPACE} \
+		--values=values/cloud-generic.yaml ${EXTRA_ARGS}
