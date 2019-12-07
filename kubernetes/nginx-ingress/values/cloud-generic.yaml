@@ -1,0 +1,22 @@
+controller:
+  priorityClassName: "addons-critical"
+  # ingressClass: nginx
+
+  extraArgs:
+    enable-ssl-passthrough: ""
+  config: # See: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
+    ssl-session-timeout: 2h
+    # http://nginx.org/en/docs/http/ngx_http_gzip_module.html
+    use-gzip: 'true'
+    gzip-level: '5'   # 1-9
+    # https://github.com/google/ngx_brotli#configuration-directives
+    enable-brotli: 'true'
+    brotli-level: '6' # 0-11
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+podSecurityPolicy:
+  enabled: true
