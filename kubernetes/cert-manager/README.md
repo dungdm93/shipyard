@@ -9,32 +9,28 @@
 ## 1. Deployment
 ### 1.1. Info
 * Kubernetes: v1.13+
-* Helm: v2.x
-* cert-manager: v0.10
-  + Helm chart: v0.10+
+* Helm: v3.x
+* cert-manager: v0.12
+  + Helm chart: v0.12+
 
 ### 1.2 Installation
 ```bash
 # Install the CustomResourceDefinition resources separately
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.10/deploy/manifests/00-crds.yaml
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/00-crds.yaml
 
 # Create the namespace for cert-manager
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.10/deploy/manifests/01-namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/01-namespace.yaml
 
 # Add the Jetstack Helm repository
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
 
 # Install the cert-manager Helm chart
-helm install \
-  --name cert-manager \
-  --namespace cert-manager \
-  --version v0.10.0 \
-  --values values.yaml \
-  jetstack/cert-manager
-## or ##
-helm upgrade cert-manager jetstack/cert-manager \
-  --values values.yaml
+helm upgrade --install \
+    cert-manager jetstack/cert-manager \
+  --namespace=cert-manager \
+  --version=v0.12.0 \
+  --values=values.yaml
 ```
 
 * [ref](https://docs.cert-manager.io/en/latest/getting-started/install/kubernetes.html#steps)
@@ -42,7 +38,7 @@ helm upgrade cert-manager jetstack/cert-manager \
 ## 2. Usage
 ### 2.1 Create Issuer
 ```bash
-kubectl apply -f issuers/letsencrypt-issuer.yaml
+kubectl apply -f issuers/letsencrypt.yaml
 ```
 
 * ref: [Supported issuer types](https://docs.cert-manager.io/en/latest/tasks/issuers/index.html#supported-issuer-types)

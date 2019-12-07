@@ -1,5 +1,5 @@
 ---
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
   name: ca-issuer
@@ -8,7 +8,7 @@ spec:
     secretName: ca-key-pair
 ---
 ##### Example #####
-# apiVersion: certmanager.k8s.io/v1alpha1
+# apiVersion: cert-manager.io/v1alpha2
 # kind: Certificate
 # metadata:
 #   name: example-com
