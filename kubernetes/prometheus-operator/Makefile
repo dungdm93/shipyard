@@ -1,5 +1,6 @@
-BASE_URL := https://github.com/coreos/prometheus-operator/raw/v0.34.0/example/prometheus-operator-crd
+RELEASE := tinker
 NAMESPACE := kube-observability
+BASE_URL := https://github.com/coreos/prometheus-operator/raw/v0.34.0/example/prometheus-operator-crd
 
 repo:
 	@if ! helm repo list | grep stable > /dev/null 2>&1; then \
@@ -20,12 +21,12 @@ apply:	repo crd
 	fi;
 
 	helm upgrade --install \
-		argus stable/prometheus-operator \
+		${RELEASE} stable/prometheus-operator \
 		--namespace=${NAMESPACE} \
 		--values=values.yaml
 
 diff:
 	helm diff upgrade \
-		argus stable/prometheus-operator \
+		${RELEASE} stable/prometheus-operator \
 		--namespace=${NAMESPACE} \
 		--values=values.yaml
