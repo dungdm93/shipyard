@@ -10,7 +10,7 @@
 ## 1. Architecture
 ![Helm Architecture](/helm/res/helm-2-architecture.png)
 
-## 2. Deployment
+## 2. Installation
 ### 2.1. Install `helm` (client-site component)
 ```bash
 curl -L https://git.io/get_helm.sh | bash
@@ -22,7 +22,7 @@ snap install helm --classic
 # from Homebrew (macOS)
 brew install kubernetes-helm
 
-# From Chocolatey/Scoop (Windows)
+# from Chocolatey/Scoop (Windows)
 choco install kubernetes-helm
 scoop install helm
 ```
@@ -40,6 +40,17 @@ helm init --service-account tiller
 ```
 
 # Helm 3
+## 2. Installation
+```bash
+curl -L https://github.com/helm/helm/raw/master/scripts/get-helm-3 | bash
+
+### or
+# from Homebrew (macOS)
+brew install helm
+
+# from Chocolatey (Windows)
+choco install kubernetes-helm
+```
 
 # References
 * Helm [home](https://helm.sh/) | [repo](https://github.com/helm)
