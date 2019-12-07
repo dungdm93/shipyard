@@ -40,7 +40,7 @@ helm init --service-account tiller
 ```
 
 # Helm 3
-## 2. Installation
+## 1. Installation
 ```bash
 curl -L https://github.com/helm/helm/raw/master/scripts/get-helm-3 | bash
 
@@ -51,6 +51,21 @@ brew install helm
 # from Chocolatey (Windows)
 choco install kubernetes-helm
 ```
+
+ref:
+* [Announcing get.helm.sh](https://helm.sh/blog/get-helm-sh/)
+
+## 2. Migration
+```bash
+rm -rf ~/.helm
+
+helm repo add stable    https://kubernetes-charts.storage.googleapis.com
+helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+helm repo add local     http://127.0.0.1:8879/charts
+```
+
+ref:
+* [How to migrate from Helm v2 to Helm v3](https://helm.sh/blog/migrate-from-helm-v2-to-helm-v3/)
 
 # References
 * Helm [home](https://helm.sh/) | [repo](https://github.com/helm)
