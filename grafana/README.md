@@ -9,19 +9,16 @@
 ## 1. Deployment
 ### 1.1. Info
 * Kubernetes: v1.13+
-* Helm: v2.x
-* Grafana: v6.3
-  + Helm chart: v6.3
+* Helm: v3.x
+* Grafana: v6.5
+  + Helm chart: v4.1
 
 ### 1.2 Installation
 ```bash
-helm install stable/grafana \
-  --name=griffin \
+helm upgrade --install \
+    griffin stable/grafana \
   --namespace=kube-observability \
   --values=values.yaml
-## or ##
-helm upgrade griffin stable/grafana \
-  --values values.yaml
 ```
 
 ## 2. Well-known dashboards

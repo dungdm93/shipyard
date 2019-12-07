@@ -5,19 +5,19 @@ ingress:
     kubernetes.io/tls-acme: "true"
     # kubernetes.io/ingress.class: nginx
   tls:
-  - secretName: "monitor.kites.rocks-tls"
+  - secretName: "lgtm.kites.rocks-tls"
     hosts:
-    - "monitor.kites.rocks"
+    - "lgtm.kites.rocks"
   hosts:
-  - "monitor.kites.rocks"
+  - "lgtm.kites.rocks"
 
 priorityClassName: addons-critical
 
 ##### Grafana configuration #####
 grafana.ini:
   server:
-    domain:   monitor.kites.rocks
-    root_url: https://monitor.kites.rocks
+    domain:   lgtm.kites.rocks
+    root_url: https://lgtm.kites.rocks
   database:
     type:     postgres
     host:     postgres:5432
