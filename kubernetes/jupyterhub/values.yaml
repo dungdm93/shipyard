@@ -31,13 +31,15 @@ proxy:
   secretToken: "45b4b4e126d378feddbb3034ae62c55828f1bb078b3dfc4ded15a0ae5158b062"
   service:
     type: ClusterIP
+  ### TLS already terminated at Ingress controller.
+  # For TLS Passthrough (this config) is not working yet.
   # docs: https://z2jh.jupyter.org/en/latest/administrator/security.html#https
   https:
-    enabled: true
-    type: secret
-    secret:
-      # Created by CertManager ingress-shim
-      name: jupyter.kites.rocks-tls
+    enabled: false
+  #   type: secret
+  #   secret:
+  #     # Created by CertManager ingress-shim
+  #     name: jupyter.kites.rocks-tls
   # pdb:
   #   enabled: true
   #   minAvailable: 1
