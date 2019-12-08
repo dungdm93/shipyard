@@ -28,6 +28,8 @@
 helm repo add jupyterhub https://jupyterhub.github.io/helm-chart/
 helm repo update
 
+kubectl create ns jupyter
+
 helm upgrade --install \
     jove jupyterhub/jupyterhub \
   --namespace=jupyter \
@@ -40,3 +42,4 @@ helm upgrade --install \
 * [JupyterLab](https://jupyterlab.readthedocs.io/)
 * [JupyterHub](https://jupyterhub.readthedocs.io/)
   * [z2jh](https://z2jh.jupyter.org/)
+  * [helm chart](https://github.com/jupyterhub/zero-to-jupyterhub-k8s/tree/master/jupyterhub)

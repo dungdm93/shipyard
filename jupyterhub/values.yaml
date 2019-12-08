@@ -1,0 +1,80 @@
+proxy:
+  secretToken: "45b4b4e126d378feddbb3034ae62c55828f1bb078b3dfc4ded15a0ae5158b062"
+#   https:
+#     enabled: true
+#     hosts:
+#     - jupyter.kites.rocks
+#     type: letsencrypt
+#     letsencrypt:
+#       contactEmail: dataops@kites.rocks
+hub:
+  extraConfig:
+    jupyterlab.py: |
+      # Default command is jupyterhub-singleuser. Other commands aviable are:
+      # jupyter-lab, jupyter-notebook, jupyter-labhub, jupyterhub-singleuser
+      c.Spawner.cmd = ['start-notebook.sh']
+singleuser:
+  # defaultUrl: "/lab"
+  extraEnv:
+    JUPYTER_ENABLE_LAB: "yes"
+    GRANT_SUDO: "yes"
+  uid: 0
+
+  # Resources
+  cpu:
+    limit: 4
+    guarantee: 0.5
+  memory:
+    limit: 4G
+    guarantee: 512M
+  storage:
+    capacity: 2Gi
+
+  # Images
+  image:
+    name: jupyter/minimal-notebook
+    tag:  65761486d5d3
+
+  profileList:
+  - display_name: "Minimal"
+    description: "Minimal Jupyter Notebook Stack"
+    default: true
+
+  - display_name: "PySpark"
+    description: "The Jupyter Python + Spark + Mesos stack"
+    kubespawner_override:
+      image: jupyter/pyspark-notebook
+      # service_account: spark-sa
+      # TODO: not working, yet.
+      # volumes:
+      # - name: spark-conf
+      #   configMap:
+      #     defaultMode: 420
+      #     name: spark-conf
+      # volumeMounts:
+      # - name: spark-conf
+      #   mountPath: /usr/local/spark/conf
+
+  - display_name: "TensorFlow"
+    description: "The Jupyter Scientific Python stack w/ Tensorflow"
+    kubespawner_override:
+      image: jupyter/tensorflow-notebook
+
+prePuller:
+  hook:
+    enabled: false
+  continuous:
+    enabled: false
+
+auth:
+  admin:
+    access: true
+    users:
+    - dung.dm
+  # type: google
+  # google:
+  #   clientId: "yourlongclientidstring.apps.googleusercontent.com"
+  #   clientSecret: "adifferentlongstring"
+  #   callbackUrl: "http://<your_jupyterhub_host>/hub/oauth_callback"
+  #   hostedDomain: "teko.vn"
+  #   loginService: "Google OAuth2"
