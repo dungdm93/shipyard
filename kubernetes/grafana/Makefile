@@ -7,7 +7,7 @@ repo:
 		helm repo update; \
 	fi;
 
-apply:	repo crd
+apply:	repo
 	@if ! kubectl get ns ${NAMESPACE} > /dev/null 2>&1; then \
 		kubectl create ns ${NAMESPACE}; \
 	fi;
