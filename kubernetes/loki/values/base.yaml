@@ -1,0 +1,22 @@
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+  pspEnabled: true
+
+priorityClassName: addons-critical
+
+podDisruptionBudget:
+  minAvailable: 1
+
+replicas: 3
+
+networkPolicy:
+  enabled: false
+
+serviceMonitor:
+  enabled: true
+
+tracing:
+  jaegerAgentHost:
