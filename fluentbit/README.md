@@ -16,17 +16,14 @@ Fluent Bit Workflow:
 ## 2. Deployment
 ### 2.1. Info
 * Kubernetes: v1.13+
-* Helm: v2.x
-* Fluent Bit: v1.2
-  + Helm chart: v2.7
+* Helm: v3.x
+* Fluent Bit: v1.3
+  + Helm chart: v2.8
 
 ### 2.2 Installation
 ```bash
-helm install stable/fluent-bit \
-  --name=tivan-fluentbit \
+helm upgrade --install \
+    tivan-fluentbit stable/fluent-bit \
   --namespace=kube-observability \
-  --values=values.yaml
-## or ##
-helm upgrade tivan-fluentbit stable/fluent-bit \
   --values=values.yaml
 ```
