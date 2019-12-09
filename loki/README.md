@@ -27,6 +27,8 @@ helm upgrade --install \
   --namespace=kube-observability \
   --values=values.yaml
 ```
+And choose additional values for your environment, e.g:
+* [local](loki/values/local.yaml): `boltdb` for index & `filesystem` for chunks store
 
 ## 3. References
 * [docs](https://github.com/grafana/loki/tree/master/docs/)
