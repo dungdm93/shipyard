@@ -1,5 +1,3 @@
-nameOverride: tivan
-
 trackOffsets: true
 input:
   systemd:
@@ -36,6 +34,11 @@ extraVolumeMounts:
 - name: loki-labelmap
   mountPath: /fluent-bit/etc/labelmap.json
   subPath: labelmap.json
+
+image:
+  fluent_bit:
+    repository: grafana/fluent-bit-plugin-loki
+    tag:  v1.1.0-amd64
 
 rbac:
   create: true
