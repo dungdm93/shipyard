@@ -29,12 +29,12 @@ Data stacks
   * [x] Grafana
   * [x] Prometheus
   * [ ] FluentBit
-  * [ ] Loki
+  * [x] Loki
   * [ ] Jaeger
 * [x] JupyterHub
 * [ ] Airflow
 * [ ] Kafka
-* [ ] ClockHouse
-* [ ] Elastic stack
-  * [ ] ElasticSearch
-  * [ ] Kibana
+* [ ] ClickHouse
+* [x] Elastic stack
+  * [x] ElasticSearch
+  * [x] Kibana
