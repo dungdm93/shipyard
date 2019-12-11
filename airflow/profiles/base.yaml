@@ -1,0 +1,21 @@
+airflow:
+  ## Generate fernetKey with:
+  ##    python -c "from cryptography.fernet import Fernet; FERNET_KEY = Fernet.generate_key().decode(); print(FERNET_KEY)"
+  fernetKey: ""
+
+workers:
+  enabled: false
+
+ingress:
+  enabled: true
+  web:
+    host: airflow.kites.rocks
+    path: ""
+    annotations:
+      kubernetes.io/tls-acme: "true"
+    tls:
+      enabled: true
+      secretName: airflow.kites.rocks-tls
+
+serviceMonitor:
+  enabled: true
