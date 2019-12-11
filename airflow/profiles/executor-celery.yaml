@@ -10,7 +10,8 @@ workers:
     instances: 1
 
 flower:
-  urlPrefix: "/flower"
+  # BUG: urlPrefix is not working
+  urlPrefix: /flower
 
 ingress:
   flower:
