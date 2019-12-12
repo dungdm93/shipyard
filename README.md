@@ -32,7 +32,7 @@ Data stacks
   * [x] Loki
   * [ ] Jaeger
 * [x] JupyterHub
-* [ ] Airflow
+* [x] Airflow
 * [ ] Kafka
 * [ ] ClickHouse
 * [x] Elastic stack
