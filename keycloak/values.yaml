@@ -1,0 +1,36 @@
+keycloak:
+  replicas: 3
+  basepath: ""
+
+  serviceAccount:
+    create: true
+  username: admin
+  password: SuperSecr3t
+
+  priorityClassName: addons-critical
+  podDisruptionBudget:
+    minAvailable: 1
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/tls-acme: "true"
+    hosts:
+    - keycloak.kites.rocks
+    path: /
+    tls:
+    - hosts:
+      - keycloak.kites.rocks
+      secretName: keycloak.kites.rocks-tls
+
+  persistence:
+    dbVendor: postgres
+
+    dbHost:     postgres.host
+    dbPort:     5432
+    dbName:     keycloak
+    dbUser:     postgres-user
+    dbPassword: postgres-pass
+
+test:
+  enabled: false
