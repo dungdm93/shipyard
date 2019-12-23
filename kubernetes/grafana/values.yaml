@@ -33,23 +33,23 @@ grafana.ini:
   #   password:     supersecret
   #   from_name:    Grafana
   #   from_address: devops@kites.rocks
-  # auth:
-  #   disable_login_form: true
-  #   oauth_auto_login: true
-  #   signout_redirect_url: https://kites.rocks
-  # auth.basic:
-  #   enabled: false
-  # auth.google:
-  #   enabled: true
-  #   client_id: CLIENT_ID
-  #   client_secret: CLIENT_SECRET
-  #   scopes: >
-  #     https://www.googleapis.com/auth/userinfo.profile
-  #     https://www.googleapis.com/auth/userinfo.email
-  #   auth_url: https://accounts.google.com/o/oauth2/auth
-  #   token_url: https://accounts.google.com/o/oauth2/token
-  #   allowed_domains: kites.rocks
-  #   allow_sign_up: true
+  auth:
+    disable_login_form: true
+    oauth_auto_login: true
+    signout_redirect_url: https://kites.rocks
+  auth.basic:
+    enabled: false
+  auth.google:
+    enabled: true
+    client_id: 470658049023-lpshbt1e7ssa2bd5ne7656kpaf13fonm.apps.googleusercontent.com
+    client_secret: rp7ISm-WRUcNJxVHOUMnRoKp
+    scopes: >
+      https://www.googleapis.com/auth/userinfo.profile
+      https://www.googleapis.com/auth/userinfo.email
+    auth_url: https://accounts.google.com/o/oauth2/auth
+    token_url: https://accounts.google.com/o/oauth2/token
+    # allowed_domains: kites.rocks
+    allow_sign_up: true
 
 # ldap: {}
 # smtp: {}
