@@ -55,13 +55,13 @@ auth:
   admin:
     access: true      # admins can access user's notebooks
     users: [dungdm93]  # list of admins
-  # type: google
-  # google:
-  #   clientId: "yourlongclientidstring.apps.googleusercontent.com"
-  #   clientSecret: "adifferentlongstring"
-  #   callbackUrl: "http://jupyter.kites.rocks/hub/oauth_callback"
-  #   hostedDomain: "kites.rocks"
-  #   loginService: "Google OAuth2"
+  type: google
+  google:
+    clientId: "470658049023-lpshbt1e7ssa2bd5ne7656kpaf13fonm.apps.googleusercontent.com"
+    clientSecret: "rp7ISm-WRUcNJxVHOUMnRoKp"
+    callbackUrl: "https://jupyter.kites.rocks/hub/oauth_callback"
+    hostedDomain: "teko.vn"
+    loginService: "Google OAuth2"
   state:  # docs: https://jupyterhub.readthedocs.io/en/stable/reference/authenticators.html#authentication-state
     enabled: true
     cryptoKey: "342c258df45ce7868f97d1e11e2ba0445a66ebc9f78728a8ebc3d26f43a46493"
