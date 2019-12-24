@@ -54,7 +54,7 @@ proxy:
 auth:
   admin:
     access: true      # admins can access user's notebooks
-    users: [dungdm93]  # list of admins
+    users: ["dung.dm", "dungdm93"]  # list of admins
   type: google
   google:
     clientId: "470658049023-lpshbt1e7ssa2bd5ne7656kpaf13fonm.apps.googleusercontent.com"
@@ -99,23 +99,32 @@ singleuser:
 
   - display_name: "PySpark"
     description: "The Jupyter Python + Spark + Mesos stack"
+    # https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
     kubespawner_override:
       image: jupyter/pyspark-notebook
-      # service_account: spark-sa
-      # TODO: not working, yet.
-      # volumes:
-      # - name: spark-conf
-      #   configMap:
-      #     defaultMode: 420
-      #     name: spark-conf
-      # volumeMounts:
-      # - name: spark-conf
-      #   mountPath: /usr/local/spark/conf
+      service_account: spark-sa
+      volumes:
+      - name: spark-conf
+        configMap:
+          defaultMode: 420
+          name: spark-conf
+      - name: home
+        persistentVolumeClaim:
+          claimName: claim-{username}{servername}
+      volume_mounts:
+      - name: spark-conf
+        mountPath: /usr/local/spark/conf
+      - name: home
+        mountPath: /home/jovyan
 
   - display_name: "TensorFlow"
     description: "The Jupyter Scientific Python stack w/ Tensorflow"
     kubespawner_override:
       image: jupyter/tensorflow-notebook
+
+  # FIXME
+  extraPodConfig:
+    enableServiceLinks: false
 
   ### Kubernetes configs
   # networkPolicy:

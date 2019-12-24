@@ -13,6 +13,10 @@ apply:	repo
 		kubectl create ns ${NAMESPACE}; \
 	fi;
 
+	kubectl apply --namespace=${NAMESPACE} \
+		-f spark-sa.yaml \
+		-f spark-conf.yaml
+
 	helm upgrade --install \
 		${RELEASE} jupyterhub/jupyterhub \
 		--namespace=${NAMESPACE} \
@@ -20,6 +24,10 @@ apply:	repo
 		--values=values.yaml
 
 diff:
+	kubectl diff --namespace=${NAMESPACE} \
+		-f spark-sa.yaml \
+		-f spark-conf.yaml
+
 	helm diff upgrade \
 		${RELEASE} jupyterhub/jupyterhub \
 		--namespace=${NAMESPACE} \
