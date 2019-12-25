@@ -93,7 +93,7 @@ hub:
   #         cidr: 0.0.0.0/0
 
 proxy:
-  secretToken: "45b4b4e126d378feddbb3034ae62c55828f1bb078b3dfc4ded15a0ae5158b062"
+  secretToken: 45b4b4e126d378feddbb3034ae62c55828f1bb078b3dfc4ded15a0ae5158b062
   service:
     type: ClusterIP
   ### TLS already terminated at Ingress controller.
@@ -122,14 +122,14 @@ auth:
     users: ["dung.dm", "dungdm93"]  # list of admins
   type: google
   google:
-    clientId: "470658049023-lpshbt1e7ssa2bd5ne7656kpaf13fonm.apps.googleusercontent.com"
-    clientSecret: "rp7ISm-WRUcNJxVHOUMnRoKp"
-    callbackUrl: "https://jupyter.kites.rocks/hub/oauth_callback"
-    hostedDomain: "teko.vn"
-    loginService: "Google OAuth2"
+    clientId:     470658049023-lpshbt1e7ssa2bd5ne7656kpaf13fonm.apps.googleusercontent.com
+    clientSecret: rp7ISm-WRUcNJxVHOUMnRoKp
+    callbackUrl:  https://jupyter.kites.rocks/hub/oauth_callback
+    hostedDomain: teko.vn
+    loginService: Google OAuth2
   state:  # docs: https://jupyterhub.readthedocs.io/en/stable/reference/authenticators.html#authentication-state
     enabled: true
-    cryptoKey: "342c258df45ce7868f97d1e11e2ba0445a66ebc9f78728a8ebc3d26f43a46493"
+    cryptoKey: 342c258df45ce7868f97d1e11e2ba0445a66ebc9f78728a8ebc3d26f43a46493
 
 singleuser:
   ### Using JupyterLab by default. Other solution:
@@ -158,12 +158,12 @@ singleuser:
     tag:  latest
 
   profileList:
-  - display_name: "Minimal"
-    description: "Minimal Jupyter Notebook Stack"
+  - display_name: Minimal
+    description:  Minimal Jupyter Notebook Stack
     default: true
 
-  - display_name: "PySpark"
-    description: "The Jupyter Python + Spark + Mesos stack"
+  - display_name: PySpark
+    description:  The Jupyter Python + Spark + Mesos stack
     # https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
     kubespawner_override:
       image: jupyter/pyspark-notebook
@@ -182,8 +182,8 @@ singleuser:
       - name: home
         mountPath: /home/jovyan
 
-  - display_name: "TensorFlow"
-    description: "The Jupyter Scientific Python stack w/ Tensorflow"
+  - display_name: TensorFlow
+    description:  The Jupyter Scientific Python stack w/ Tensorflow
     kubespawner_override:
       image: jupyter/tensorflow-notebook
 
@@ -218,6 +218,10 @@ singleuser:
   #   enableServiceLinks: false
 
   ### Kubernetes configs
+  extraLabels:
+    hub.jupyter.org/network-access-hub: "true"
+    hub.jupyter.org/username: "{username}"
+
   # networkPolicy:
   #   enabled: false
   #   egress:
@@ -239,11 +243,11 @@ ingress:
     kubernetes.io/tls-acme: "true"
     # kubernetes.io/ingress.class: nginx  hosts: []
   tls:
-  - secretName: "jupyter.kites.rocks-tls"
+  - secretName: jupyter.kites.rocks-tls
     hosts:
-    - "jupyter.kites.rocks"
+    - jupyter.kites.rocks
   hosts:
-  - "jupyter.kites.rocks"
+  - jupyter.kites.rocks
 
 cull:
   enabled: true
