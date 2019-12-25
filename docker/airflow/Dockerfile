@@ -1,6 +1,6 @@
 FROM python:3.7-slim-stretch AS base
 
-LABEL maintainer="Dũng Đặng Minh <dungdm93@live.com>"
+LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 
 ENV AIRFLOW_HOME="/airflow"
 ENV PATH="${PATH}:${AIRFLOW_HOME}/bin" \

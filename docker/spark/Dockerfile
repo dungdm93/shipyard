@@ -1,5 +1,7 @@
 FROM ubuntu:bionic
 
+LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+
 RUN set -eux; \
     apt-get update; \
     apt-get install -y \
@@ -24,7 +26,6 @@ ENV SPARK_VERSION=2.4.4  \
     SPARK_HOME=/opt/spark   \
     HADOOP_HOME=/opt/hadoop \
     JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-WORKDIR /opt/spark/
 
 # Main Apache distributions:
 #   * https://apache.org/dist
