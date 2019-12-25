@@ -16,6 +16,71 @@ hub:
   # allowNamedServers:        true
   # namedServerLimitPerUser:  5
 
+  extraConfig:
+    10-modify_pod_hook.py: |
+      """
+      Sine KubeSpawner doesn't supported env.valueFrom yet,
+      use modify_pod_hook to inject envs into singleuser container.
+      See:
+      * https://github.com/jupyterhub/kubespawner/issues/306
+      * https://github.com/jupyterhub/zero-to-jupyterhub-k8s/issues/1103
+      """
+      from kubernetes import client
+
+      def modify_pod_hook(spawner, pod):
+          extra_envs = [
+            client.V1EnvVar(
+              name='KUBERNETES_NAMESPACE',
+              value_from=client.V1EnvVarSource(
+                field_ref=client.V1ObjectFieldSelector(
+                  api_version='v1',
+                  field_path='metadata.namespace',
+                )
+              )
+            ),
+            client.V1EnvVar(
+              name='KUBERNETES_NODE_NAME',
+              value_from=client.V1EnvVarSource(
+                field_ref=client.V1ObjectFieldSelector(
+                  api_version='v1',
+                  field_path='spec.nodeName',
+                )
+              )
+            ),
+            client.V1EnvVar(
+              name='KUBERNETES_NODE_IP',
+              value_from=client.V1EnvVarSource(
+                field_ref=client.V1ObjectFieldSelector(
+                  api_version='v1',
+                  field_path='status.hostIP',
+                )
+              )
+            ),
+            client.V1EnvVar(
+              name='KUBERNETES_POD_NAME',
+              value_from=client.V1EnvVarSource(
+                field_ref=client.V1ObjectFieldSelector(
+                  api_version='v1',
+                  field_path='metadata.name',
+                )
+              )
+            ),
+            client.V1EnvVar(
+              name='KUBERNETES_POD_IP',
+              value_from=client.V1EnvVarSource(
+                field_ref=client.V1ObjectFieldSelector(
+                  api_version='v1',
+                  field_path='status.podIP',
+                )
+              )
+            ),
+          ]
+          pod.spec.containers[0].env.extend(extra_envs)
+          pod.spec.enable_service_links = False
+          return pod
+
+      c.KubeSpawner.modify_pod_hook = modify_pod_hook
+
   ### Kubernetes configs
   # pdb:
   #   enabled: true
@@ -123,8 +188,34 @@ singleuser:
       image: jupyter/tensorflow-notebook
 
   # FIXME
-  extraPodConfig:
-    enableServiceLinks: false
+  # extraEnv:
+  # - name: KUBERNETES_NAMESPACE
+  #   valueFrom:
+  #     fieldRef:
+  #       apiVersion: v1
+  #       fieldPath: metadata.namespace
+  # - name: KUBERNETES_NODE_NAME
+  #   valueFrom:
+  #     fieldRef:
+  #       apiVersion: v1
+  #       fieldPath: spec.nodeName
+  # - name: KUBERNETES_NODE_IP
+  #   valueFrom:
+  #     fieldRef:
+  #       apiVersion: v1
+  #       fieldPath: status.hostIP
+  # - name: KUBERNETES_POD_NAME
+  #   valueFrom:
+  #     fieldRef:
+  #       apiVersion: v1
+  #       fieldPath: metadata.name
+  # - name: KUBERNETES_POD_IP
+  #   valueFrom:
+  #     fieldRef:
+  #       apiVersion: v1
+  #       fieldPath: status.podIP
+  # extraPodConfig:
+  #   enableServiceLinks: false
 
   ### Kubernetes configs
   # networkPolicy:

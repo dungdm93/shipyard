@@ -4,11 +4,11 @@ metadata:
   name: spark-conf
 data:
   spark-defaults.conf: |
-    spark.driver.cores          2
-    spark.driver.memory         4G
-    spark.executor.cores        4
-    spark.executor.memory       8G
-    spark.deploy.defaultCores   8
+    # spark.driver.cores          2
+    # spark.driver.memory         4G
+    # spark.executor.cores        4
+    # spark.executor.memory       8G
+    # spark.deploy.defaultCores   8
 
     # spark.master                spark://spark.kites.rocks:7077
     # spark.master                yarn
@@ -16,8 +16,13 @@ data:
     spark.submit.deployMode     client
     spark.scheduler.mode        FAIR
 
+    # spark.driver.host
+    # spark.driver.port
+    # spark.driver.bindAddress
+    # spark.kubernetes.driver.pod.name
+
     spark.kubernetes.namespace        jupyter
-    spark.kubernetes.container.image  gcr.io/spark-operator/spark:v2.4.4
+    spark.kubernetes.container.image  gcr.io/spark-operator/spark-py:v2.4.4
 
     # spark.eventLog.enabled         true
     # spark.eventLog.dir             hdfs://hadoop.kites.rocks:8020/apps/spark/spark-events

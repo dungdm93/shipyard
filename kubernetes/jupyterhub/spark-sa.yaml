@@ -22,7 +22,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: spark-sa
-  namespace: jupyter
+  # namespace: jupyter
 roleRef:
   kind: Role
   name: spark-role
