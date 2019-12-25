@@ -55,6 +55,8 @@ RUN set -eux; \
     rm  -rf  "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" "$HOME/.gnupg"; \
     mv  "/opt/spark-${SPARK_VERSION}-bin-without-hadoop" "${SPARK_HOME}";
 
+COPY --chown=root:root configs/ ${SPARK_HOME}/conf
+
 ENV PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
 
 ENTRYPOINT [ "/opt/entrypoint.sh" ]
