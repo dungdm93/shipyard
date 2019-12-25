@@ -105,16 +105,16 @@ case "$SPARK_K8S_CMD" in
     ;;
   executor)
     CMD=(
-      ${JAVA_HOME}/bin/java
+      "$SPARK_HOME/bin/spark-class"
       "${SPARK_EXECUTOR_JAVA_OPTS[@]}"
       -Xms$SPARK_EXECUTOR_MEMORY
       -Xmx$SPARK_EXECUTOR_MEMORY
       org.apache.spark.executor.CoarseGrainedExecutorBackend
-      --driver-url $SPARK_DRIVER_URL
+      --driver-url  $SPARK_DRIVER_URL
       --executor-id $SPARK_EXECUTOR_ID
-      --cores $SPARK_EXECUTOR_CORES
-      --app-id $SPARK_APPLICATION_ID
-      --hostname $SPARK_EXECUTOR_POD_IP
+      --app-id      $SPARK_APPLICATION_ID
+      --hostname    $SPARK_EXECUTOR_POD_IP
+      --cores       $SPARK_EXECUTOR_CORES
     )
     ;;
 
