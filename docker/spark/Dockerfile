@@ -17,7 +17,8 @@ RUN set -eux; \
 RUN set -eux; \
     export TINI_VERSION=v0.18.0; \
     curl -sSL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini \
-         -o   /usr/bin/tini
+         -o   /usr/bin/tini; \
+    chmod +x /usr/bin/tini;
 
 COPY ./entrypoint.sh /opt/
 
