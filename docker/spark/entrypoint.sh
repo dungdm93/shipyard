@@ -46,6 +46,7 @@ case "$SPARK_K8S_CMD" in
     *)
       echo "Non-spark-on-k8s command provided, proceeding in pass-through mode..."
       exec /usr/bin/tini -s -- "$@"
+      exit $?
       ;;
 esac
 

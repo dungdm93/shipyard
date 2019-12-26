@@ -20,8 +20,6 @@ RUN set -eux; \
          -o   /usr/bin/tini; \
     chmod +x /usr/bin/tini;
 
-COPY ./entrypoint.sh /opt/
-
 ENV SPARK_VERSION=2.4.4  \
     HADOOP_VERSION=3.1.3 \
     SPARK_HOME=/opt/spark   \
@@ -55,7 +53,8 @@ RUN set -eux; \
     rm  -rf  "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" "$HOME/.gnupg"; \
     mv  "/opt/spark-${SPARK_VERSION}-bin-without-hadoop" "${SPARK_HOME}";
 
-COPY --chown=root:root configs/ ${SPARK_HOME}/conf
+COPY ./entrypoint.sh /opt/
+COPY ./configs/      ${SPARK_HOME}/conf/
 
 ENV PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
 
