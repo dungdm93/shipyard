@@ -178,7 +178,7 @@ singleuser:
           claimName: claim-{username}{servername}
       volume_mounts:
       - name: spark-conf
-        mountPath: /usr/local/spark/conf
+        mountPath: /usr/local/bin/start-notebook.d
       - name: home
         mountPath: /home/jovyan
 
