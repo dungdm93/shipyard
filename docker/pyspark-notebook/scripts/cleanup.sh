@@ -7,7 +7,7 @@ cleanup-apt() {
 }
 
 cleanup-conda() {
-    conda clean --all --yes
+    conda clean -fay
     # find $CONDA_DIR -type f -name '*.py[co]'    -delete \
     #              -o -type d -name '__pycache__' -delete
     rm -rfv $CONDA_DIR/share/jupyter/lab/staging
