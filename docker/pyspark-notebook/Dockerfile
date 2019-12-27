@@ -9,9 +9,9 @@ COPY scripts/ /usr/local/bin/
 RUN set -eux; \
     apt-get update -y; \
     apt-get install --no-install-recommends -y \
-        vim gosu gnupg curl tzdata openssh-client ca-certificates-java  \
-        iproute2 net-tools telnet dnsutils iputils-* htop iftop         \
-        libsasl2-modules libsasl2-dev openjdk-8-jre-headless;           \
+        gosu gnupg curl vim gettext-base tzdata openssh-client  \
+        iproute2 net-tools telnet dnsutils iputils-* htop iftop \
+        libsasl2-modules openjdk-8-jre-headless; \
     cleanup.sh apt;
 
 ENV SPARK_VERSION=2.4.4  \
@@ -31,18 +31,18 @@ ARG APACHE_MIRROR=${APACHE_DIST}
 
 RUN set -eux; \
     cd /tmp;  \
-    wget -qO - "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \
-    wget       "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"; \
-    wget -qO - "${APACHE_DIST}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc" | gpg --batch --verify - "hadoop-${HADOOP_VERSION}.tar.gz"; \
+    curl -L  "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \
+    curl -LO "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"; \
+    curl -L  "${APACHE_DIST}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc" | gpg --batch --verify - "hadoop-${HADOOP_VERSION}.tar.gz"; \
     tar -xzf "hadoop-${HADOOP_VERSION}.tar.gz" -C /opt --owner root --group root --no-same-owner; \
     rm  -rf  "hadoop-${HADOOP_VERSION}.tar.gz" "$HOME/.gnupg"; \
     mv  "/opt/hadoop-${HADOOP_VERSION}" "${HADOOP_HOME}";
 
 RUN set -eux; \
     cd /tmp;  \
-    wget -qO - "${APACHE_DIST}/spark/KEYS" | gpg --batch --import -; \
-    wget       "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
-    wget -qO - "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
+    curl -L  "${APACHE_DIST}/spark/KEYS" | gpg --batch --import -; \
+    curl -LO "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
+    curl -L  "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
     tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" -C /opt --owner root --group root --no-same-owner; \
     rm  -rf  "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" "$HOME/.gnupg"; \
     mv  "/opt/spark-${SPARK_VERSION}-bin-without-hadoop" "${SPARK_HOME}";

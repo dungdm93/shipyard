@@ -159,14 +159,15 @@ singleuser:
 
   profileList:
   - display_name: Minimal
-    description:  Minimal Jupyter Notebook Stack
+    description:  Minimal Jupyter Notebook stack
     default: true
 
   - display_name: PySpark
-    description:  The Jupyter Python + Spark + Mesos stack
+    description:  The Jupyter Python + Spark stack
     # https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
     kubespawner_override:
-      image: jupyter/pyspark-notebook
+      image: hub.teko.vn/data/pyspark-notebook:2.4.4-hadoop-3.1.3
+      image_pull_policy: Always
       service_account: spark-sa
       volumes:
       - name: spark-conf
