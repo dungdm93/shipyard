@@ -1,24 +1,7 @@
-FROM jupyter/scipy-notebook
+FROM alpine:3.10 AS downloader
 
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
-
-USER root
-SHELL [ "/bin/bash", "-c" ]
-COPY ./scripts/ /usr/local/bin/
-
-RUN set -eux; \
-    apt-get update -y; \
-    apt-get install --no-install-recommends -y \
-        gosu gnupg curl vim gettext-base tzdata openssh-client  \
-        iproute2 net-tools telnet dnsutils iputils-* htop iftop \
-        libsasl2-modules openjdk-8-jre-headless; \
-    cleanup.sh apt;
-
-ENV SPARK_VERSION=2.4.4  \
-    HADOOP_VERSION=3.2.1 \
-    SPARK_HOME=/opt/spark   \
-    HADOOP_HOME=/opt/hadoop \
-    JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+WORKDIR /build
+RUN apk add -U curl gnupg tar
 
 # Main Apache distributions:
 #   * https://apache.org/dist
@@ -28,25 +11,50 @@ ENV SPARK_VERSION=2.4.4  \
 #   * https://apache.org/mirrors
 ARG APACHE_DIST=https://archive.apache.org/dist
 ARG APACHE_MIRROR=${APACHE_DIST}
+ARG HADOOP_VERSION=3.2.1
+ARG SPARK_VERSION=2.4.4
 
 RUN set -eux; \
-    cd /tmp;  \
     curl -L  "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \
     curl -LO "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"; \
-    curl -L  "${APACHE_DIST}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc" | gpg --batch --verify - "hadoop-${HADOOP_VERSION}.tar.gz"; \
-    tar -xzf "hadoop-${HADOOP_VERSION}.tar.gz" -C /opt; \
-    rm  -rf  "hadoop-${HADOOP_VERSION}.tar.gz" "$HOME/.gnupg"; \
-    mv  "/opt/hadoop-${HADOOP_VERSION}" "${HADOOP_HOME}";
+    curl -L  "${APACHE_DIST}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc" \
+           | gpg --batch --verify - "hadoop-${HADOOP_VERSION}.tar.gz";
+RUN tar -xzf "hadoop-${HADOOP_VERSION}.tar.gz"; \
+    mv       "hadoop-${HADOOP_VERSION}" "hadoop";
 
 RUN set -eux; \
-    cd /tmp;  \
     curl -L  "${APACHE_DIST}/spark/KEYS" | gpg --batch --import -; \
     curl -LO "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
-    curl -L  "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
-    tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" -C /opt; \
-    rm  -rf  "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" "$HOME/.gnupg"; \
-    mv  "/opt/spark-${SPARK_VERSION}-bin-without-hadoop" "${SPARK_HOME}";
+    curl -L  "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" \
+           | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz";
+RUN tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
+    mv       "spark-${SPARK_VERSION}-bin-without-hadoop" "spark";
 
+
+
+FROM jupyter/scipy-notebook
+
+LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+USER root
+SHELL [ "/bin/bash", "-c" ]
+COPY ./scripts/ /usr/local/bin/
+
+RUN set -eux; \
+    apt-get update -y; \
+    apt-get install --no-install-recommends -y \
+        gosu curl vim gettext-base tzdata openssh-client libsasl2-modules \
+        iproute2 net-tools telnet dnsutils iputils-* htop iftop \
+        openjdk-8-jre-headless; \
+    cleanup.sh apt;
+
+ENV SPARK_VERSION=${SPARK_VERSION}  \
+    HADOOP_VERSION=${HADOOP_VERSION} \
+    SPARK_HOME=/opt/spark   \
+    HADOOP_HOME=/opt/hadoop \
+    JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
+COPY --from=downloader "/build/hadoop" "${HADOOP_HOME}"
+COPY --from=downloader "/build/spark"  "${SPARK_HOME}"
 COPY ./configs/spark/*  ${SPARK_HOME}/conf/
 COPY ./configs/hadoop/* ${HADOOP_HOME}/etc/hadoop/
 
@@ -62,7 +70,7 @@ RUN set -eux; \
         boost pyarrow  \
         psycopg2        \
         mysqlclient     \
-        pyodbc pymssql  \
+        pyodbc          \
         cx_oracle;      \
     \
     cleanup.sh conda npm home; \
