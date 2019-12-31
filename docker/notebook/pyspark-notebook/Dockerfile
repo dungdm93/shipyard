@@ -4,7 +4,7 @@ LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 
 USER root
 SHELL [ "/bin/bash", "-c" ]
-COPY scripts/ /usr/local/bin/
+COPY ./scripts/ /usr/local/bin/
 
 RUN set -eux; \
     apt-get update -y; \
@@ -15,7 +15,7 @@ RUN set -eux; \
     cleanup.sh apt;
 
 ENV SPARK_VERSION=2.4.4  \
-    HADOOP_VERSION=3.1.3 \
+    HADOOP_VERSION=3.2.1 \
     SPARK_HOME=/opt/spark   \
     HADOOP_HOME=/opt/hadoop \
     JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
@@ -34,7 +34,7 @@ RUN set -eux; \
     curl -L  "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \
     curl -LO "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"; \
     curl -L  "${APACHE_DIST}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc" | gpg --batch --verify - "hadoop-${HADOOP_VERSION}.tar.gz"; \
-    tar -xzf "hadoop-${HADOOP_VERSION}.tar.gz" -C /opt --owner root --group root --no-same-owner; \
+    tar -xzf "hadoop-${HADOOP_VERSION}.tar.gz" -C /opt; \
     rm  -rf  "hadoop-${HADOOP_VERSION}.tar.gz" "$HOME/.gnupg"; \
     mv  "/opt/hadoop-${HADOOP_VERSION}" "${HADOOP_HOME}";
 
@@ -43,11 +43,12 @@ RUN set -eux; \
     curl -L  "${APACHE_DIST}/spark/KEYS" | gpg --batch --import -; \
     curl -LO "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
     curl -L  "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
-    tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" -C /opt --owner root --group root --no-same-owner; \
+    tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" -C /opt; \
     rm  -rf  "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" "$HOME/.gnupg"; \
     mv  "/opt/spark-${SPARK_VERSION}-bin-without-hadoop" "${SPARK_HOME}";
 
-COPY --chown=root:users configs/ ${SPARK_HOME}/conf
+COPY ./configs/spark/*  ${SPARK_HOME}/conf/
+COPY ./configs/hadoop/* ${HADOOP_HOME}/etc/hadoop/
 
 ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip" \
     PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
@@ -96,18 +97,8 @@ RUN set -eux; \
 
 # Tools
 RUN set -eux; \
-    conda install -y -c conda-forge \
-        flake8 jupyterlab-git; \
-    jupyter labextension install \
-        jupyterlab-flake8 jupyterlab-drawio; \
-    \
-    cleanup.sh conda npm home; \
-    fix-permissions $CONDA_DIR /home/$NB_USER;
-
-# ML tools: facets & What-If Tool
-RUN set -eux; \
-    pip install facets-overview witwidget; \
-    jupyter labextension install wit-widget; \
+    conda install -y -c conda-forge jupyterlab-git; \
+    jupyter labextension install jupyterlab-drawio; \
     \
     cleanup.sh conda npm home; \
     fix-permissions $CONDA_DIR /home/$NB_USER;
