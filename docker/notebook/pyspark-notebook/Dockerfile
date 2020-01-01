@@ -47,41 +47,35 @@ RUN set -eux; \
         openjdk-8-jre-headless; \
     cleanup.sh apt;
 
-ENV SPARK_VERSION=${SPARK_VERSION}  \
-    HADOOP_VERSION=${HADOOP_VERSION} \
-    SPARK_HOME=/opt/spark   \
+USER $NB_UID
+
+ENV SPARK_HOME=/opt/spark   \
     HADOOP_HOME=/opt/hadoop \
     JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
-COPY --from=downloader "/build/hadoop" "${HADOOP_HOME}"
-COPY --from=downloader "/build/spark"  "${SPARK_HOME}"
-COPY ./configs/spark/*  ${SPARK_HOME}/conf/
-COPY ./configs/hadoop/* ${HADOOP_HOME}/etc/hadoop/
+COPY --chown=$NB_UID:$NB_GID --from=downloader  /build/hadoop ${HADOOP_HOME}
+COPY --chown=$NB_UID:$NB_GID --from=downloader  /build/spark  ${SPARK_HOME}
+COPY --chown=$NB_UID:$NB_GID ./configs/spark/*  ${SPARK_HOME}/conf/
+COPY --chown=$NB_UID:$NB_GID ./configs/hadoop/* ${HADOOP_HOME}/etc/hadoop/
 
 ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip" \
     PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
-
-USER $NB_UID
 
 # Database drivers
 RUN set -eux; \
     conda install -y \
         python-dotenv \
-        boost pyarrow  \
-        psycopg2        \
-        mysqlclient     \
-        pyodbc          \
-        cx_oracle;      \
+        boost pyarrow \
+        psycopg2      \
+        mysqlclient   \
+        pyodbc        \
+        cx_oracle;    \
     \
     cleanup.sh conda npm home; \
     fix-permissions $CONDA_DIR /home/$NB_USER;
 
 # Widgets & visualization
 RUN set -eux; \
-    # ipywidgets
-    conda install -y -c conda-forge ipywidgets; \
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager; \
-    \
     # ipywidgets ipyleaflet pythreejs bqplot
     conda install -y -c conda-forge \
         ipyleaflet=0.11.4 pythreejs bqplot; \
