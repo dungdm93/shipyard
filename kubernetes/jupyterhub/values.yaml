@@ -166,7 +166,7 @@ singleuser:
     description:  The Jupyter Python + Spark stack
     # https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
     kubespawner_override:
-      image: hub.teko.vn/data/pyspark-notebook:2.4.4-hadoop-3.1.3
+      image: hub.teko.vn/data/pyspark-notebook:2.4.4-hadoop-3.2.1
       image_pull_policy: Always
       service_account: spark-sa
       volumes:
