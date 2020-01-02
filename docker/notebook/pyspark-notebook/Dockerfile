@@ -65,11 +65,14 @@ ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zi
 RUN set -eux; \
     conda install -y \
         python-dotenv \
-        boost pyarrow \
+        papermill     \
+        boost         \
         psycopg2      \
         mysqlclient   \
         pyodbc        \
         cx_oracle;    \
+    pip install --no-cache-dir \
+        pyarrow==0.15.*; \
     \
     cleanup.sh conda npm home; \
     fix-permissions $CONDA_DIR /home/$NB_USER;
