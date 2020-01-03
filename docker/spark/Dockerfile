@@ -1,30 +1,7 @@
-FROM ubuntu:bionic
+FROM alpine:3.10 AS downloader
 
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
-
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y \
-        openjdk-8-jre-headless ca-certificates-java \
-        libc6 libpam-modules libnss3 \
-        bash gnupg curl; \
-    rm -rf /var/cache/apt/*; \
-    \
-    echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su; \
-    chgrp root /etc/passwd; \
-    chmod ug+rw /etc/passwd;
-
-RUN set -eux; \
-    export TINI_VERSION=v0.18.0; \
-    curl -sSL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini \
-         -o   /usr/bin/tini; \
-    chmod +x /usr/bin/tini;
-
-ENV SPARK_VERSION=2.4.4  \
-    HADOOP_VERSION=3.1.3 \
-    SPARK_HOME=/opt/spark   \
-    HADOOP_HOME=/opt/hadoop \
-    JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+WORKDIR /build
+RUN apk add -U curl gnupg tar
 
 # Main Apache distributions:
 #   * https://apache.org/dist
@@ -34,28 +11,39 @@ ENV SPARK_VERSION=2.4.4  \
 #   * https://apache.org/mirrors
 ARG APACHE_DIST=https://archive.apache.org/dist
 ARG APACHE_MIRROR=${APACHE_DIST}
+ARG SPARK_VERSION=2.4.4
+ARG TINI_VERSION=0.18.0
 
 RUN set -eux; \
-    cd /tmp;  \
-    curl -sSL  "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \
-    curl -sSLO "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"; \
-    curl -sSL  "${APACHE_DIST}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc" | gpg --batch --verify - "hadoop-${HADOOP_VERSION}.tar.gz"; \
-    tar -xzf "hadoop-${HADOOP_VERSION}.tar.gz" -C /opt --owner root --group root --no-same-owner; \
-    rm  -rf  "hadoop-${HADOOP_VERSION}.tar.gz" "$HOME/.gnupg"; \
-    mv  "/opt/hadoop-${HADOOP_VERSION}" "${HADOOP_HOME}";
+    curl -L  "${APACHE_DIST}/spark/KEYS" | gpg --batch --import -; \
+    curl -LO "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
+    curl -L  "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" \
+           | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz";
+RUN tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
+    mv       "spark-${SPARK_VERSION}-bin-without-hadoop" "spark";
 
 RUN set -eux; \
-    cd /tmp;  \
-    curl -sSL  "${APACHE_DIST}/spark/KEYS" | gpg --batch --import -; \
-    curl -sSLO "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
-    curl -sSL  "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
-    tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" -C /opt --owner root --group root --no-same-owner; \
-    rm  -rf  "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" "$HOME/.gnupg"; \
-    mv  "/opt/spark-${SPARK_VERSION}-bin-without-hadoop" "${SPARK_HOME}";
+    curl -LO "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini"; \
+    chmod +x tini;
 
+
+# TODO: Docker is not supported yet
+# ARG HADOOP_VERSION=3.2.1
+# FROM hub.teko.vn/data/hadoop:${HADOOP_VERSION}
+FROM hub.teko.vn/data/hadoop:3.2.1
+
+RUN set -eux; \
+    echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su; \
+    chgrp root  /etc/passwd; \
+    chmod ug+rw /etc/passwd;
+
+ENV SPARK_HOME=/opt/spark
+
+COPY --from=downloader /build/tini  /usr/bin/tini
+COPY --from=downloader /build/spark ${SPARK_HOME}
+COPY                   ./configs/*  ${SPARK_HOME}/conf/
 COPY ./entrypoint.sh /opt/
-COPY ./configs/      ${SPARK_HOME}/conf/
 
-ENV PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
+ENV PATH="${SPARK_HOME}/bin:${PATH}"
 
 ENTRYPOINT [ "/opt/entrypoint.sh" ]
