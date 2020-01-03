@@ -1,15 +1,21 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        gnupg curl; \
+    rm -rf /var/cache/apt/*;
+
 ENV CONDA_VERSION=4.7.12 \
     PYTHON_VERSION=3.7   \
     CONDA_HOME=/opt/conda
 
 RUN set -eux; \
     cd /tmp;  \
-    curl -sSLO "https://repo.continuum.io/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh"; \
-    /bin/bash  "Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh" -b -p "${CONDA_HOME}"; \
-    rm  -rf    "Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh"; \
+    curl -LO "https://repo.continuum.io/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh"; \
+    bash     "Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh" -b -p "${CONDA_HOME}"; \
+    rm  -rf  "Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh"; \
     \
     echo "conda ${CONDA_VERSION}" >> "${CONDA_HOME}/conda-meta/pinned"; \
     "${CONDA_HOME}/bin/conda" config --system --prepend channels conda-forge; \
