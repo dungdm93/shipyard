@@ -1,6 +1,5 @@
 build:
 	docker build --pull \
-		--build-arg APACHE_MIRROR=http://mirrors.viethosting.com/apache \
 		--tag hub.teko.vn/data/pyspark-notebook:2.4.4-hadoop-3.2.1 .
 
 publish: build

@@ -53,10 +53,11 @@ ENV SPARK_HOME=/opt/spark   \
     HADOOP_HOME=/opt/hadoop \
     JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
-COPY --chown=$NB_UID:$NB_GID --from=downloader  /build/hadoop ${HADOOP_HOME}
-COPY --chown=$NB_UID:$NB_GID --from=downloader  /build/spark  ${SPARK_HOME}
-COPY --chown=$NB_UID:$NB_GID ./configs/spark/*  ${SPARK_HOME}/conf/
-COPY --chown=$NB_UID:$NB_GID ./configs/hadoop/* ${HADOOP_HOME}/etc/hadoop/
+COPY --chown=$NB_UID:$NB_GID --from=downloader   /build/hadoop ${HADOOP_HOME}
+COPY --chown=$NB_UID:$NB_GID --from=downloader   /build/spark  ${SPARK_HOME}
+COPY --chown=$NB_UID:$NB_GID ./configs/spark/*   ${SPARK_HOME}/conf/
+COPY --chown=$NB_UID:$NB_GID ./configs/hadoop/*  ${HADOOP_HOME}/etc/hadoop/
+COPY --chown=$NB_UID:$NB_GID ./configs/jupyter/* ${CONDA_DIR}/etc/jupyter
 
 ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip" \
     PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
