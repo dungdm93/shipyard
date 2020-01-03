@@ -1,9 +1,12 @@
-build:
-	docker build --pull \
-		--tag hub.teko.vn/data/airflow:all-1.10.6 .
+IMAGE := hub.teko.vn/data/airflow:1.10.6-all
 
-publish: build
-	docker push hub.teko.vn/data/airflow:all-1.10.6
+build:
+	docker build --pull --tag ${IMAGE} .
+
+push:
+	docker push ${IMAGE}
+
+publish: build push
 
 run:
-	docker run -it --rm hub.teko.vn/data/airflow:all-1.10.6 bash
+	docker run -it --rm ${IMAGE} bash

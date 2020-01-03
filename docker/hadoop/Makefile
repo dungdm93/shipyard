@@ -1,12 +1,12 @@
+IMAGE := hub.teko.vn/data/hadoop:3.2.1
+
 build:
-	docker build --pull \
-		--tag hub.teko.vn/data/hadoop:3.2.1 .
+	docker build --pull --tag ${IMAGE} .
 
 push:
-	docker push hub.teko.vn/data/hadoop:3.2.1
+	docker push ${IMAGE}
 
 publish: build push
 
 run:
-	docker run -it --rm \
-		hub.teko.vn/data/hadoop:3.2.1 bash
+	docker run -it --rm ${IMAGE} bash
