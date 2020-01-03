@@ -3,25 +3,31 @@ set -e
 
 cleanup-apt() {
     apt-get clean
-    rm -rfv /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/*
 }
 
 cleanup-conda() {
     conda clean -fay
     # find $CONDA_DIR -type f -name '*.py[co]'    -delete \
     #              -o -type d -name '__pycache__' -delete
-    rm -rfv $CONDA_DIR/share/jupyter/lab/staging
+    rm -rf $CONDA_DIR/share/jupyter/lab/staging
 }
 
 cleanup-npm() {
     npm cache clean --force
-    rm -rfv /home/$NB_USER/.node-gyp
+    rm -rf \
+        /home/$NB_USER/.npm     \
+        /home/$NB_USER/.yarn    \
+        /home/$NB_USER/.node-gyp
 }
 
 cleanup-home() {
-    rm -rfv \
+    rm -rf \
         /home/$NB_USER/.cache   \
-        /home/$NB_USER/.empty
+        /home/$NB_USER/.empty   \
+        /home/$NB_USER/.npm     \
+        /home/$NB_USER/.yarn    \
+        /home/$NB_USER/.node-gyp
 }
 
 for type in "$@"; do
