@@ -1,0 +1,53 @@
+diff --git a/docker/spark/entrypoint.sh b/docker/spark/entrypoint.sh
+index ed22003..2a3f0d0 100755
+--- a/docker/spark/entrypoint.sh
++++ b/docker/spark/entrypoint.sh
+@@ -36,14 +36,9 @@ if [ -z "$uidentry" ] ; then
+     fi
+ fi
+ 
+-SPARK_CLASSPATH="$SPARK_CLASSPATH:${SPARK_HOME}/jars/*"
+ env | grep SPARK_JAVA_OPT_ | sort -t_ -k4 -n | sed 's/[^=]*=\(.*\)/\1/g' > /tmp/java_opts.txt
+ readarray -t SPARK_EXECUTOR_JAVA_OPTS < /tmp/java_opts.txt
+ 
+-if [ -n "$SPARK_EXTRA_CLASSPATH" ]; then
+-  SPARK_CLASSPATH="$SPARK_CLASSPATH:$SPARK_EXTRA_CLASSPATH"
+-fi
+-
+ if [ "$PYSPARK_MAJOR_PYTHON_VERSION" == "2" ]; then
+     pyv="$(python -V 2>&1)"
+     export PYTHON_VERSION="${pyv:7}"
+@@ -62,10 +57,6 @@ if [ -n ${HADOOP_HOME}  ] && [ -z ${SPARK_DIST_CLASSPATH}  ]; then
+   export SPARK_DIST_CLASSPATH=$($HADOOP_HOME/bin/hadoop classpath)
+ fi
+ 
+-if ! [ -z ${HADOOP_CONF_DIR+x} ]; then
+-  SPARK_CLASSPATH="$HADOOP_CONF_DIR:$SPARK_CLASSPATH";
+-fi
+-
+ case "$1" in
+   driver)
+     shift 1
+@@ -79,17 +70,16 @@ case "$1" in
+   executor)
+     shift 1
+     CMD=(
+-      ${JAVA_HOME}/bin/java
++      "$SPARK_HOME/bin/spark-class"
+       "${SPARK_EXECUTOR_JAVA_OPTS[@]}"
+       -Xms$SPARK_EXECUTOR_MEMORY
+       -Xmx$SPARK_EXECUTOR_MEMORY
+-      -cp "$SPARK_CLASSPATH:$SPARK_DIST_CLASSPATH"
+       org.apache.spark.executor.CoarseGrainedExecutorBackend
+-      --driver-url $SPARK_DRIVER_URL
++      --driver-url  $SPARK_DRIVER_URL
+       --executor-id $SPARK_EXECUTOR_ID
+-      --cores $SPARK_EXECUTOR_CORES
+-      --app-id $SPARK_APPLICATION_ID
+-      --hostname $SPARK_EXECUTOR_POD_IP
++      --app-id      $SPARK_APPLICATION_ID
++      --hostname    $SPARK_EXECUTOR_POD_IP
++      --cores       $SPARK_EXECUTOR_CORES
+     )
+     ;;
+ 
