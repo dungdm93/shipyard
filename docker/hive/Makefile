@@ -1,4 +1,4 @@
-HADOOP_VERSION ?= 3.2.1
+HADOOP_VERSION ?= 3.1.0
 HIVE_VERSION   ?= 3.1.2
 IMAGE := hub.teko.vn/data/hive:${HIVE_VERSION}-hadoop-${HADOOP_VERSION}
 

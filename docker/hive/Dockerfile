@@ -1,4 +1,4 @@
-ARG HADOOP_VERSION=3.2.1
+ARG HADOOP_VERSION=3.1.0
 
 FROM alpine:3.10 AS downloader
 
@@ -20,7 +20,7 @@ RUN set -eux; \
     curl -LO "${APACHE_MIRROR}/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz"; \
     curl -L  "${APACHE_DIST}/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz.asc" \
            | gpg --batch --verify - "apache-hive-${HIVE_VERSION}-bin.tar.gz";
-RUN tar -xzf "apache-hive-${HIVE_VERSION}-bin.tar.gz"; \
+RUN tar -xf  "apache-hive-${HIVE_VERSION}-bin.tar.gz" --no-same-owner; \
     mv       "apache-hive-${HIVE_VERSION}-bin" "hive";
 
 

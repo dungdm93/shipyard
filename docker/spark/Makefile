@@ -4,6 +4,7 @@ IMAGE := hub.teko.vn/data/spark:${SPARK_VERSION}-hadoop-${HADOOP_VERSION}
 
 build:
 	docker build \
+		--build-arg HADOOP_VERSION=${HADOOP_VERSION} \
 		--build-arg SPARK_VERSION=${SPARK_VERSION} \
 		--tag ${IMAGE} .
 

@@ -1,36 +1,5 @@
-FROM alpine:3.10 AS downloader
-
-WORKDIR /build
-RUN apk add -U curl gnupg tar
-
-# Main Apache distributions:
-#   * https://apache.org/dist
-#   * https://archive.apache.org/dist
-#   * https://dist.apache.org/repos/dist/release
-# List all Apache mirrors:
-#   * https://apache.org/mirrors
-ARG APACHE_DIST=https://archive.apache.org/dist
-ARG APACHE_MIRROR=${APACHE_DIST}
-ARG HADOOP_VERSION=3.2.1
-ARG SPARK_VERSION=2.4.4
-
-RUN set -eux; \
-    curl -L  "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \
-    curl -LO "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"; \
-    curl -L  "${APACHE_DIST}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc" \
-           | gpg --batch --verify - "hadoop-${HADOOP_VERSION}.tar.gz";
-RUN tar -xzf "hadoop-${HADOOP_VERSION}.tar.gz"; \
-    mv       "hadoop-${HADOOP_VERSION}" "hadoop";
-
-RUN set -eux; \
-    curl -L  "${APACHE_DIST}/spark/KEYS" | gpg --batch --import -; \
-    curl -LO "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
-    curl -L  "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" \
-           | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz";
-RUN tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
-    mv       "spark-${SPARK_VERSION}-bin-without-hadoop" "spark";
-
-
+ARG  PYSPARK_SOURCE_IMAGE
+FROM ${PYSPARK_SOURCE_IMAGE} AS source
 
 FROM jupyter/scipy-notebook
 
@@ -53,10 +22,8 @@ ENV SPARK_HOME=/opt/spark   \
     HADOOP_HOME=/opt/hadoop \
     JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
-COPY --chown=$NB_UID:$NB_GID --from=downloader   /build/hadoop ${HADOOP_HOME}
-COPY --chown=$NB_UID:$NB_GID --from=downloader   /build/spark  ${SPARK_HOME}
-COPY --chown=$NB_UID:$NB_GID ./configs/spark/*   ${SPARK_HOME}/conf/
-COPY --chown=$NB_UID:$NB_GID ./configs/hadoop/*  ${HADOOP_HOME}/etc/hadoop/
+COPY --chown=$NB_UID:$NB_GID --from=source       /opt/hadoop ${HADOOP_HOME}
+COPY --chown=$NB_UID:$NB_GID --from=source       /opt/spark  ${SPARK_HOME}
 COPY --chown=$NB_UID:$NB_GID ./configs/jupyter/* ${CONDA_DIR}/etc/jupyter
 
 ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip" \

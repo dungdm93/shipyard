@@ -21,7 +21,7 @@ RUN set -eux; \
     curl -LO "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
     curl -L  "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" \
            | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz";
-RUN tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
+RUN tar -xf  "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" --no-same-owner; \
     mv       "spark-${SPARK_VERSION}-bin-without-hadoop" "spark";
 
 RUN set -eux; \
