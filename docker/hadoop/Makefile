@@ -1,7 +1,10 @@
-IMAGE := hub.teko.vn/data/hadoop:3.2.1
+HADOOP_VERSION ?= 3.2.1
+IMAGE := hub.teko.vn/data/hadoop:${HADOOP_VERSION}
 
 build:
-	docker build --pull --tag ${IMAGE} .
+	docker build --pull \
+		--build-arg HADOOP_VERSION=${HADOOP_VERSION} \
+		--tag ${IMAGE} .
 
 push:
 	docker push ${IMAGE}

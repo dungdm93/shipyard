@@ -1,7 +1,12 @@
-IMAGE := hub.teko.vn/data/hive:3.1.2-hadoop-3.2.1
+HADOOP_VERSION ?= 3.2.1
+HIVE_VERSION   ?= 3.1.2
+IMAGE := hub.teko.vn/data/hive:${HIVE_VERSION}-hadoop-${HADOOP_VERSION}
 
 build:
-	docker build --tag ${IMAGE} .
+	docker build \
+		--build-arg HADOOP_VERSION=${HADOOP_VERSION} \
+		--build-arg HIVE_VERSION=${HIVE_VERSION} \
+		--tag ${IMAGE} .
 
 push:
 	docker push ${IMAGE}

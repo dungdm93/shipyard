@@ -1,3 +1,5 @@
+ARG HADOOP_VERSION=3.2.1
+
 FROM alpine:3.10 AS downloader
 
 WORKDIR /build
@@ -22,10 +24,8 @@ RUN tar -xzf "apache-hive-${HIVE_VERSION}-bin.tar.gz"; \
     mv       "apache-hive-${HIVE_VERSION}-bin" "hive";
 
 
-# TODO: Docker is not supported yet
-# ARG HADOOP_VERSION=3.2.1
-# FROM hub.teko.vn/data/hadoop:${HADOOP_VERSION}
-FROM hub.teko.vn/data/hadoop:3.2.1
+
+FROM hub.teko.vn/data/hadoop:${HADOOP_VERSION}
 
 ENV HIVE_HOME=/opt/hive
 

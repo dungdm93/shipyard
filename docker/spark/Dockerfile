@@ -1,3 +1,5 @@
+ARG HADOOP_VERSION=3.2.1
+
 FROM alpine:3.10 AS downloader
 
 WORKDIR /build
@@ -27,10 +29,8 @@ RUN set -eux; \
     chmod +x tini;
 
 
-# TODO: Docker is not supported yet
-# ARG HADOOP_VERSION=3.2.1
-# FROM hub.teko.vn/data/hadoop:${HADOOP_VERSION}
-FROM hub.teko.vn/data/hadoop:3.2.1
+
+FROM hub.teko.vn/data/hadoop:${HADOOP_VERSION}
 
 RUN set -eux; \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su; \
