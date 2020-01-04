@@ -29,8 +29,21 @@ LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        openjdk-8-jre-headless krb5-user libnss3; \
+        openjdk-8-jre-headless krb5-user \
+        libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
+        libssl1.1 libisal2 libnss3; \
+    ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so; \
+    ln -s libssl.so.1.1    /usr/lib/x86_64-linux-gnu/libssl.so;    \
     rm -rf /var/cache/apt/*;
+
+# TODO: Native Hadoop Library
+# > hadoop checknative -a
+# * libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1
+# * libssl1.1
+#   ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so
+#   ln -s libssl.so.1.1    /usr/lib/x86_64-linux-gnu/libssl.so
+# * libisal2
+#   ln -s libisal.so.2     /usr/lib/x86_64-linux-gnu/libisal.so
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 \
     HADOOP_HOME=/opt/hadoop
