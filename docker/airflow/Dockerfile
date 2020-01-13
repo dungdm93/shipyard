@@ -2,7 +2,7 @@ FROM python:3.7-slim-stretch AS base
 
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 
-ENV AIRFLOW_HOME="/airflow"
+ENV AIRFLOW_HOME="/opt/airflow"
 ENV PATH="${PATH}:${AIRFLOW_HOME}/bin" \
     PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${AIRFLOW_HOME}/lib/python3.7/site-packages/"
 
@@ -17,7 +17,9 @@ RUN set -eux; \
         # pip install sasl
         libsasl2-dev \
         # pip install pykerberos
-        libkrb5-dev; \
+        libkrb5-dev;
+
+RUN set -eux; \
     mkdir -p ${AIRFLOW_HOME}; \
     pip install --prefix="${AIRFLOW_HOME}" \
         'pymssql<3.0' 'apache-airflow[all]';
