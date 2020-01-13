@@ -2,9 +2,12 @@ FROM python:3.7-slim-stretch AS base
 
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 
-ENV AIRFLOW_HOME="/opt/airflow"
-ENV PATH="${AIRFLOW_HOME}/bin:${PATH}" \
-    PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${AIRFLOW_HOME}/lib/python3.7/site-packages/"
+ENV AIRFLOW_HOME="/opt/airflow" \
+    AIRFLOW_INSTALL_DIR="/usr/local/airflow"
+ENV PATH="${AIRFLOW_INSTALL_DIR}/bin:${PATH}" \
+    PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${AIRFLOW_INSTALL_DIR}/lib/python3.7/site-packages/"
+
+RUN mkdir -p "${AIRFLOW_HOME}"
 
 FROM base AS builder
 
@@ -25,10 +28,10 @@ RUN set -eux; \
         libev-dev
 
 RUN set -eux; \
-    mkdir -p ${AIRFLOW_HOME}; \
+    mkdir -p ${AIRFLOW_INSTALL_DIR}; \
     # Speed up cassandra-driver installation
     export CASS_DRIVER_BUILD_CONCURRENCY=8; \
-    pip install --prefix="${AIRFLOW_HOME}" \
+    pip install --prefix="${AIRFLOW_INSTALL_DIR}" \
         "apache-airflow[all]==${AIRFLOW_VERSION}" \
         "lz4" "python-snappy" \
         "pymssql<3.0";
@@ -56,4 +59,4 @@ RUN set -eux; \
         /usr/share/doc \
         /usr/share/doc-base
 
-COPY --from=builder "${AIRFLOW_HOME}" "${AIRFLOW_HOME}"
+COPY --from=builder "${AIRFLOW_INSTALL_DIR}" "${AIRFLOW_INSTALL_DIR}"
