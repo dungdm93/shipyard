@@ -19,20 +19,29 @@ RUN set -eux; \
         # pip install sasl
         libsasl2-dev \
         # pip install pykerberos
-        libkrb5-dev;
+        libkrb5-dev \
+        # pip install python-snappy
+        libsnappy-dev \
+        libev-dev
 
 RUN set -eux; \
     mkdir -p ${AIRFLOW_HOME}; \
+    # Speed up cassandra-driver installation
+    export CASS_DRIVER_BUILD_CONCURRENCY=8; \
     pip install --prefix="${AIRFLOW_HOME}" \
-        "pymssql<3.0" "apache-airflow[all]==${AIRFLOW_VERSION}";
+        "apache-airflow[all]==${AIRFLOW_VERSION}" \
+        "lz4" "python-snappy" \
+        "pymssql<3.0";
 
 FROM base
 
 RUN set -eux; \
     apt-get update; \
     apt-get install -yqq --no-install-recommends \
-        libmariadbclient18 \
-        curl rsync netcat locales; \
+        curl rsync netcat locales \
+        libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
+        libev4 libssl1.1 libisal2 libnss3 \
+        libmariadbclient18; \
     \
     sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen; \
     locale-gen; \
