@@ -3,10 +3,12 @@ FROM python:3.7-slim-stretch AS base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 
 ENV AIRFLOW_HOME="/opt/airflow"
-ENV PATH="${PATH}:${AIRFLOW_HOME}/bin" \
+ENV PATH="${AIRFLOW_HOME}/bin:${PATH}" \
     PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${AIRFLOW_HOME}/lib/python3.7/site-packages/"
 
 FROM base AS builder
+
+ARG AIRFLOW_VERSION=1.10.7
 
 RUN set -eux; \
     apt-get update; \
@@ -22,7 +24,7 @@ RUN set -eux; \
 RUN set -eux; \
     mkdir -p ${AIRFLOW_HOME}; \
     pip install --prefix="${AIRFLOW_HOME}" \
-        'pymssql<3.0' 'apache-airflow[all]';
+        "pymssql<3.0" "apache-airflow[all]==${AIRFLOW_VERSION}";
 
 FROM base
 
