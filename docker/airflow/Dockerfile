@@ -7,7 +7,12 @@ ENV AIRFLOW_HOME="/opt/airflow" \
 ENV PATH="${AIRFLOW_INSTALL_DIR}/bin:${PATH}" \
     PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${AIRFLOW_INSTALL_DIR}/lib/python3.7/site-packages/"
 
-RUN mkdir -p "${AIRFLOW_HOME}"
+RUN set -eux; \
+    useradd -ms "/bin/bash" airflow; \
+    mkdir -p "${AIRFLOW_HOME}"; \
+    chown -R airflow: "${AIRFLOW_HOME}";
+
+WORKDIR ${AIRFLOW_HOME}
 
 FROM base AS builder
 
@@ -60,3 +65,6 @@ RUN set -eux; \
         /usr/share/doc-base
 
 COPY --from=builder "${AIRFLOW_INSTALL_DIR}" "${AIRFLOW_INSTALL_DIR}"
+
+EXPOSE 8080 5555 8793
+USER airflow
