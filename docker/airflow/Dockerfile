@@ -65,6 +65,8 @@ RUN set -eux; \
         /usr/share/doc-base
 
 COPY --from=builder "${AIRFLOW_INSTALL_DIR}" "${AIRFLOW_INSTALL_DIR}"
+COPY ./scripts/* /usr/local/bin/
 
+ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
 EXPOSE 8080 5555 8793
 USER airflow
