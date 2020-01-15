@@ -44,7 +44,8 @@ migrate_airflow_db() {
         wait_for $DB_HOST $DB_PORT
     fi
 
-    airflow upgradedb
+    # TODO: disable examples while db migration in order to suppress some unexpected errors
+    AIRFLOW__CORE__LOAD_EXAMPLES=False airflow upgradedb
 }
 
 run_airflow_daemon() {
