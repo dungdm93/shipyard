@@ -1,0 +1,48 @@
+FROM alpine:3.10 AS downloader
+
+WORKDIR /build
+RUN apk add -U curl gnupg tar
+
+# Main Apache distributions:
+#   * https://apache.org/dist
+#   * https://archive.apache.org/dist
+#   * https://dist.apache.org/repos/dist/release
+# List all Apache mirrors:
+#   * https://apache.org/mirrors
+ARG APACHE_DIST=https://archive.apache.org/dist
+ARG APACHE_MIRROR=${APACHE_DIST}
+ARG HADOOP_VERSION=2.7
+ARG SPARK_VERSION=2.4.4
+ARG TINI_VERSION=0.18.0
+
+RUN set -eux; \
+    curl -L  "${APACHE_DIST}/spark/KEYS" | gpg --batch --import -; \
+    curl -LO "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz"; \
+    curl -L  "${APACHE_DIST}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz.asc" \
+           | gpg --batch --verify - "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz";
+RUN tar -xf  "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" --no-same-owner; \
+    mv       "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" "spark";
+
+RUN set -eux; \
+    curl -LO "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini"; \
+    chmod +x tini;
+
+
+
+FROM ubuntu:bionic
+
+RUN set -eux; \
+    echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su; \
+    chgrp root  /etc/passwd; \
+    chmod ug+rw /etc/passwd;
+
+ENV SPARK_HOME=/opt/spark
+
+COPY --from=downloader /build/tini  /usr/bin/tini
+COPY --from=downloader /build/spark ${SPARK_HOME}
+COPY                   ./configs/*  ${SPARK_HOME}/conf/
+COPY ./entrypoint.sh /opt/
+
+ENV PATH="${SPARK_HOME}/bin:${PATH}"
+
+ENTRYPOINT [ "/opt/entrypoint.sh" ]
