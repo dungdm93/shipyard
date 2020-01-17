@@ -26,5 +26,8 @@ run:
 	docker run -it --rm ${IMAGE} bash
 
 
-# make build STANDALONE=true
-# make build
+# Spark bundled (w/ Hadoop)
+# $ make build
+#
+# Spark standalone (w/o Hadoop)
+# $ make build STANDALONE=true

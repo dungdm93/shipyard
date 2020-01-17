@@ -40,9 +40,9 @@ ENV SPARK_HOME=/opt/spark
 
 COPY --from=downloader /build/tini  /usr/bin/tini
 COPY --from=downloader /build/spark ${SPARK_HOME}
-COPY                   ./configs/*  ${SPARK_HOME}/conf/
-COPY ./entrypoint.sh /opt/
+COPY ./configs/*       ${SPARK_HOME}/conf/
+COPY ./entrypoint.sh   /usr/local/bin/
 
 ENV PATH="${SPARK_HOME}/bin:${PATH}"
 
-ENTRYPOINT [ "/opt/entrypoint.sh" ]
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]

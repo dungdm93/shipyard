@@ -2,7 +2,7 @@ PYTHON_VERSION ?= 3.7
 
 IMAGE_REPO ?= hub.teko.vn/data/spark
 
-BASE_TAG   ?= 2.4.4-hadoop-3.2.1
+BASE_TAG   ?= 2.4.4
 BASE_IMAGE := ${IMAGE_REPO}:${BASE_TAG}
 
 TARGET_TAG   ?= ${BASE_TAG}-python-${PYTHON_VERSION}
@@ -21,3 +21,10 @@ publish: build push
 
 run:
 	docker run -it --rm ${TARGET_IMAGE} bash
+
+
+# Spark bundled (w/ Hadoop)
+# $ make build
+#
+# Spark standalone (w/o Hadoop)
+# $ make build BASE_TAG=2.4.4-hadoop-3.2.1

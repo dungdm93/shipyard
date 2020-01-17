@@ -1,15 +1,14 @@
-HADOOP_VERSION ?= 3.2.1
-SPARK_VERSION  ?= 2.4.4
-PYSPARK_SOURCE_IMAGE := hub.teko.vn/data/spark:${SPARK_VERSION}-hadoop-${HADOOP_VERSION}
-IMAGE := hub.teko.vn/data/pyspark-notebook:${SPARK_VERSION}-hadoop-${HADOOP_VERSION}
+IMAGE_TAG    ?= 2.4.4
+SOURCE_IMAGE := hub.teko.vn/data/spark:${IMAGE_TAG}
+TARGET_IMAGE := hub.teko.vn/data/pyspark-notebook:${IMAGE_TAG}
 
 build:
 	docker build --pull \
-		--build-arg PYSPARK_SOURCE_IMAGE=${PYSPARK_SOURCE_IMAGE} \
-		--tag ${IMAGE} .
+		--build-arg SOURCE_IMAGE=${SOURCE_IMAGE} \
+		--tag ${TARGET_IMAGE} .
 
 push:
-	docker push ${IMAGE}
+	docker push ${TARGET_IMAGE}
 
 publish: build push
 
@@ -18,4 +17,11 @@ run:
 		-p 8888:8888 \
 		-e GRANT_SUDO=yes \
 		-e JUPYTER_ENABLE_LAB=yes \
-		${IMAGE}
+		${TARGET_IMAGE}
+
+
+# Spark bundled (w/ Hadoop)
+# $ make build
+#
+# Spark standalone (w/o Hadoop)
+# $ make build IMAGE_TAG=2.4.4-hadoop-3.2.1
