@@ -8,7 +8,9 @@ ENV PATH="${AIRFLOW_INSTALL_DIR}/bin:${PATH}" \
     PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${AIRFLOW_INSTALL_DIR}/lib/python3.7/site-packages/"
 
 RUN set -eux; \
-    useradd -ms "/bin/bash" airflow; \
+    groupadd -r --gid=999 docker; \
+    useradd  -ms "/bin/bash" --uid=1000 airflow; \
+    usermod  -aG docker airflow; \
     mkdir -p "${AIRFLOW_HOME}"; \
     chown -R airflow: "${AIRFLOW_HOME}";
 
