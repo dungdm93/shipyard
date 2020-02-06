@@ -32,5 +32,17 @@
             <artifactId>ojdbc8</artifactId>
             <version>19.3.0.0</version>
         </dependency>
+        <dependency>
+            <!-- https://clickhouse.tech/docs/en/interfaces/jdbc/ -->
+            <groupId>ru.yandex.clickhouse</groupId>
+            <artifactId>clickhouse-jdbc</artifactId>
+            <version>0.2.4</version>
+        </dependency>
+        <dependency>
+            <!-- https://mongodb.github.io/mongo-java-driver/3.12/driver/getting-started/installation/ -->
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>3.12.1</version>
+        </dependency>
     </dependencies>
 </project>
