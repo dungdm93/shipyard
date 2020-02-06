@@ -15,17 +15,21 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.18</version>
         </dependency>
+        <!--
         <dependency>
+            # PostgreSQL already embeded into SDC
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.9</version>
         </dependency>
         <dependency>
-            <!-- https://docs.microsoft.com/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server -->
+            # MS-SQL already embeded into SDC
+            # https://docs.microsoft.com/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
             <version>8.2.0.jre8</version>
         </dependency>
+        -->
         <dependency>
             <!-- https://medium.com/oracledevs/oracle-jdbc-drivers-on-maven-central-64fcf724d8b -->
             <groupId>com.oracle.ojdbc</groupId>
