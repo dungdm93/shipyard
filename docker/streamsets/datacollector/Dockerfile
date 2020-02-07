@@ -15,8 +15,9 @@ SHELL [ "/bin/bash", "-c" ]
 RUN set -eux; \
     function join { local IFS="$1"; echo "${*:2}"; }; \
     SDC_LIBS=( \
-        streamsets-datacollector-aws-lib    \
-        streamsets-datacollector-jdbc-lib   \
+        streamsets-datacollector-aws-lib        \
+        streamsets-datacollector-jdbc-lib       \
+        streamsets-datacollector-mongodb_3-lib  \
     ); \
     "${SDC_DIST}/bin/streamsets" stagelibs -install="$(join ',' ${SDC_LIBS[@]})"
 
