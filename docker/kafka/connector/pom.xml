@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>vn.teko.streamsets.sdc</groupId>
+    <groupId>vn.teko.kafka.connector</groupId>
     <artifactId>jdbc-drivers</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
@@ -15,21 +15,17 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.18</version>
         </dependency>
-        <!--
         <dependency>
-            # PostgreSQL already embeded into SDC
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.9</version>
         </dependency>
         <dependency>
-            # MS-SQL already embeded into SDC
-            # https://docs.microsoft.com/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server
+            <!-- https://docs.microsoft.com/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server -->
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
             <version>8.2.0.jre8</version>
         </dependency>
-        -->
         <dependency>
             <!-- https://medium.com/oracledevs/oracle-jdbc-drivers-on-maven-central-64fcf724d8b -->
             <groupId>com.oracle.ojdbc</groupId>
@@ -41,12 +37,6 @@
             <groupId>ru.yandex.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
             <version>0.2.4</version>
-        </dependency>
-        <dependency>
-            <!-- https://mongodb.github.io/mongo-java-driver/3.12/driver/getting-started/installation/ -->
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-sync</artifactId>
-            <version>3.12.1</version>
         </dependency>
     </dependencies>
 </project>

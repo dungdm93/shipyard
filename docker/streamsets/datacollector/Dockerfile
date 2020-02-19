@@ -2,7 +2,6 @@ ARG SDC_VERSION=3.13.0
 FROM maven:3.6-jdk-8 AS downloader
 
 WORKDIR /app/
-
 COPY ./pom.xml /app/
 RUN set -eux; \
     mvn dependency:resolve; \
