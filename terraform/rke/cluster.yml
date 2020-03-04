@@ -1,0 +1,67 @@
+# Generate default configs
+# > rke config -e -p
+
+cluster_name: dwh-compute
+
+nodes:
+- address: 172.20.186.13
+  hostname_override: k8s-master-1
+  role:
+  - etcd
+  - controlplane
+  user: teko
+  labels: {}
+  taints: []
+- address: 172.20.186.14
+  hostname_override: k8s-master-2
+  role:
+  - etcd
+  - controlplane
+  user: teko
+  labels: {}
+  taints: []
+- address: 172.20.186.15
+  hostname_override: k8s-master-3
+  role:
+  - etcd
+  - controlplane
+  user: teko
+  labels: {}
+  taints: []
+
+- address: 172.20.186.16
+  hostname_override: k8s-worker-1
+  role:
+  - worker
+  user: teko
+  labels: {}
+  taints: []
+- address: 172.20.186.17
+  hostname_override: k8s-worker-2
+  role:
+  - worker
+  user: teko
+  labels: {}
+  taints: []
+
+services:
+  kubelet:
+    extra_args:
+      container-runtime: remote
+      container-runtime-endpoint: unix:///run/containerd/containerd.sock
+      # cgroup-driver: systemd
+      container-log-max-files: 5      # default=5
+      container-log-max-size:  128Mi  # default=10Mi
+
+addon_job_timeout: 30
+network:
+  plugin: flannel
+authentication:
+  strategy: x509
+  sans:
+  - k8s.kites.rocks
+  webhook: null
+
+bastion_host:
+  address: 172.20.186.18
+  user: teko
