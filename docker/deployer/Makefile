@@ -10,4 +10,4 @@ push:
 publish: build push
 
 run:
-	docker run -it --rm ${IMAGE} bash
+	docker run -it --rm ${IMAGE} bash -l
