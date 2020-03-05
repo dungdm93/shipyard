@@ -7,7 +7,8 @@ RUN set -eux; \
         bash-completion \
         openssh-client \
         gnupg \
-        curl;
+        curl \
+        git;
 
 # Install Google Cloud SDK
 RUN set -eux; \
