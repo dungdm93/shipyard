@@ -37,6 +37,17 @@ RUN curl -sSL "https://github.com/rancher/rke/releases/download/${RKE_VERSION}/r
           -o /usr/local/bin/rke; \
     chmod +x /usr/local/bin/rke;
 
+# Install helmfile
+ENV HELMFILE_VERSION=v0.102.0
+RUN curl -sSL "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" \
+          -o /usr/local/bin/helmfile; \
+    chmod +x /usr/local/bin/helmfile; \
+    helm plugin install https://github.com/databus23/helm-diff --version=v3.1.1; \
+    helm plugin install https://github.com/futuresimple/helm-secrets; \
+    helm plugin install https://github.com/hypnoglow/helm-s3; \
+    helm plugin install https://github.com/hayorov/helm-gcs;  \
+    helm plugin install https://github.com/aslafy-z/helm-git;
+
 # Install mc (minio client)
 RUN curl -sSL "https://dl.min.io/client/mc/release/linux-amd64/mc" \
           -o /usr/local/bin/mc; \
