@@ -1,7 +1,7 @@
 # Generate default configs
 # > rke config -e -p
 
-cluster_name: dwh-compute
+cluster_name: compute.dwh
 
 nodes:
 - address: 172.20.186.13
