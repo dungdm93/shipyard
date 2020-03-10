@@ -22,8 +22,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+      enableServiceLinks: false
       containers:
-        - name: {{ .Chart.Name }}
+        - name:  app
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- with .Values.app.command }}
@@ -47,12 +48,12 @@ spec:
             {{- toYaml . | nindent 12 }}
         {{- end }}
           resources:
-            {{- toYaml .Values.resources | nindent 10 }}
+            {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 10 }}
-        serviceAccountName: {{ include "backend.serviceAccountName" . }}
-        securityContext:
-          {{- toYaml .Values.podSecurityContext | nindent 8 }}
+            {{- toYaml .Values.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "backend.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

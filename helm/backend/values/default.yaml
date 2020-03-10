@@ -1,0 +1,10 @@
+image:
+  repository: hub.teko.vn/data/spark
+  tag: 2.4.4-hadoop-3.2.1
+  pullPolicy: IfNotPresent
+
+app:
+  replicas: 1
+  command:
+  - spark
+  - history-server
