@@ -1,0 +1,21 @@
+{{ range .Values.configMaps }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-%s" (include "backend.fullname" $) .name }}
+  labels:
+    {{- include "backend.labels" $ | nindent 4 }}
+{{- with .data }}
+data:
+  {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+{{- with .binaryData }}
+binaryData:
+  {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+{{ end }}

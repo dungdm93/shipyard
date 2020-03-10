@@ -8,3 +8,21 @@ app:
   command:
   - spark
   - history-server
+
+configMaps:
+- name: configs
+  data:
+    foo: bar
+    abc: xyz
+- name: abcxyz
+  data:
+    first: 1
+    second: 2
+
+secrets:
+- name: credential
+  type: Opaque
+  stringData:
+    username: admin
+  data:
+    password: Zm9vYmFyCg==  # base64 encoded string
