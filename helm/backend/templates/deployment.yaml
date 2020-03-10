@@ -4,6 +4,8 @@ metadata:
   name: {{ include "backend.fullname" . }}
   labels:
     {{- include "backend.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.app.annotations | nindent 4 }}
 spec:
   replicas: {{ .Values.app.replicas }}
   selector:
@@ -13,6 +15,8 @@ spec:
     metadata:
       labels:
         {{- include "backend.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- toYaml .Values.app.podAnnotations | nindent 8 }}
     spec:
     {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
