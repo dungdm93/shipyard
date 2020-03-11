@@ -1,4 +1,4 @@
-IMAGE := hub.teko.vn/library/deployer
+IMAGE := hub.teko.vn/library/deployer:base
 
 build:
 	docker build --pull \
