@@ -27,12 +27,39 @@ RUN set -eux; \
     helm completion bash > /etc/bash_completion.d/helm;
 
 # Install helm plugins
+# RUN set -eux; \
+#     helm plugin install https://github.com/databus23/helm-diff --version=v3.1.1; \
+#     helm plugin install https://github.com/futuresimple/helm-secrets; \
+#     helm plugin install https://github.com/hypnoglow/helm-s3; \
+#     helm plugin install https://github.com/hayorov/helm-gcs;  \
+#     helm plugin install https://github.com/aslafy-z/helm-git;
 RUN set -eux; \
-    helm plugin install https://github.com/databus23/helm-diff --version=v3.1.1; \
-    helm plugin install https://github.com/futuresimple/helm-secrets; \
-    helm plugin install https://github.com/hypnoglow/helm-s3; \
-    helm plugin install https://github.com/hayorov/helm-gcs;  \
-    helm plugin install https://github.com/aslafy-z/helm-git;
+    export HELM_PLUGIN_HOME="${XDG_DATA_HOME:-$HOME/.local/share/helm}/plugins"; \
+    mkdir -p "${HELM_PLUGIN_HOME}"; cd "${HELM_PLUGIN_HOME}"; \
+    echo "Installing helm-diff plugin"; \
+    ( \
+        HELM_DIFF_VERSION=v3.1.1; \
+        curl -sSL "https://github.com/databus23/helm-diff/releases/download/${HELM_DIFF_VERSION}/helm-diff-linux.tgz" \
+            | tar -xzvf -; \
+        mv diff helm-diff; \
+    ) \
+    echo "Installing helm-s3 plugin"; \
+    ( \
+        mkdir helm-s3; \
+        HELM_S3_VERSION=v0.9.2; \
+        curl -sSL "https://github.com/hypnoglow/helm-s3/releases/download/${HELM_S3_VERSION}/helm-s3_${HELM_S3_VERSION#v}_linux_amd64.tar.gz" \
+            | tar -xzvf - -C helm-s3; \
+    ) \
+    echo "Installing helm-s3 plugin"; \
+    ( \
+        mkdir -p helm-gcs/scripts; \
+        HELM_GCS_VERSION=v0.3.1; \
+        curl -sSL "https://github.com/hayorov/helm-gcs/releases/download/${HELM_GCS_VERSION#v}/helm-gcs_${HELM_GCS_VERSION#v}_Linux_x86_64.tar.gz" \
+            | tar -xzvf - -C helm-gcs; \
+        curl -sSL "https://github.com/hayorov/helm-gcs/raw/0.3.1/plugin.yaml"     -o "helm-gcs/plugin.yaml"; \
+        curl -sSL "https://github.com/hayorov/helm-gcs/raw/0.3.1/scripts/pull.sh" -o "helm-gcs/scripts/pull.sh"; \
+        chmod +x "helm-gcs/scripts/pull.sh"; \
+    )
 
 # Install rke
 ENV RKE_VERSION=v1.0.4
