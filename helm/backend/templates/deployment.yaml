@@ -29,7 +29,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name:  app
-          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- with .Values.app.command }}
           command:
