@@ -39,14 +39,26 @@ spec:
           args:
             {{- toYaml . | nindent 12 }}
         {{- end }}
+        {{- if .Values.env }}
           env:
             {{- include "backend.env" . | nindent 12 }}
+        {{- end }}
+        {{- if .Values.envFrom }}
           envFrom:
             {{- include "backend.envFrom" . | nindent 12 }}
+        {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.app.port }}
               protocol: TCP
+        {{- if .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.volumeMounts | nindent 12 }}
+        {{- end }}
+        {{- if .Values.volumeDevices }}
+          volumeDevices:
+            {{- toYaml .Values.volumeDevices | nindent 12 }}
+        {{- end }}
         {{- with .Values.app.healthcheck.liveness }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -66,6 +78,10 @@ spec:
       serviceAccountName: {{ include "backend.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+    {{- if .Values.volumes }}
+      volumes:
+        {{- include "backend.volumes" . | nindent 8 }}
+    {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

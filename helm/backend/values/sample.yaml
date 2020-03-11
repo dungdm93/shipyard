@@ -8,7 +8,8 @@ app:
   command:
   - spark
   - history-server
-  env:
+
+env:
   - name: abc
     value: xyz
   - name: foo
@@ -34,7 +35,7 @@ app:
       resourceFieldRef:
         resource: limits.cpu
 
-  envFrom:
+envFrom:
   - prefix: ENV_
     secretRef:
       name: credential
@@ -42,20 +43,26 @@ app:
   - configMapRef:
       name: configs
 
+volumes:
+  - name: configs
+    configMap:
+      name: configs
+      optional: true
+
 configMaps:
-- name: configs
-  data:
-    foo: bar
-    abc: xyz
-- name: abcxyz
-  data:
-    first: 1
-    second: 2
+  - name: configs
+    data:
+      foo: bar
+      abc: xyz
+  - name: abcxyz
+    data:
+      first: 1
+      second: 2
 
 secrets:
-- name: credential
-  type: Opaque
-  stringData:
-    username: admin
-  data:
-    password: Zm9vYmFyCg==  # base64 encoded string
+  - name: credential
+    type: Opaque
+    stringData:
+      username: admin
+    data:
+      password: Zm9vYmFyCg==  # base64 encoded string

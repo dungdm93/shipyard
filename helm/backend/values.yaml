@@ -37,6 +37,21 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+env: []
+envFrom: []
+
+volumes: []
+# - name: configs
+#   configMap:
+#     name: configs
+#     optional: true
+
+volumeMounts: []
+# - name: configs
+#   mountPath: /etc/spark/configs
+
+volumeDevices: []
+
 configMaps: []
 # - name: configs
 #   data:

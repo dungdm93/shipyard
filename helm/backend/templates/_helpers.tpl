@@ -83,7 +83,7 @@ Create the name of the service account to use
 
 {{- define "backend.env" -}}
 {{- $prefix := include "backend.fullname" . -}}
-{{- range .Values.app.env }}
+{{- range .Values.env }}
 - name: {{ .name }}
   {{- if .value }}
   value: {{ .value }}
@@ -96,8 +96,31 @@ Create the name of the service account to use
 
 {{- define "backend.envFrom" -}}
 {{- $prefix := include "backend.fullname" . -}}
-{{- range .Values.app.envFrom }}
+{{- range .Values.envFrom }}
 {{- $src := mergeOverwrite . (dict "releaseName" $prefix) }}
 - {{- include "backend.envSource" $src | nindent 2 }}
+{{- end }}
+{{- end -}}
+
+{{- define "backend.volumeSource" -}}
+{{- if not .externalSource -}}
+  {{- $mergeDict := dict -}}
+  {{- if .configMap }}
+    {{- $mergeDict = dict "configMap" (dict "name"       (printf "%s-%s" .releaseName .configMap.name))    -}}
+  {{- else if .secret }}
+    {{- $mergeDict = dict "secret"    (dict "secretName" (printf "%s-%s" .releaseName .secret.secretName)) -}}
+  {{- end }}
+  {{- $_ := mergeOverwrite . $mergeDict -}}
+{{- end -}}
+{{- $_ := unset . "externalSource" -}}
+{{- $_ := unset . "releaseName" -}}
+{{ . | toYaml }}
+{{- end -}}
+
+{{- define "backend.volumes" -}}
+{{- $prefix := include "backend.fullname" . -}}
+{{- range .Values.volumes }}
+{{- $src := mergeOverwrite . (dict "releaseName" $prefix) }}
+- {{- include "backend.volumeSource" $src | nindent 2 }}
 {{- end }}
 {{- end -}}
