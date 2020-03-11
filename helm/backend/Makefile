@@ -1,5 +1,5 @@
 RELEASE ?= foobar
-VALUES  ?= ./values/default.yaml
+VALUES  ?= ./values/sample.yaml
 
 dep:
 	@if [ ! -d "./charts" ]; then \
