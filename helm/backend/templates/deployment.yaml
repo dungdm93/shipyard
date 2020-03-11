@@ -55,6 +55,10 @@ spec:
           readinessProbe:
             {{- toYaml . | nindent 12 }}
         {{- end }}
+        {{- with .Values.app.healthcheck.startup }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
