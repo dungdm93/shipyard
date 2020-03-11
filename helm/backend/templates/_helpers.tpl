@@ -86,7 +86,7 @@ Create the name of the service account to use
 {{- range .Values.env }}
 - name: {{ .name }}
   {{- if .value }}
-  value: {{ .value }}
+  value: {{ .value | quote }}
   {{- else if .valueFrom }}
   {{- $src := mergeOverwrite .valueFrom (dict "releaseName" $prefix) }}
   valueFrom: {{- include "backend.envSource" $src | nindent 4 }}
