@@ -1,5 +1,6 @@
 FROM  ubuntu:18.04
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+SHELL [ "/bin/bash", "-c" ]
 
 RUN set -eux; \
     apt-get update; \
@@ -36,30 +37,35 @@ RUN set -eux; \
 RUN set -eux; \
     export HELM_PLUGIN_HOME="${XDG_DATA_HOME:-$HOME/.local/share/helm}/plugins"; \
     mkdir -p "${HELM_PLUGIN_HOME}"; cd "${HELM_PLUGIN_HOME}"; \
+    \
     echo "Installing helm-diff plugin"; \
-    ( \
-        HELM_DIFF_VERSION=v3.1.1; \
-        curl -sSL "https://github.com/databus23/helm-diff/releases/download/${HELM_DIFF_VERSION}/helm-diff-linux.tgz" \
-            | tar -xzvf -; \
-        mv diff helm-diff; \
-    ) \
+    HELM_DIFF_VERSION=v3.1.1; \
+    curl -sSL "https://github.com/databus23/helm-diff/releases/download/${HELM_DIFF_VERSION}/helm-diff-linux.tgz" \
+        | tar -xzvf -; \
+    mv diff helm-diff; \
+    \
     echo "Installing helm-s3 plugin"; \
-    ( \
-        mkdir helm-s3; \
-        HELM_S3_VERSION=v0.9.2; \
-        curl -sSL "https://github.com/hypnoglow/helm-s3/releases/download/${HELM_S3_VERSION}/helm-s3_${HELM_S3_VERSION#v}_linux_amd64.tar.gz" \
-            | tar -xzvf - -C helm-s3; \
-    ) \
-    echo "Installing helm-s3 plugin"; \
-    ( \
-        mkdir -p helm-gcs/scripts; \
-        HELM_GCS_VERSION=v0.3.1; \
-        curl -sSL "https://github.com/hayorov/helm-gcs/releases/download/${HELM_GCS_VERSION#v}/helm-gcs_${HELM_GCS_VERSION#v}_Linux_x86_64.tar.gz" \
-            | tar -xzvf - -C helm-gcs; \
-        curl -sSL "https://github.com/hayorov/helm-gcs/raw/0.3.1/plugin.yaml"     -o "helm-gcs/plugin.yaml"; \
-        curl -sSL "https://github.com/hayorov/helm-gcs/raw/0.3.1/scripts/pull.sh" -o "helm-gcs/scripts/pull.sh"; \
-        chmod +x "helm-gcs/scripts/pull.sh"; \
-    )
+    mkdir helm-s3; \
+    HELM_S3_VERSION=v0.9.2; \
+    curl -sSL "https://github.com/hypnoglow/helm-s3/releases/download/${HELM_S3_VERSION}/helm-s3_${HELM_S3_VERSION#v}_linux_amd64.tar.gz" \
+        | tar -xzvf - -C helm-s3; \
+    \
+    echo "Installing helm-gcs plugin"; \
+    mkdir -p helm-gcs/scripts helm-gcs/bin; \
+    HELM_GCS_VERSION=v0.3.1; \
+    curl -sSL "https://github.com/hayorov/helm-gcs/releases/download/${HELM_GCS_VERSION#v}/helm-gcs_${HELM_GCS_VERSION#v}_Linux_x86_64.tar.gz" \
+        | tar -xzvf - -C helm-gcs; \
+    curl -sSL "https://github.com/hayorov/helm-gcs/raw/0.3.1/plugin.yaml"     -o "helm-gcs/plugin.yaml"; \
+    curl -sSL "https://github.com/hayorov/helm-gcs/raw/0.3.1/scripts/pull.sh" -o "helm-gcs/scripts/pull.sh"; \
+    mv "helm-gcs/helm-gcs" "helm-gcs/bin/"; \
+    chmod +x "helm-gcs/scripts/pull.sh"; \
+    \
+    echo "Installing helm-git plugin"; \
+    HELM_GIT_VERSION=v0.5.0; \
+    curl -sSL "https://github.com/aslafy-z/helm-git/archive/${HELM_GIT_VERSION}.tar.gz" \
+        | tar -xzvf -; \
+    mv "helm-git-${HELM_GIT_VERSION#v}" "helm-git"; \
+    rm -rf helm-git/{tests,*.json};
 
 # Install rke
 ENV RKE_VERSION=v1.0.4
