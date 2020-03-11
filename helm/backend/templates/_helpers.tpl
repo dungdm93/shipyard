@@ -61,3 +61,43 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{- define "backend.envSource" -}}
+{{- if not .externalSource -}}
+  {{- $mergeDict := dict -}}
+  {{- if .configMapKeyRef }}
+    {{- $mergeDict = dict "configMapKeyRef" (dict "name" (printf "%s-%s" .releaseName .configMapKeyRef.name)) -}}
+  {{- else if .configMapRef }}
+    {{- $mergeDict = dict "configMapRef"    (dict "name" (printf "%s-%s" .releaseName .configMapRef.name))    -}}
+  {{- else if .secretKeyRef }}
+    {{- $mergeDict = dict "secretKeyRef"    (dict "name" (printf "%s-%s" .releaseName .secretKeyRef.name))    -}}
+  {{- else if .secretRef }}
+    {{- $mergeDict = dict "secretRef"       (dict "name" (printf "%s-%s" .releaseName .secretRef.name))       -}}
+  {{- end }}
+  {{- $_ := mergeOverwrite . $mergeDict -}}
+{{- end -}}
+{{- $_ := unset . "externalSource" -}}
+{{- $_ := unset . "releaseName" -}}
+{{ . | toYaml }}
+{{- end -}}
+
+{{- define "backend.env" -}}
+{{- $prefix := include "backend.fullname" . -}}
+{{- range .Values.app.env }}
+- name: {{ .name }}
+  {{- if .value }}
+  value: {{ .value }}
+  {{- else if .valueFrom }}
+  {{- $src := mergeOverwrite .valueFrom (dict "releaseName" $prefix) }}
+  valueFrom: {{- include "backend.envSource" $src | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{- define "backend.envFrom" -}}
+{{- $prefix := include "backend.fullname" . -}}
+{{- range .Values.app.envFrom }}
+{{- $src := mergeOverwrite . (dict "releaseName" $prefix) }}
+- {{- include "backend.envSource" $src | nindent 2 }}
+{{- end }}
+{{- end -}}

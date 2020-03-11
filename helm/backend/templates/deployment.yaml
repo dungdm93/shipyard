@@ -39,6 +39,10 @@ spec:
           args:
             {{- toYaml . | nindent 12 }}
         {{- end }}
+          env:
+            {{- include "backend.env" . | nindent 12 }}
+          envFrom:
+            {{- include "backend.envFrom" . | nindent 12 }}
           ports:
             - name: http
               containerPort: {{ .Values.app.port }}

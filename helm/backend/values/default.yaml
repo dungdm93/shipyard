@@ -8,6 +8,39 @@ app:
   command:
   - spark
   - history-server
+  env:
+  - name: abc
+    value: xyz
+  - name: foo
+    value: bar
+  - name: first
+    valueFrom:
+      configMapKeyRef:
+        name: configs
+        key: foo
+  - name: second
+    valueFrom:
+      externalSource: true
+      configMapKeyRef:
+        name: abcxyz
+        key: bar
+  - name: POD_IP
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: status.podIP
+  - name: CPU_LIMIT
+    valueFrom:
+      resourceFieldRef:
+        resource: limits.cpu
+
+  envFrom:
+  - prefix: ENV_
+    secretRef:
+      name: credential
+      optional: true
+  - configMapRef:
+      name: configs
 
 configMaps:
 - name: configs
