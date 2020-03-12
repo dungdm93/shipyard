@@ -9,7 +9,8 @@ RUN set -eux; \
         openssh-client \
         gnupg \
         curl \
-        git;
+        git; \
+    rm -rf /var/lib/apt/lists/*;
 
 COPY ./settings/ssh.config /root/.ssh/config
 
