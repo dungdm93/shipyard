@@ -1,0 +1,3 @@
+RELEASE   ?= briskly
+
+include ../Makefile
