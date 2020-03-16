@@ -36,7 +36,7 @@ spec:
     {{- end }}
       enableServiceLinks: false
       containers:
-        - name: flower
+        - name: airflow-flower
           image: "{{ $flower.image.repository }}:{{ $flower.image.tag }}"
           imagePullPolicy: {{ $flower.imagePullPolicy }}
         {{- with $flower.command }}
