@@ -1,0 +1,63 @@
+{{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "presto.fullname" . }}-worker
+  labels:
+    {{- include "presto.worker.labels" . | nindent 4 }}
+    {{- with $worker.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $worker.annotations | nindent 4 }}
+spec:
+  replicas: {{ $worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "presto.worker.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "presto.worker.selectorLabels" . | nindent 8 }}
+        {{- with $worker.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "presto.checksum" . | nindent 8 }}
+        {{- with $worker.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: presto-worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # TODO ports & healthchecks
+          resources:
+            {{- toYaml $worker.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $worker.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "presto.serviceAccountName" . }}
+      priorityClassName:  {{ $worker.priorityClassName }}
+      runtimeClassName:   {{ $worker.runtimeClassName }}
+      schedulerName:      {{ $worker.schedulerName }}
+      securityContext:
+        {{- toYaml $worker.podSecurityContext | nindent 8 }}
+    {{- with $worker.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $worker.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $worker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

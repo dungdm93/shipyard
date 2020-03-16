@@ -1,0 +1,74 @@
+{{- $coordinator := mergeOverwrite (deepCopy .Values.commons) .Values.coordinator -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "presto.fullname" . }}-coordinator
+  labels:
+    {{- include "presto.coordinator.labels" . | nindent 4 }}
+    {{- with $coordinator.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $coordinator.annotations | nindent 4 }}
+spec:
+  replicas: {{ $coordinator.replicas }}
+  selector:
+    matchLabels:
+      {{- include "presto.coordinator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "presto.coordinator.selectorLabels" . | nindent 8 }}
+        {{- with $coordinator.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "presto.checksum" . | nindent 8 }}
+        {{- with $coordinator.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: presto-coordinator
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /v1/cluster
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /v1/cluster
+              port: http
+          resources:
+            {{- toYaml $coordinator.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $coordinator.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "presto.serviceAccountName" . }}
+      priorityClassName:  {{ $coordinator.priorityClassName }}
+      runtimeClassName:   {{ $coordinator.runtimeClassName }}
+      schedulerName:      {{ $coordinator.schedulerName }}
+      securityContext:
+        {{- toYaml $coordinator.podSecurityContext | nindent 8 }}
+    {{- with $coordinator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $coordinator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $coordinator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
