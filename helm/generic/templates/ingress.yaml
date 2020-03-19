@@ -1,5 +1,5 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "backend.fullname" . -}}
+{{- $fullName := include "generic.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1beta1
@@ -10,11 +10,9 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    {{- include "backend.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+    {{- include "generic.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
 spec:
 {{- if .Values.ingress.tls }}
   tls:

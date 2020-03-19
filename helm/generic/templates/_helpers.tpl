@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "backend.name" -}}
+{{- define "generic.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "backend.fullname" -}}
+{{- define "generic.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "backend.chart" -}}
+{{- define "generic.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "backend.labels" -}}
-helm.sh/chart: {{ include "backend.chart" . }}
-{{ include "backend.selectorLabels" . }}
+{{- define "generic.labels" -}}
+helm.sh/chart: {{ include "generic.chart" . }}
+{{ include "generic.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -46,23 +46,23 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "backend.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "backend.name" . }}
+{{- define "generic.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "generic.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "backend.serviceAccountName" -}}
+{{- define "generic.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default (include "backend.fullname" .) .Values.serviceAccount.name }}
+    {{ default (include "generic.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
 
-{{- define "backend.envSource" -}}
+{{- define "generic.envSource" -}}
 {{- if not .externalSource -}}
   {{- $mergeDict := dict -}}
   {{- if .configMapKeyRef }}
@@ -81,28 +81,28 @@ Create the name of the service account to use
 {{ . | toYaml }}
 {{- end -}}
 
-{{- define "backend.env" -}}
-{{- $prefix := include "backend.fullname" . -}}
+{{- define "generic.env" -}}
+{{- $prefix := include "generic.fullname" . -}}
 {{- range .Values.env }}
 - name: {{ .name }}
   {{- if .value }}
   value: {{ .value | quote }}
   {{- else if .valueFrom }}
   {{- $src := mergeOverwrite .valueFrom (dict "releaseName" $prefix) }}
-  valueFrom: {{- include "backend.envSource" $src | nindent 4 }}
+  valueFrom: {{- include "generic.envSource" $src | nindent 4 }}
   {{- end }}
 {{- end }}
 {{- end -}}
 
-{{- define "backend.envFrom" -}}
-{{- $prefix := include "backend.fullname" . -}}
+{{- define "generic.envFrom" -}}
+{{- $prefix := include "generic.fullname" . -}}
 {{- range .Values.envFrom }}
 {{- $src := mergeOverwrite . (dict "releaseName" $prefix) }}
-- {{- include "backend.envSource" $src | nindent 2 }}
+- {{- include "generic.envSource" $src | nindent 2 }}
 {{- end }}
 {{- end -}}
 
-{{- define "backend.volumeSource" -}}
+{{- define "generic.volumeSource" -}}
 {{- if not .externalSource -}}
   {{- $mergeDict := dict -}}
   {{- if .configMap }}
@@ -117,10 +117,10 @@ Create the name of the service account to use
 {{ . | toYaml }}
 {{- end -}}
 
-{{- define "backend.volumes" -}}
-{{- $prefix := include "backend.fullname" . -}}
+{{- define "generic.volumes" -}}
+{{- $prefix := include "generic.fullname" . -}}
 {{- range .Values.volumes }}
 {{- $src := mergeOverwrite . (dict "releaseName" $prefix) }}
-- {{- include "backend.volumeSource" $src | nindent 2 }}
+- {{- include "generic.volumeSource" $src | nindent 2 }}
 {{- end }}
 {{- end -}}

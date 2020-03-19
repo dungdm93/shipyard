@@ -1,5 +1,5 @@
 apiVersion: v2
-name: backend
+name: generic
 description: A generic helm chart for backend services
 keywords: [generic]
 type: application

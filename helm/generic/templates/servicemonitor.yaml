@@ -2,9 +2,9 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "backend.fullname" . }}
+  name: {{ include "generic.fullname" . }}
   labels:
-    {{- include "backend.labels" . | nindent 4 }}
+    {{- include "generic.labels" . | nindent 4 }}
   {{- with .Values.serviceMonitor.additionalLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -25,5 +25,5 @@ spec:
     - {{ .Release.Namespace }}
   selector:
     matchLabels:
-      {{- include "backend.selectorLabels" . | nindent 6 }}
+      {{- include "generic.selectorLabels" . | nindent 6 }}
 {{- end }}

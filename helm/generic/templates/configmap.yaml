@@ -3,9 +3,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ printf "%s-%s" (include "backend.fullname" $) .name }}
+  name: {{ printf "%s-%s" (include "generic.fullname" $) .name }}
   labels:
-    {{- include "backend.labels" $ | nindent 4 }}
+    {{- include "generic.labels" $ | nindent 4 }}
 {{- with .data }}
 data:
   {{- range $key, $value := . }}
