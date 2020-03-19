@@ -76,6 +76,9 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
       serviceAccountName: {{ include "backend.serviceAccountName" . }}
+      priorityClassName:  {{ .Values.app.priorityClassName }}
+      runtimeClassName:   {{ .Values.app.runtimeClassName }}
+      schedulerName:      {{ .Values.app.schedulerName }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
     {{- if .Values.volumes }}
