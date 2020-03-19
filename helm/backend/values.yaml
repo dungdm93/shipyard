@@ -15,6 +15,10 @@ app:
   port: 80
   annotations: {}
   podAnnotations: {}
+    ## In order to get prometheus to scrape pods
+    # prometheus.io/scrape: "true"
+    # prometheus.io/path: /metrics
+    # prometheus.io/port: "8080"
   healthcheck:
     liveness: {}
     #   periodSeconds: 3
@@ -126,6 +130,11 @@ securityContext: {}
 service:
   type: ClusterIP
   port: 80
+  annotations: {}
+    ## In order to get prometheus to scrape service
+    # prometheus.io/scrape: "true"
+    # prometheus.io/path: /metrics
+    # prometheus.io/port: "8080"
 
 ingress:
   enabled: false
@@ -139,3 +148,11 @@ ingress:
   # - secretName: example.com-tls
   #   hosts:
   #   - example.com
+
+########## Observation ##########
+serviceMonitor:
+  enabled: true
+  additionalLabels: {}
+  interval: 30s
+  honorLabels: false
+  relabellings: {}
