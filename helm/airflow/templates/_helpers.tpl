@@ -67,3 +67,18 @@ Checksum pod annotations
 */}}
 {{- define "airflow.checksum" -}}
 {{- end -}}
+
+{{/*
+git-sync container
+*/}}
+{{- define "airflow.gitsync" -}}
+- name: git-sync
+  image: {{ .Values.dags.git.syncImage }}
+  imagePullPolicy: IfNotPresent
+  envFrom:
+  - secretRef:
+      name: {{ include "airflow.fullname" . }}-gitsync
+  volumeMounts:
+  - name: airflow-dags
+    mountPath: {{ .Values.dags.path }}
+{{- end -}}

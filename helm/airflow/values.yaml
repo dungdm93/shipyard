@@ -54,6 +54,8 @@ dags:
     sidecarContainer: true
     initContainer: true
 
+  mount: ...
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true

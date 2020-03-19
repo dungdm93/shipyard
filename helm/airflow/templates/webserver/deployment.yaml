@@ -29,6 +29,9 @@ spec:
     {{- end }}
       enableServiceLinks: false
       containers:
+      {{- if and (eq .Values.dags.fetcher "git") .Values.dags.git.sidecarContainer -}}
+        {{- include "airflow.gitsync" . | nindent 8 }}
+      {{- end }}
         - name: webserver
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

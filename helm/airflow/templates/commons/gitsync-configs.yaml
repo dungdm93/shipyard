@@ -1,0 +1,12 @@
+{{- if eq .Values.dags.fetcher "git" -}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "airflow.fullname" . }}-gitsync
+  labels:
+    {{- include "airflow.labels" . | nindent 4 }}
+stringData:
+  GIT_SYNC_REPO: {{ .Values.dags.git.repo }}
+  GIT_SYNC_REV:  {{ .Values.dags.git.ref }}
+{{- end }}
