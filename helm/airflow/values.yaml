@@ -37,6 +37,23 @@ worker:
 flower:
   args: [flower]
 
+dags:
+  path: /usr/local/airflow/dags
+  doNotPickle: false
+  # DAGs fetcher, options:
+  # * none: DAGs are embedded inside the Docker image
+  # * git: sync DAGs from git repo
+  # * mount: using a share file system like S3FS,...
+  # * remote: TODO implementing in Airflow 2.0
+  fetcher: git
+
+  git:
+    repo: ""
+    ref:  master
+    syncImage: k8s.gcr.io/git-sync:v3.1.5
+    sidecarContainer: true
+    initContainer: true
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
