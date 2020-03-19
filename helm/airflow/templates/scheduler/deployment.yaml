@@ -1,3 +1,5 @@
+{{- $scheduler := mergeOverwrite (deepCopy .Values.commons) .Values.scheduler -}}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -5,7 +7,7 @@ metadata:
   labels:
     {{- include "airflow.scheduler.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml .Values.scheduler.annotations | nindent 4 }}
+    {{- toYaml $scheduler.annotations | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -16,7 +18,7 @@ spec:
       labels:
         {{- include "airflow.scheduler.selectorLabels" . | nindent 8 }}
       annotations:
-        {{- with .Values.scheduler.podAnnotations }}
+        {{- with $scheduler.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- include "airflow.checksum" . | nindent 8 }}
@@ -30,41 +32,41 @@ spec:
         - name: scheduler
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- with .Values.scheduler.command }}
+        {{- with $scheduler.command }}
           command:
             {{- toYaml . | nindent 12 }}
         {{- end }}
-        {{- with .Values.scheduler.args }}
+        {{- with $scheduler.args }}
           args:
             {{- toYaml . | nindent 12 }}
         {{- end }}
           env:
-            {{- toYaml .Values.scheduler.env | nindent 12 }}
+            {{- toYaml $scheduler.env | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: "{{ template "airflow.fullname" . }}-env"
           # Scheduler has no port & healcheck
           resources:
-            {{- toYaml .Values.scheduler.resources | nindent 12 }}
+            {{- toYaml $scheduler.resources | nindent 12 }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
-      priorityClassName:  {{ .Values.scheduler.priorityClassName }}
-      runtimeClassName:   {{ .Values.scheduler.runtimeClassName }}
-      schedulerName:      {{ .Values.scheduler.schedulerName }}
+      priorityClassName:  {{ $scheduler.priorityClassName }}
+      runtimeClassName:   {{ $scheduler.runtimeClassName }}
+      schedulerName:      {{ $scheduler.schedulerName }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
     {{- if .Values.volumes }}
       volumes:
         {{- include "generic.volumes" . | nindent 8 }}
     {{- end }}
-    {{- with .Values.scheduler.nodeSelector }}
+    {{- with $scheduler.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.scheduler.affinity }}
+    {{- with $scheduler.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.scheduler.tolerations }}
+    {{- with $scheduler.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

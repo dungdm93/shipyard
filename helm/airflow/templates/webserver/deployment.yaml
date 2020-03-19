@@ -1,3 +1,5 @@
+{{- $webserver := mergeOverwrite (deepCopy .Values.commons) .Values.webserver -}}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -5,9 +7,9 @@ metadata:
   labels:
     {{- include "airflow.webserver.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml .Values.webserver.annotations | nindent 4 }}
+    {{- toYaml $webserver.annotations | nindent 4 }}
 spec:
-  replicas: {{ .Values.webserver.replicas }}
+  replicas: {{ $webserver.replicas }}
   selector:
     matchLabels:
       {{- include "airflow.webserver.selectorLabels" . | nindent 6 }}
@@ -16,7 +18,7 @@ spec:
       labels:
         {{- include "airflow.webserver.selectorLabels" . | nindent 8 }}
       annotations:
-        {{- with .Values.webserver.podAnnotations }}
+        {{- with $webserver.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- include "airflow.checksum" . | nindent 8 }}
@@ -30,16 +32,16 @@ spec:
         - name: webserver
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- with .Values.webserver.command }}
+        {{- with $webserver.command }}
           command:
             {{- toYaml . | nindent 12 }}
         {{- end }}
-        {{- with .Values.webserver.args }}
+        {{- with $webserver.args }}
           args:
             {{- toYaml . | nindent 12 }}
         {{- end }}
           env:
-            {{- toYaml .Values.webserver.env | nindent 12 }}
+            {{- toYaml $webserver.env | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: "{{ template "airflow.fullname" . }}-env"
@@ -59,26 +61,26 @@ spec:
               port: web
             periodSeconds: 30
           resources:
-            {{- toYaml .Values.webserver.resources | nindent 12 }}
+            {{- toYaml $webserver.resources | nindent 12 }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
-      priorityClassName:  {{ .Values.webserver.priorityClassName }}
-      runtimeClassName:   {{ .Values.webserver.runtimeClassName }}
-      schedulerName:      {{ .Values.webserver.schedulerName }}
+      priorityClassName:  {{ $webserver.priorityClassName }}
+      runtimeClassName:   {{ $webserver.runtimeClassName }}
+      schedulerName:      {{ $webserver.schedulerName }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
     {{- if .Values.volumes }}
       volumes:
         {{- include "generic.volumes" . | nindent 8 }}
     {{- end }}
-    {{- with .Values.webserver.nodeSelector }}
+    {{- with $webserver.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.webserver.affinity }}
+    {{- with $webserver.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.webserver.tolerations }}
+    {{- with $webserver.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

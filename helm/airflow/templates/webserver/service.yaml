@@ -1,3 +1,5 @@
+{{- $webserver := mergeOverwrite (deepCopy .Values.commons) .Values.webserver -}}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -5,7 +7,7 @@ metadata:
   labels:
     {{- include "airflow.webserver.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml .Values.webserver.serviceAnnotations | nindent 4 }}
+    {{- toYaml $webserver.serviceAnnotations | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:

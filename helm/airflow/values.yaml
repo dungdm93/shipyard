@@ -7,30 +7,28 @@ image:
   pullPolicy: IfNotPresent
   pullSecrets: []
 
-webserver:
+# Commons k8s configurations. It can be overridden by
+# airflow components: webserver, scheduler, worker,flower
+commons:
   replicas: null
-  command: null
-  args: [webserver]
+  command: []
+  args: []
   env: []
   annotations: {}
   podAnnotations: {}
   serviceAnnotations: {}
 
+  resources: {}
+
   schedulerName: null
   runtimeClassName: null
   priorityClassName: null
+
+webserver:
+  args: [webserver]
 
 scheduler:
-  command: null
   args: [scheduler]
-  env: []
-  annotations: {}
-  podAnnotations: {}
-  serviceAnnotations: {}
-
-  schedulerName: null
-  runtimeClassName: null
-  priorityClassName: null
 
 serviceAccount:
   # Specifies whether a service account should be created
