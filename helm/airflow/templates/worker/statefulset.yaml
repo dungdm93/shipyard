@@ -1,0 +1,83 @@
+{{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "airflow.fullname" . }}-worker
+  labels:
+    {{- include "airflow.worker.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $worker.annotations | nindent 4 }}
+spec:
+  replicas: {{ $worker.replicas }}
+  serviceName: "{{ template "airflow.fullname" . }}-worker"
+  podManagementPolicy: Parallel
+  updateStrategy:
+    ## Kill the workers as soon as possible, the scheduler will restart the failed jobs later
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "airflow.worker.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "airflow.worker.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- with $worker.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- include "airflow.checksum" . | nindent 8 }}
+    spec:
+    {{- with .Values.image.pullSecret }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: {{ $worker.terminationPeriod }}
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with $worker.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with $worker.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          env:
+            {{- toYaml $worker.env | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: "{{ template "airflow.fullname" . }}-env"
+          ports:
+          - name: worker-log
+            containerPort: 8793
+            protocol: TCP
+          volumeMounts: {}
+          # Worker has no healthcheck endpoint
+          resources:
+            {{- toYaml $worker.resources | nindent 12 }}
+      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
+      priorityClassName:  {{ $worker.priorityClassName }}
+      runtimeClassName:   {{ $worker.runtimeClassName }}
+      schedulerName:      {{ $worker.schedulerName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+    {{- if .Values.volumes }}
+      volumes:
+        {{- include "generic.volumes" . | nindent 8 }}
+    {{- end }}
+    {{- with $worker.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $worker.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $worker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

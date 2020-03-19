@@ -30,6 +30,10 @@ webserver:
 scheduler:
   args: [scheduler]
 
+worker:
+  args: [worker]
+  terminationPeriod: 120  # 2 minutes to worker complete its tasks
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true

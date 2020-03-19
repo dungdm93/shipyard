@@ -1,0 +1,20 @@
+{{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "airflow.fullname" . }}-worker
+  labels:
+    {{- include "airflow.worker.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $worker.serviceAnnotations | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - port: 8793
+    targetPort: worker-log
+    protocol: TCP
+    name: worker-log
+  selector:
+    {{- include "airflow.worker.selectorLabels" . | nindent 4 }}
