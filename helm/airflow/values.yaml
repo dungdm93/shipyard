@@ -10,7 +10,7 @@ image:
 webserver:
   replicas: null
   command: null
-  args: null
+  args: [webserver]
   env: []
   annotations: {}
   podAnnotations: {}
