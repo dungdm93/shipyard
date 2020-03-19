@@ -14,12 +14,18 @@ webserver:
   env: []
   annotations: {}
   podAnnotations: {}
-    ## In order to get prometheus to scrape pods
-    # prometheus.io/scrape: "true"
-    # prometheus.io/path: /metrics
-    # prometheus.io/port: "8080"
-    ## In order to fluentbit parse logs
-    # fluentbit.io/parser: apache
+  serviceAnnotations: {}
+
+  schedulerName: null
+  runtimeClassName: null
+  priorityClassName: null
+
+scheduler:
+  command: null
+  args: [scheduler]
+  env: []
+  annotations: {}
+  podAnnotations: {}
   serviceAnnotations: {}
 
   schedulerName: null
