@@ -21,7 +21,8 @@ clean:
 diff:
 	helm diff upgrade ${RELEASE} . \
 		--namespace=${NAMESPACE} \
-		--values=${VALUES}
+		--values=${VALUES} \
+		--allow-unreleased
 
 apply:
 	helm upgrade --install ${RELEASE} . \
