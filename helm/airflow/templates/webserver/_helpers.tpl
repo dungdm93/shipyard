@@ -7,7 +7,7 @@ app.kubernetes.io/component: webserver
 {{- end -}}
 
 {{/*
-webserver selector labels
+Webserver selector labels
 */}}
 {{- define "airflow.webserver.selectorLabels" -}}
 {{ include "airflow.selectorLabels" . }}

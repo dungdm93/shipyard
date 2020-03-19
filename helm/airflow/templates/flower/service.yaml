@@ -1,0 +1,19 @@
+{{- $flower := mergeOverwrite (deepCopy .Values.commons) .Values.flower -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "airflow.fullname" . }}-flower
+  labels:
+    {{- include "airflow.flower.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $flower.serviceAnnotations | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: 5555
+    name: flower
+    protocol: TCP
+    targetPort: flower
+  selector:
+    {{- include "airflow.flower.selectorLabels" . | nindent 4 }}
