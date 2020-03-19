@@ -9,10 +9,10 @@ spec:
   selector:
     matchLabels:
       {{- include "backend.selectorLabels" . | nindent 6 }}
-{{- if .Values.podDisruptionBudget.minAvailable }}
+  {{- if .Values.podDisruptionBudget.minAvailable }}
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
-{{- end }}
-{{- if .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  {{- if .Values.podDisruptionBudget.maxUnavailable }}
   maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
-{{- end }}
+  {{- end }}
 {{- end }}
