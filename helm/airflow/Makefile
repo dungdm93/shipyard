@@ -1,4 +1,4 @@
-RELEASE   ?= airflow
+RELEASE   ?= pinwheel
 NAMESPACE ?= default
 VALUES    ?= ./values/sample.yaml
 

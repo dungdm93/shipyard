@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "airflow.fullname" . }}-webserver
+  labels:
+    {{- include "airflow.webserver.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.webserver.annotations | nindent 4 }}
+spec:
+  replicas: {{ .Values.webserver.replicas }}
+  selector:
+    matchLabels:
+      {{- include "airflow.webserver.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "airflow.webserver.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- with .Values.webserver.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.image.pullSecret }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: webserver
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with .Values.webserver.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.webserver.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          env:
+            {{- toYaml .Values.webserver.env | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: "{{ template "airflow.fullname" . }}-env"
+          ports:
+          - name: web
+            containerPort: 8080
+            protocol: TCP
+          volumeMounts: {}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: web
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: web
+            periodSeconds: 30
+          resources:
+            {{- toYaml .Values.webserver.resources | nindent 12 }}
+      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
+      priorityClassName:  {{ .Values.webserver.priorityClassName }}
+      runtimeClassName:   {{ .Values.webserver.runtimeClassName }}
+      schedulerName:      {{ .Values.webserver.schedulerName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+    {{- if .Values.volumes }}
+      volumes:
+        {{- include "generic.volumes" . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.webserver.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.webserver.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.webserver.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
