@@ -11,5 +11,9 @@ gen: dep
 	@rm   -rf out/*;
 	helm template ${RELEASE} . --values=${VALUES} --output-dir=out/;
 
+push:
+	# TODO: BasicAuth https://github.com/chartmuseum/helm-push#basic-auth
+	helm push . teko
+
 clean:
 	rm -rf out charts
