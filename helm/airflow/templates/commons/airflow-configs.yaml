@@ -1,9 +1,18 @@
 {{- $airflow := .Values.airflow }}
 {{- $core := (dict "core" dict | mergeOverwrite $airflow).core }}
+{{- $celery := (dict "celery" dict | mergeOverwrite $airflow).celery }}
 {{- $elasticsearch := (dict "elasticsearch" dict | mergeOverwrite $airflow).elasticsearch }}
 
 {{- $_ := set $core "dags_folder" .Values.dags.path }}
 {{- $_ := set $core "donot_pickle" .Values.dags.doNotPickle }}
+{{- $_ := set $core "sql_alchemy_conn" (include "airflow.database" .) }}
+
+{{- if eq $core.executor "CeleryExecutor" }}
+  {{- $_ := set $celery "broker_url" (include "airflow.celeryBroker" .) }}
+  {{- if not $celery.result_backend }}
+    {{- $_ := set $celery "result_backend" (include "airflow.celeryResultBackend" .) }}
+  {{- end }}
+{{- end }}
 
 {{- $logsUrl := urlParse .Values.logs.path }}
 {{- if or (not $logsUrl.scheme) (eq $logsUrl.scheme "file") }}

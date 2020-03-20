@@ -115,6 +115,16 @@ Airflow celery broker connection url
 {{- end -}}
 
 {{/*
+Airflow celery broker connection url
+*/}}
+{{- define "airflow.celeryResultBackend" -}}
+  {{- $dbUrlParts := urlParse (include "airflow.database" .) }}
+  {{- $scheme := regexReplaceAll "(\\w+)(\\+\\w+)?" $dbUrlParts.scheme "db+${1}" }}
+  {{- $_ := set $dbUrlParts "scheme" $scheme }}
+  {{- urlJoin $dbUrlParts }}
+{{- end -}}
+
+{{/*
 Execute a template in a subchart:
 https://github.com/helm/helm/issues/4535#issuecomment-477778391
 https://stackoverflow.com/a/52024583
