@@ -88,6 +88,58 @@ logs:
 
     inlineVolume: {}
 
+postgresql:
+  enabled: true
+
+  postgresqlUsername: postgres
+  postgresqlPassword: airflow
+  postgresqlDatabase: airflow
+
+  replication:
+    enabled: false
+
+  service:
+    port: 5432
+
+  persistence:
+    enabled: true
+
+externalDatabase:
+  type: postgres
+  host: localhost
+  port: 5432
+  username: ""
+  password: ""
+  database: airflow
+
+redis:
+  enabled: true
+
+  password: airflow
+
+  cluster:
+    enabled: false
+
+  sentinel:
+    enabled: false
+    service:
+      redisPort: 6379
+
+  service:
+    port: 6379
+
+  master:
+    persistence:
+      enabled: true
+
+externalCeleryBroker:
+  type: amqp
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  path: vhost
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
