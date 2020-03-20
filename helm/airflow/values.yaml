@@ -98,47 +98,27 @@ postgresql:
   replication:
     enabled: false
 
-  service:
-    port: 5432
-
   persistence:
     enabled: true
 
-externalDatabase:
-  type: postgres
-  host: localhost
-  port: 5432
-  username: ""
-  password: ""
-  database: airflow
+# See: https://docs.sqlalchemy.org/en/13/dialects/index.html
+externalDatabase: ""
 
 redis:
   enabled: true
-
-  password: airflow
 
   cluster:
     enabled: false
 
   sentinel:
     enabled: false
-    service:
-      redisPort: 6379
-
-  service:
-    port: 6379
 
   master:
     persistence:
       enabled: true
 
-externalCeleryBroker:
-  type: amqp
-  host: localhost
-  port: 5672
-  username: guest
-  password: guest
-  path: vhost
+# See: https://docs.celeryproject.org/en/stable/getting-started/brokers/index.html
+externalCeleryBroker: ""
 
 serviceAccount:
   # Specifies whether a service account should be created

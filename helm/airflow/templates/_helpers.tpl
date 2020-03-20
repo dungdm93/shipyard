@@ -82,3 +82,50 @@ git-sync container
   - name: airflow-dags
     mountPath: {{ .Values.dags.path }}
 {{- end -}}
+
+{{/*
+Airflow database connection url
+*/}}
+{{- define "airflow.database" -}}
+{{- if .Values.postgresql.enabled -}}
+  {{- $pg := .Values.postgresql }}
+  {{- $pgHost := include "call-nested" (list . "postgresql" "postgresql.fullname") }}
+  {{- printf "postgresql+psycopg2://%s:%s@%s:%s/%s" $pg.postgresqlUsername $pg.postgresqlPassword $pgHost (toString $pg.service.port) $pg.postgresqlDatabase -}}
+{{- else -}}
+  {{- .Values.externalDatabase }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Airflow celery broker connection url
+*/}}
+{{- define "airflow.celeryBroker" -}}
+{{- if .Values.redis.enabled -}}
+  {{- $redis := .Values.redis }}
+  {{- $redisHost := include "call-nested" (list . "redis" "redis.fullname") }}
+  {{- if not $redis.sentinel.enabled -}}
+    {{- $redisHost = printf "%s-master" $redisHost }}
+  {{- end -}}
+  {{- $redisPort := $redis.sentinel.enabled | ternary $redis.sentinel.service.redisPort $redis.master.service.port }}
+  {{- $redisAuthority := (empty $redis.password) | ternary "" (printf ":%s@" $redis.password) }}
+  {{- printf "redis://%s%s:%s/0" $redisAuthority $redisHost (toString $redisPort) -}}
+{{- else -}}
+  {{- .Values.externalCeleryBroker }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Execute a template in a subchart:
+https://github.com/helm/helm/issues/4535#issuecomment-477778391
+https://stackoverflow.com/a/52024583
+*/}}
+{{- define "call-nested" }}
+{{- $dot := index . 0 }}
+{{- $subchart := index . 1 | splitList "." }}
+{{- $template := index . 2 }}
+{{- $values := $dot.Values }}
+{{- range $subchart }}
+{{- $values = index $values . }}
+{{- end }}
+{{- include $template (dict "Chart" (dict "Name" (last $subchart)) "Values" $values "Release" $dot.Release "Capabilities" $dot.Capabilities) }}
+{{- end }}
