@@ -1,5 +1,5 @@
 RELEASE   ?= pinwheel
 NAMESPACE ?= default
-VALUES    ?= ./values/sample.yaml
+VALUES    ?= ./examples/getting-started.yaml
 
 include ../Makefile

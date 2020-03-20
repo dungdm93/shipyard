@@ -16,7 +16,7 @@ gen: dep
 		--output-dir=out/;
 
 clean:
-	rm -rf ./out ./charts
+	rm -rf ./out
 
 diff:
 	helm diff upgrade ${RELEASE} . \

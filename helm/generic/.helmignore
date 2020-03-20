@@ -21,4 +21,4 @@
 *.tmproj
 .vscode/
 out/
-values/
+examples/
