@@ -7,6 +7,10 @@ image:
   pullPolicy: IfNotPresent
   pullSecrets: []
 
+airflow:
+  core:
+    executor: CeleryExecutor
+
 # Commons k8s configurations. It can be overridden by
 # airflow components: webserver, scheduler, worker,flower
 commons:

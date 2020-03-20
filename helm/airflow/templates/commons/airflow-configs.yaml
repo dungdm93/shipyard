@@ -1,0 +1,40 @@
+{{- $airflow := .Values.airflow }}
+{{- $core := (dict "core" dict | mergeOverwrite $airflow).core }}
+{{- $elasticsearch := (dict "elasticsearch" dict | mergeOverwrite $airflow).elasticsearch }}
+
+{{- $_ := set $core "dags_folder" .Values.dags.path }}
+{{- $_ := set $core "donot_pickle" .Values.dags.doNotPickle }}
+
+{{- $logsUrl := urlParse .Values.logs.path }}
+{{- if or (not $logsUrl.scheme) (eq $logsUrl.scheme "file") }}
+  {{- $_ := set $core "base_log_folder" $logsUrl.path }}
+  {{- $_ := set $core "remote_logging" false }}
+{{- else }}
+  {{- $_ := set $core "remote_logging" true }}
+  {{- if eq $logsUrl.scheme "es" }}
+    {{- $_ := unset $core "remote_base_log_folder" }}
+    {{- $_ := set $elasticsearch "host" $logsUrl.host }}
+  {{- else if eq $logsUrl.scheme "wasbs" }}
+    {{- $_ := set $core "remote_base_log_folder" "//TODO" }}
+  {{- else }}
+    {{- $_ := set $core "remote_base_log_folder" $logsUrl }}
+  {{- end }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "airflow.fullname" . }}-configs
+  labels:
+    {{- include "airflow.labels" . | nindent 4 }}
+data:
+  airflow.cfg: |
+{{- range $key, $value := $airflow }}
+  {{- if $value }}
+    [{{ $key }}]
+    {{- range $elem, $elemVal := $value }}
+    {{ $elem }} = {{ $elemVal }}
+    {{- end }}
+
+  {{- end }}
+{{ end }}
