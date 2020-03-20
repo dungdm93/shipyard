@@ -56,8 +56,8 @@ spec:
                 name: "{{ template "airflow.fullname" . }}-env"
           ports:
           - name: worker-log
-            containerPort: 8793
             protocol: TCP
+            containerPort: 8793
           volumeMounts: {}
           # Worker has no healthcheck endpoint
           resources:

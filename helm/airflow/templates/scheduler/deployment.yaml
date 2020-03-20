@@ -48,7 +48,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: "{{ template "airflow.fullname" . }}-env"
-          # Scheduler has no port & healcheck
+          # Scheduler has no ports & healchecks
           resources:
             {{- toYaml $scheduler.resources | nindent 12 }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}

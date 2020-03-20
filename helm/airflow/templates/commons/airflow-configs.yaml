@@ -35,6 +35,5 @@ data:
     {{- range $elem, $elemVal := $value }}
     {{ $elem }} = {{ $elemVal }}
     {{- end }}
-
   {{- end }}
 {{ end }}

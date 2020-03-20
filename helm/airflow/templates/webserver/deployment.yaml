@@ -50,8 +50,8 @@ spec:
                 name: "{{ template "airflow.fullname" . }}-env"
           ports:
           - name: web
-            containerPort: 8080
             protocol: TCP
+            containerPort: 8080
           volumeMounts: {}
           livenessProbe:
             httpGet:
