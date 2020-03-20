@@ -38,7 +38,7 @@ flower:
   args: [flower]
 
 dags:
-  path: /usr/local/airflow/dags
+  path: /opt/airflow/dags
   doNotPickle: false
   # DAGs fetcher, options:
   # * none: DAGs are embedded inside the Docker image
@@ -55,6 +55,34 @@ dags:
     initContainer: true
 
   mount: ...
+
+logs:
+  # Logging location configuration.
+  # For remote logging:
+  #   * Amazon S3:          s3://bucket/path/to/logs
+  #   * Amazon CloudWatch:  cloudwatch://...
+  #   * Google GCS:         gs://bucket/path/to/logs
+  #   * Google StackDriver: stackdriver://...
+  #   * Azure WASB:         wasbs://...
+  #   * ElasticSearch:      es://host:port
+  # For local logging:
+  #   * /path/to/logs
+  #   * files://path/to/logs
+  path: /opt/airflow/logs
+
+  # Storage configuration for local logs
+  persistence:
+    enabled: false
+    subPath: ""
+    subPathExpr: ""
+
+    pvc:
+      existingClaim: null
+      storageClass: default
+      accessMode: ReadWriteOnce
+      size: 1Gi
+
+    inlineVolume: {}
 
 serviceAccount:
   # Specifies whether a service account should be created
