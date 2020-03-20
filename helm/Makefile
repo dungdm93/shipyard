@@ -3,11 +3,9 @@ NAMESPACE ?= default
 VALUES    ?= ./values/sample.yaml
 
 dep:
-	@if [ ! -d "./charts" ]; then \
-		helm dependency update;  \
-	fi
+	helm dependency update;
 
-gen: dep
+gen:
 	@mkdir -p ./out;
 	@rm   -rf ./out/*;
 	helm template ${RELEASE} . \
