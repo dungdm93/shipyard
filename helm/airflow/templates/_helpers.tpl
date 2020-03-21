@@ -139,3 +139,34 @@ https://stackoverflow.com/a/52024583
 {{- end }}
 {{- include $template (dict "Chart" (dict "Name" (last $subchart)) "Values" $values "Release" $dot.Release "Capabilities" $dot.Capabilities) }}
 {{- end }}
+
+{{/*
+Airflow volumeMounts
+*/}}
+{{- define "airflow.volumeMounts" -}}
+- name: airflow-config
+  mountPath: /opt/airflow/airflow.cfg
+  subPath:   airflow.cfg
+{{- if list "git" "mount" | has .Values.dags.fetcher }}
+- name: airflow-dags
+  mountPath: {{ .Values.dags.path }}
+{{- end }}
+{{- $logsUrl := urlParse .Values.logs.path }}
+{{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) .Values.logs.persistence.enabled }}
+- name: airflow-logs
+  mountPath: {{ $logsUrl.path }}
+  {{- with .Values.logs.persistence.subPath }}
+  subPath: {{ . }}
+  {{- end }}
+  {{- with .Values.logs.persistence.subPathExpr }}
+  subPathExpr: {{ . }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Airflow volumes
+*/}}
+{{- define "airflow.volumes" -}}
+// TODO
+{{- end -}}

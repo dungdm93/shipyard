@@ -52,7 +52,8 @@ spec:
           - name: web
             protocol: TCP
             containerPort: 8080
-          volumeMounts: {}
+          volumeMounts:
+            {{- include "airflow.volumeMounts" . | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /health

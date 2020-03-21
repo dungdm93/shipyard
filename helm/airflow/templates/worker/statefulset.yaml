@@ -58,7 +58,8 @@ spec:
           - name: worker-log
             protocol: TCP
             containerPort: 8793
-          volumeMounts: {}
+          volumeMounts:
+            {{- include "airflow.volumeMounts" . | nindent 12 }}
           # Worker has no healthcheck endpoint
           resources:
             {{- toYaml $worker.resources | nindent 12 }}

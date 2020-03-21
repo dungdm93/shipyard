@@ -12,7 +12,7 @@ airflow:
     executor: CeleryExecutor
 
 # Commons k8s configurations. It can be overridden by
-# airflow components: webserver, scheduler, worker,flower
+# airflow components: webserver, scheduler, worker, flower
 commons:
   replicas: null
   command: []
@@ -48,7 +48,6 @@ dags:
   # * none: DAGs are embedded inside the Docker image
   # * git: sync DAGs from git repo
   # * mount: using a share file system like S3FS,...
-  # * remote: TODO implementing in Airflow 2.0
   fetcher: git
 
   git:

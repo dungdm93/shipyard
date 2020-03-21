@@ -48,6 +48,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: "{{ template "airflow.fullname" . }}-env"
+          volumeMounts:
+            {{- include "airflow.volumeMounts" . | nindent 12 }}
           # Scheduler has no ports & healchecks
           resources:
             {{- toYaml $scheduler.resources | nindent 12 }}
