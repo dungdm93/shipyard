@@ -82,6 +82,11 @@ git-sync sidecar container
   volumeMounts:
     - name: airflow-dags
       mountPath: /git
+    {{- if or $gitsync.auth.sshKey $gitsync.auth.externalSshKeySecret.name }}
+    - name: airflow-gitsync-sshkey
+      mountPath: /etc/git-secret/ssh
+      subPath:   gitSshKey
+    {{- end }}
 {{- end -}}
 
 {{/*
@@ -197,5 +202,18 @@ Airflow volumes
 {{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) .Values.logs.persistence.enabled }}
 - name: airflow-logs
   emptyDir: {}
+{{- end }}
+{{- $gitsync := .Values.dags.git -}}
+{{- if $gitsync.auth.sshKey }}
+- name: airflow-gitsync-sshkey
+  secret:
+    secretName: {{ include "airflow.fullname" . }}-gitsync-sshkey
+{{- else if $gitsync.auth.externalSshKeySecret.name }}
+- name: airflow-gitsync-sshkey
+  secret:
+    secretName:  {{ $gitsync.auth.externalSshKeySecret.name }}
+    items:
+    - key:  {{ $gitsync.auth.externalSshKeySecret.key | default "gitSshKey" }}
+      path: gitSshKey
 {{- end }}
 {{- end -}}

@@ -1,0 +1,12 @@
+{{- if and (eq .Values.dags.fetcher "git") .Values.dags.git.auth.sshKey }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "airflow.fullname" . }}-gitsync-sshkey
+  labels:
+    {{- include "airflow.labels" . | nindent 4 }}
+type: Opaque
+data:
+  gitSshKey: {{ trim .Values.dags.git.auth.sshKey | b64enc }}
+{{- end }}

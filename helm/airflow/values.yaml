@@ -60,6 +60,17 @@ dags:
       repository: k8s.gcr.io/git-sync
       tag:   v3.1.5
 
+    auth:
+      username:
+      password:
+
+      sshKey:
+      externalSshKeySecret:
+        name:
+        key:
+
+    syncInterval: 60
+
   mount: ...
 
 logs:

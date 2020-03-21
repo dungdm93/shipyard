@@ -1,4 +1,5 @@
 {{- if eq .Values.dags.fetcher "git" -}}
+{{- $gitsync := .Values.dags.git -}}
 ---
 apiVersion: v1
 kind: Secret
@@ -6,9 +7,19 @@ metadata:
   name: {{ include "airflow.fullname" . }}-gitsync
   labels:
     {{- include "airflow.labels" . | nindent 4 }}
+type: Opaque
 stringData:
-  GIT_SYNC_REPO:    {{ .Values.dags.git.repo }}
-  GIT_SYNC_BRANCH:  {{ .Values.dags.git.branch }}
-  GIT_SYNC_ROOT:    /git
-  GIT_SYNC_DEST:    repo
+  GIT_SYNC_REPO:     {{ $gitsync.repo }}
+  GIT_SYNC_BRANCH:   {{ $gitsync.branch }}
+  GIT_SYNC_ROOT:     /git
+  GIT_SYNC_DEST:     repo
+  GIT_SYNC_WAIT:     {{ $gitsync.syncInterval | quote}}
+{{- if $gitsync.auth.username }}
+  GIT_SYNC_USERNAME: {{ $gitsync.auth.username | quote }}
+  GIT_SYNC_PASSWORD: {{ $gitsync.auth.password | quote }}
+{{- else if or $gitsync.auth.sshKey $gitsync.auth.externalSshKeySecret.name }}
+  GIT_SYNC_SSH:      "true"
+  GIT_SSH_KEY_FILE:  "/etc/git-secret/ssh"
+  GIT_KNOWN_HOSTS:   "false"
+{{- end }}
 {{- end }}
