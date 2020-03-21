@@ -55,9 +55,9 @@ spec:
             - configMapRef:
                 name: "{{ template "airflow.fullname" . }}-env"
           ports:
-          - name: worker-log
-            protocol: TCP
-            containerPort: 8793
+            - name: worker-log
+              protocol: TCP
+              containerPort: 8793
           volumeMounts:
             {{- include "airflow.volumeMounts" . | nindent 12 }}
           # Worker has no healthcheck endpoint

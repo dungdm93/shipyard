@@ -11,9 +11,9 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - port: 5555
-    name: flower
-    protocol: TCP
-    targetPort: flower
+    - port: 5555
+      name: flower
+      protocol: TCP
+      targetPort: flower
   selector:
     {{- include "airflow.flower.selectorLabels" . | nindent 4 }}

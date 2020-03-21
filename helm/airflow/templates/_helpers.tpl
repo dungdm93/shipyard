@@ -76,11 +76,11 @@ git-sync container
   image: {{ .Values.dags.git.syncImage }}
   imagePullPolicy: IfNotPresent
   envFrom:
-  - secretRef:
-      name: {{ include "airflow.fullname" . }}-gitsync
+    - secretRef:
+        name: {{ include "airflow.fullname" . }}-gitsync
   volumeMounts:
-  - name: airflow-dags
-    mountPath: {{ .Values.dags.path }}
+    - name: airflow-dags
+      mountPath: {{ .Values.dags.path }}
 {{- end -}}
 
 {{/*
@@ -168,7 +168,7 @@ Airflow volumeMounts
 Airflow volumes
 */}}
 {{- define "airflow.volumes" -}}
-- name: scripts
+- name: airflow-config
   configMap:
     name: {{ include "airflow.fullname" . }}-configs
 {{- if list "git" "mount" | has .Values.dags.fetcher }}

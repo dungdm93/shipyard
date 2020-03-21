@@ -46,19 +46,17 @@ spec:
             - configMapRef:
                 name: "{{ template "airflow.fullname" . }}-env"
           ports:
-          - name: web
-            protocol: TCP
-            containerPort: 8080
-          volumeMounts: {}
+            - name: flower
+              protocol: TCP
+              containerPort: 5555
+          volumeMounts:
+            - name: airflow-config
+              mountPath: /opt/airflow/airflow.cfg
+              subPath:   airflow.cfg
           livenessProbe:
             httpGet:
-              path: /health
-              port: web
-            periodSeconds: 30
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: web
+              path: /
+              port: flower
             periodSeconds: 30
           resources:
             {{- toYaml $flower.resources | nindent 12 }}
@@ -68,10 +66,10 @@ spec:
       schedulerName:      {{ $flower.schedulerName }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-    {{- if .Values.volumes }}
       volumes:
-        {{- include "generic.volumes" . | nindent 8 }}
-    {{- end }}
+        - name: airflow-config
+          configMap:
+            name: {{ include "airflow.fullname" . }}-configs
     {{- with $flower.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

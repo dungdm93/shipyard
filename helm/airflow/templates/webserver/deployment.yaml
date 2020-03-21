@@ -49,9 +49,9 @@ spec:
             - configMapRef:
                 name: "{{ template "airflow.fullname" . }}-env"
           ports:
-          - name: web
-            protocol: TCP
-            containerPort: 8080
+            - name: web
+              protocol: TCP
+              containerPort: 8080
           volumeMounts:
             {{- include "airflow.volumeMounts" . | nindent 12 }}
           livenessProbe:
