@@ -1,11 +1,9 @@
 nameOverride: ""
 fullnameOverride: ""
 
-image:
-  repository: hub.teko.vn/data/airflow
-  tag: 1.10.7-all
-  pullPolicy: IfNotPresent
-  pullSecrets: []
+imagePullPolicy: IfNotPresent
+imagePullSecrets: []
+# - name: regcred
 
 airflow:
   core:
@@ -14,6 +12,9 @@ airflow:
 # Commons k8s configurations. It can be overridden by
 # airflow components: webserver, scheduler, worker, flower
 commons:
+  image:
+    repository: hub.teko.vn/data/airflow
+    tag: 1.10.7-all
   replicas: null
   command: []
   args: []

@@ -28,7 +28,7 @@ spec:
         {{- end }}
         {{- include "airflow.checksum" . | nindent 8 }}
     spec:
-    {{- with .Values.image.pullSecret }}
+    {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
@@ -39,8 +39,8 @@ spec:
         {{- include "airflow.gitsync" . | nindent 8 }}
       {{- end }}
         - name: worker
-          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ $worker.image.repository }}:{{ $worker.image.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- with $worker.command }}
           command:
             {{- toYaml . | nindent 12 }}

@@ -23,15 +23,15 @@ spec:
         {{- end }}
         {{- include "airflow.checksum" . | nindent 8 }}
     spec:
-    {{- with .Values.image.pullSecret }}
+    {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       enableServiceLinks: false
       containers:
         - name: flower
-          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ $flower.image.repository }}:{{ $flower.image.tag }}"
+          imagePullPolicy: {{ $flower.imagePullPolicy }}
         {{- with $flower.command }}
           command:
             {{- toYaml . | nindent 12 }}
