@@ -168,5 +168,17 @@ Airflow volumeMounts
 Airflow volumes
 */}}
 {{- define "airflow.volumes" -}}
-// TODO
+- name: scripts
+  configMap:
+    name: {{ include "airflow.fullname" . }}-configs
+{{- if list "git" "mount" | has .Values.dags.fetcher }}
+- name: airflow-dags
+  emptyDir: {}
+  # TODO implement
+{{- end }}
+{{- $logsUrl := urlParse .Values.logs.path }}
+{{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) .Values.logs.persistence.enabled }}
+- name: airflow-logs
+  emptyDir: {}
+{{- end }}
 {{- end -}}

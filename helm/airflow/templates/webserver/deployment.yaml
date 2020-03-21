@@ -72,10 +72,8 @@ spec:
       schedulerName:      {{ $webserver.schedulerName }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-    {{- if .Values.volumes }}
       volumes:
-        {{- include "generic.volumes" . | nindent 8 }}
-    {{- end }}
+        {{- include "airflow.volumes" . | nindent 8 }}
     {{- with $webserver.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
