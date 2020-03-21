@@ -107,6 +107,8 @@ externalDatabase: ""
 redis:
   enabled: true
 
+  password: airflow
+
   cluster:
     enabled: false
 
