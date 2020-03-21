@@ -52,11 +52,13 @@ dags:
   fetcher: git
 
   git:
-    repo: ""
-    ref:  master
-    syncImage: k8s.gcr.io/git-sync:v3.1.5
-    sidecarContainer: true
-    initContainer: true
+    repo:    ""
+    branch:  master
+    subpath: ""
+
+    image:
+      repository: k8s.gcr.io/git-sync
+      tag:   v3.1.5
 
   mount: ...
 

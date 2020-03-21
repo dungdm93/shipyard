@@ -69,18 +69,32 @@ Checksum pod annotations
 {{- end -}}
 
 {{/*
-git-sync container
+git-sync sidecar container
 */}}
-{{- define "airflow.gitsync" -}}
+{{- define "airflow.gitsync.sidecar" -}}
+{{- $gitsync := .Values.dags.git -}}
 - name: git-sync
-  image: {{ .Values.dags.git.syncImage }}
+  image: "{{ $gitsync.image.repository }}:{{ $gitsync.image.tag }}"
   imagePullPolicy: IfNotPresent
   envFrom:
     - secretRef:
         name: {{ include "airflow.fullname" . }}-gitsync
   volumeMounts:
     - name: airflow-dags
-      mountPath: {{ .Values.dags.path }}
+      mountPath: /git
+{{- end -}}
+
+{{/*
+git-sync postStart lifecycle
+*/}}
+{{- define "airflow.gitsync.postStart" -}}
+{{- $gitsync := .Values.dags.git -}}
+if [ -e "{{ .Values.dags.path }}" ]; then
+  rm -r "{{ .Values.dags.path }}";
+else
+  mkdir -p "{{ dir .Values.dags.path }}";
+fi
+ln -sfn "{{ clean (printf "/git/repo/%s" $gitsync.subpath) }}" "{{ .Values.dags.path }}";
 {{- end -}}
 
 {{/*
@@ -147,7 +161,10 @@ Airflow volumeMounts
 - name: airflow-config
   mountPath: /opt/airflow/airflow.cfg
   subPath:   airflow.cfg
-{{- if list "git" "mount" | has .Values.dags.fetcher }}
+{{- if eq .Values.dags.fetcher "git" }}
+- name: airflow-dags
+  mountPath: /git
+{{- else if eq .Values.dags.fetcher "mount" }}
 - name: airflow-dags
   mountPath: {{ .Values.dags.path }}
 {{- end }}

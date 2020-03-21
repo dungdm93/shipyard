@@ -7,6 +7,8 @@ metadata:
   labels:
     {{- include "airflow.labels" . | nindent 4 }}
 stringData:
-  GIT_SYNC_REPO: {{ .Values.dags.git.repo }}
-  GIT_SYNC_REV:  {{ .Values.dags.git.ref }}
+  GIT_SYNC_REPO:    {{ .Values.dags.git.repo }}
+  GIT_SYNC_BRANCH:  {{ .Values.dags.git.branch }}
+  GIT_SYNC_ROOT:    /git
+  GIT_SYNC_DEST:    repo
 {{- end }}

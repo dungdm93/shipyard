@@ -29,8 +29,8 @@ spec:
     {{- end }}
       enableServiceLinks: false
       containers:
-      {{- if and (eq .Values.dags.fetcher "git") .Values.dags.git.sidecarContainer -}}
-        {{- include "airflow.gitsync" . | nindent 8 }}
+      {{- if eq .Values.dags.fetcher "git" }}
+        {{- include "airflow.gitsync.sidecar" . | nindent 8 }}
       {{- end }}
         - name: webserver
           image: "{{ $webserver.image.repository }}:{{ $webserver.image.tag }}"
@@ -66,6 +66,16 @@ spec:
             periodSeconds: 30
           resources:
             {{- toYaml $webserver.resources | nindent 12 }}
+          {{- if eq .Values.dags.fetcher "git" }}
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    {{- include "airflow.gitsync.postStart" . | nindent 20 }}
+          {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       priorityClassName:  {{ $webserver.priorityClassName }}
       runtimeClassName:   {{ $webserver.runtimeClassName }}
