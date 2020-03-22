@@ -40,6 +40,11 @@ worker:
 
 flower:
   args: [flower]
+  service:
+    type: ClusterIP
+    port: 5555
+    nodePort:
+    annotations: {}
 
 dags:
   path: /opt/airflow/dags

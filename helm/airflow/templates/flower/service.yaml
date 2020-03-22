@@ -7,13 +7,16 @@ metadata:
   labels:
     {{- include "airflow.flower.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml $flower.serviceAnnotations | nindent 4 }}
+    {{- toYaml $flower.service.annotations | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ $flower.service.type }}
   ports:
-    - port: 5555
+    - port: {{ $flower.service.port }}
       name: flower
       protocol: TCP
+      {{- if eq $flower.service.type "NodePort" }}
+      nodePort: {{ $flower.service.nodePort }}
+      {{- end }}
       targetPort: flower
   selector:
     {{- include "airflow.flower.selectorLabels" . | nindent 4 }}
