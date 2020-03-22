@@ -1,0 +1,14 @@
+serviceAccount:
+  create: false
+
+dags:
+  fetcher: git
+
+  git:
+    repo:    https://github.com/apache/airflow
+    branch:  master
+    subpath: dags/
+
+airflow:
+  webserver:
+    expose_config: true

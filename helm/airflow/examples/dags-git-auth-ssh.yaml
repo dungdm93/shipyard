@@ -1,0 +1,12 @@
+dags:
+  fetcher: git
+
+  git:
+    repo:    git@github.com:example/airflow-private.git
+    branch:  master
+
+    auth:
+      sshKey: |
+        -----BEGIN RSA PRIVATE KEY-----
+        // YOUR-SSH-KEY-HERE
+        -----END RSA PRIVATE KEY-----

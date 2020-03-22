@@ -1,0 +1,10 @@
+dags:
+  fetcher: git
+
+  git:
+    repo:    https://github.com/example/airflow-private
+    branch:  master
+
+    auth:
+      username: example
+      password: Pa$$w0rd

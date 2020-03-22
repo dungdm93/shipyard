@@ -1,0 +1,7 @@
+dags:
+  fetcher: git
+
+  git:
+    repo:    https://github.com/example/airflow-public
+    branch:  master
+    subpath: dags

@@ -1,6 +1,6 @@
 RELEASE   ?= foobar
 NAMESPACE ?= default
-VALUES    ?= ./values/sample.yaml
+VALUES    ?= ./values/gs.yaml
 
 dep:
 	helm dependency update;
