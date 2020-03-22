@@ -21,7 +21,6 @@ commons:
   env: []
   annotations: {}
   podAnnotations: {}
-  serviceAnnotations: {}
 
   resources: {}
 
@@ -172,7 +171,11 @@ podDisruptionBudget:
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8080
+  nodePort:
+  annotations: {}
+  sessionAffinity: "None"
+  sessionAffinityConfig: {}
 
 ingress:
   enabled: false

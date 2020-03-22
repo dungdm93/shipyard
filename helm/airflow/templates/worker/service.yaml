@@ -6,8 +6,6 @@ metadata:
   name: {{ include "airflow.fullname" . }}-worker
   labels:
     {{- include "airflow.worker.labels" . | nindent 4 }}
-  annotations:
-    {{- toYaml $worker.serviceAnnotations | nindent 4 }}
 spec:
   type: ClusterIP
   clusterIP: None

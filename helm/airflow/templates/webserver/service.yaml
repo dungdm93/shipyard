@@ -7,13 +7,19 @@ metadata:
   labels:
     {{- include "airflow.webserver.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml $webserver.serviceAnnotations | nindent 4 }}
+    {{- toYaml .Values.service.annotations | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: 8080
+    - port: {{ .Values.service.port }}
       name: web
       protocol: TCP
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
       targetPort: web
   selector:
     {{- include "airflow.webserver.selectorLabels" . | nindent 4 }}
+  sessionAffinity: {{ .Values.service.sessionAffinity }}
+  sessionAffinityConfig:
+    {{- toYaml .Values.service.sessionAffinityConfig | nindent 4 }}
