@@ -55,12 +55,15 @@ spec:
             - configMapRef:
                 name: "{{ template "airflow.fullname" . }}-env"
           ports:
-            - name: worker-log
+            - name: worker
               protocol: TCP
               containerPort: 8793
           volumeMounts:
             {{- include "airflow.volumeMounts" . | nindent 12 }}
-          # Worker has no healthcheck endpoint
+          livenessProbe:
+            tcpSocket:
+              port: worker
+            periodSeconds: 30
           resources:
             {{- toYaml $worker.resources | nindent 12 }}
           {{- if eq .Values.dags.fetcher "git" }}

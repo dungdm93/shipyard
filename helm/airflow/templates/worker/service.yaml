@@ -13,8 +13,8 @@ spec:
   clusterIP: None
   ports:
     - port: 8793
-      name: worker-log
+      name: worker
       protocol: TCP
-      targetPort: worker-log
+      targetPort: worker
   selector:
     {{- include "airflow.worker.selectorLabels" . | nindent 4 }}
