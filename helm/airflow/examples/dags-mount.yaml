@@ -1,0 +1,9 @@
+dags:
+  fetcher: mount
+
+  # mount:
+  #   subPath: /dags
+
+  #   storageClass: "ssd"
+  #   accessMode: ReadOnlyMany
+  #   size: 3G

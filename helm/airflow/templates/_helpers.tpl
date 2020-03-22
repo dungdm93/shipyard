@@ -94,11 +94,7 @@ git-sync postStart lifecycle
 */}}
 {{- define "airflow.gitsync.postStart" -}}
 {{- $gitsync := .Values.dags.git -}}
-if [ -e "{{ .Values.dags.path }}" ]; then
-  rm -r "{{ .Values.dags.path }}";
-else
-  mkdir -p "{{ dir .Values.dags.path }}";
-fi
+mkdir -p "{{ dir .Values.dags.path }}";
 ln -sfn "{{ clean (printf "/git/repo/%s" $gitsync.subpath) }}" "{{ .Values.dags.path }}";
 {{- end -}}
 
@@ -166,13 +162,16 @@ Airflow volumeMounts
 - name: airflow-config
   mountPath: /opt/airflow/airflow.cfg
   subPath:   airflow.cfg
+
 {{- if eq .Values.dags.fetcher "git" }}
 - name: airflow-dags
   mountPath: /git
 {{- else if eq .Values.dags.fetcher "mount" }}
 - name: airflow-dags
   mountPath: {{ .Values.dags.path }}
+  subPath: {{ .Values.dags.mount.subPath }}
 {{- end }}
+
 {{- $logsUrl := urlParse .Values.logs.path }}
 {{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) .Values.logs.persistence.enabled }}
 - name: airflow-logs
@@ -193,17 +192,12 @@ Airflow volumes
 - name: airflow-config
   configMap:
     name: {{ include "airflow.fullname" . }}-configs
-{{- if list "git" "mount" | has .Values.dags.fetcher }}
+
+{{- $dags := .Values.dags -}}
+{{- if eq $dags.fetcher "git" }}
 - name: airflow-dags
   emptyDir: {}
-  # TODO implement
-{{- end }}
-{{- $logsUrl := urlParse .Values.logs.path }}
-{{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) .Values.logs.persistence.enabled }}
-- name: airflow-logs
-  emptyDir: {}
-{{- end }}
-{{- $gitsync := .Values.dags.git -}}
+{{- $gitsync := $dags.git -}}
 {{- if $gitsync.auth.sshKey }}
 - name: airflow-gitsync-sshkey
   secret:
@@ -215,5 +209,20 @@ Airflow volumes
     items:
     - key:  {{ $gitsync.auth.externalSshKeySecret.key | default "gitSshKey" }}
       path: gitSshKey
+{{- end }}
+{{- else if eq $dags.fetcher "mount" }}
+- name: airflow-dags
+{{- if not $dags.mount.inlineVolume }}
+  persistentVolumeClaim:
+    claimName: {{ $dags.mount.existingClaim | default (printf "%s-dags" (include "airflow.fullname" .)) }}
+{{- else }}
+  {{- toYaml $dags.mount.inlineVolume | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- $logsUrl := urlParse .Values.logs.path }}
+{{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) .Values.logs.persistence.enabled }}
+- name: airflow-logs
+  emptyDir: {}
 {{- end }}
 {{- end -}}

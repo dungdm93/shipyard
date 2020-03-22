@@ -71,7 +71,19 @@ dags:
 
     syncInterval: 60
 
-  mount: ...
+  mount:
+    subPath: ""
+
+    # Option 1: helm managed PVC
+    storageClass: null
+    accessMode: ReadWriteMany
+    size: 1G
+
+    # Option 2: existing PVC
+    existingClaim: null
+
+    # Option 3: using inline Volume like ConfigMap,...
+    inlineVolume: {}
 
 logs:
   # Logging location configuration.
