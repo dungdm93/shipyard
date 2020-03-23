@@ -1,0 +1,4 @@
+logs:
+  path: gs://bucket/airflow/logs
+  remoteConnId: gcs-conn
+  # level: INFO

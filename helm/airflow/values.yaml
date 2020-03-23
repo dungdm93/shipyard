@@ -109,6 +109,12 @@ logs:
   #   * files://path/to/logs
   path: /opt/airflow/logs
 
+  # Airflow Connection ID for remote logging
+  remoteConnId:
+
+  # Airflow job log level
+  level: INFO
+
   # Storage configuration for local logs
   persistence:
     enabled: false
