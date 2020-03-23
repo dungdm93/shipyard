@@ -40,6 +40,8 @@ spec:
     {{- end }}
       enableServiceLinks: false
       terminationGracePeriodSeconds: {{ $worker.terminationPeriod }}
+      initContainers:
+        {{- include "airflow.chownData" . | nindent 8 }}
       containers:
       {{- if eq .Values.dags.fetcher "git" }}
         {{- include "airflow.gitsync.sidecar" . | nindent 8 }}

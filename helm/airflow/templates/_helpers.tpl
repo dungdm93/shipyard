@@ -76,6 +76,37 @@ checksum/gitsync-sshkey:  {{ include (print $.Template.BasePath "/commons/gitsyn
 {{- end -}}
 
 {{/*
+Check logs is localy
+*/}}
+{{- define "airflow.logs.local" -}}
+{{- $logsUrl := urlParse .path -}}
+{{- if or (empty $logsUrl.scheme) (eq $logsUrl.scheme "file") -}}
+{{- $logsUrl.path }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Check logs is persistence
+*/}}
+{{- define "airflow.logs.local.persistence" -}}
+{{- if and (include "airflow.logs.local" .) .persistence.enabled -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Check logs is persistence and PVC is managed by Helm
+*/}}
+{{- define "airflow.logs.local.persistence.managedPvc" -}}
+{{- if not (include "airflow.logs.local.persistence" .) -}}
+{{- else if .persistence.existingClaim -}}
+{{- else if .persistence.inlineVolume -}}
+{{- else -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
 git-sync sidecar container
 */}}
 {{- define "airflow.gitsync.sidecar" -}}
@@ -94,6 +125,28 @@ git-sync sidecar container
       mountPath: /etc/git-secret/ssh
       subPath:   gitSshKey
     {{- end }}
+{{- end -}}
+
+{{/*
+chownData init container
+*/}}
+{{- define "airflow.chownData" -}}
+{{- $logs := .Values.logs -}}
+{{- if include "airflow.logs.local.persistence" $logs -}}
+- name: chown-data
+  image: busybox:1-glibc
+  imagePullPolicy: IfNotPresent
+  command:
+    - chown
+    - -R
+    - 1000:1000
+    - {{ $logs.path }}
+  volumeMounts:
+    - name: airflow-logs
+      mountPath: {{ $logs.path }}
+  securityContext:
+    runAsUser: 0  # root
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -179,14 +232,14 @@ Airflow volumeMounts
   subPath: {{ .Values.dags.mount.subPath }}
 {{- end }}
 
-{{- $logsUrl := urlParse .Values.logs.path -}}
-{{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) .Values.logs.persistence.enabled }}
+{{- $logs := .Values.logs -}}
+{{- if include "airflow.logs.local.persistence" $logs }}
 - name: airflow-logs
-  mountPath: {{ $logsUrl.path }}
-  {{- with .Values.logs.persistence.subPath }}
+  mountPath: {{ include "airflow.logs.local" $logs }}
+  {{- with $logs.persistence.subPath }}
   subPath: {{ . }}
   {{- end }}
-  {{- with .Values.logs.persistence.subPathExpr }}
+  {{- with $logs.persistence.subPathExpr }}
   subPathExpr: {{ . }}
   {{- end }}
 {{- end }}
@@ -228,8 +281,7 @@ Airflow volumes
 {{- end }}
 
 {{- $logs := .Values.logs -}}
-{{- $logsUrl := urlParse $logs.path -}}
-{{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) $logs.persistence.enabled }}
+{{- if include "airflow.logs.local.persistence" $logs }}
 - name: airflow-logs
 {{- if not $logs.persistence.inlineVolume }}
   persistentVolumeClaim:

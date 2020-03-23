@@ -1,17 +1,5 @@
-{{- define "airflow.logs.managedPvc" -}}
 {{- $logs  := .Values.logs -}}
-{{- $logsUrl := urlParse $logs.path -}}
-{{- if and $logsUrl.scheme (not (eq $logsUrl.scheme "file")) -}}
-{{- else if not $logs.persistence.enabled -}}
-{{- else if $logs.persistence.existingClaim -}}
-{{- else if $logs.persistence.inlineVolume -}}
-{{- else -}}
-true
-{{- end -}}
-{{- end -}}
-
-{{- $logs  := .Values.logs -}}
-{{- if (include "airflow.logs.managedPvc" .) }}
+{{- if include "airflow.logs.local.persistence.managedPvc" $logs }}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

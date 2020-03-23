@@ -14,22 +14,24 @@
   {{- end }}
 {{- end }}
 
-{{- $logsUrl := urlParse .Values.logs.path }}
-{{- $_ := set $core "logging_level" .Values.logs.level }}
+{{- with .Values.logs -}}
+{{- $logsUrl := urlParse .path }}
+{{- $_ := set $core "logging_level" .level }}
 {{- if or (not $logsUrl.scheme) (eq $logsUrl.scheme "file") }}
   {{- $_ := set $core "base_log_folder" $logsUrl.path }}
   {{- $_ := set $core "remote_logging" false }}
 {{- else }}
   {{- $_ := set $core "remote_logging" true }}
-  {{- $_ := set $core "remote_log_conn_id" .Values.logs.remoteConnId }}
+  {{- $_ := set $core "remote_log_conn_id" .remoteConnId }}
   {{- if eq $logsUrl.scheme "es" }}
     {{- $_ := unset $core "remote_base_log_folder" }}
     {{- $_ := set $elasticsearch "host" $logsUrl.host }}
   {{- else if eq $logsUrl.scheme "wasbs" }}
     {{- $_ := set $core "remote_base_log_folder" "//TODO" }}
   {{- else }}
-    {{- $_ := set $core "remote_base_log_folder" .Values.logs.path }}
+    {{- $_ := set $core "remote_base_log_folder" .path }}
   {{- end }}
+{{- end }}
 {{- end }}
 ---
 apiVersion: v1
