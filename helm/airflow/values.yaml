@@ -205,7 +205,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   hosts:
     - host: airflow.local
-      paths: []
+      path: /
   tls: []
   #  - secretName: airflow.local-tls
   #    hosts:
