@@ -37,6 +37,42 @@
 
 {{- if eq $core.executor "KubernetesExecutor" }}
   {{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
+
+  {{- $_ := set $kubernetes "in_cluster"                         true                     }}
+  {{- $_ := set $kubernetes "namespace"                          .Release.Namespace       }}
+  {{- $_ := set $kubernetes "worker_container_repository"        $worker.image.repository }}
+  {{- $_ := set $kubernetes "worker_container_tag"               $worker.image.tag        }}
+  {{- $_ := set $kubernetes "worker_container_image_pull_policy" .Values.imagePullPolicy  }}
+  # image_pull_secrets
+
+  {{- $_ := set $kubernetes "airflow_configmap" (printf "%s-configs" (include "airflow.fullname" .)) }}
+  # env_from_configmap_ref
+  # env_from_secret_ref
+
+  # DAGs
+  {{- if eq .Values.dags.fetcher "none" }}
+    {{- $_ := set $kubernetes "dags_in_image" true }}
+  {{- else if eq .Values.dags.fetcher "git" }}
+    {{- $_ := set $kubernetes "dags_in_image" false }}
+    {{- $gitsync := .Values.dags.git -}}
+
+    {{- $_ := set $kubernetes "git_repo"    $gitsync.repo    }}
+    {{- $_ := set $kubernetes "git_branch"  $gitsync.branch  }}
+    {{- $_ := set $kubernetes "git_subpath" $gitsync.subpath }}
+
+    {{- if $gitsync.auth.username }}
+      {{- $_ := set $kubernetes "git_sync_credentials_secret" (printf "%s-gitsync" (include "airflow.fullname" .)) }}
+    {{- else if $gitsync.auth.sshKey }}
+      {{- $_ := set $kubernetes "git_ssh_key_secret_name" (printf "%s-gitsync" (include "airflow.fullname" .)) }}
+    {{- else if $gitsync.auth.externalSshKeySecret.name }}
+      {{- $_ := set $kubernetes "git_ssh_key_secret_name" $gitsync.auth.externalSshKeySecret.name }}
+      {{- if not (eq ($gitsync.auth.externalSshKeySecret.key | default "gitSshKey") "gitSshKey")}}
+        {{- fail "Custom externalSshKeySecret.key is not support by KubernetesExecutor yet" }}
+      {{- end }}
+    {{- end }}
+  {{- else if eq .Values.dags.fetcher "mount" }}
+    {{- $_ := set $kubernetes "dags_in_image" false }}
+  {{- end }}
 {{- end }}
 ---
 apiVersion: v1
