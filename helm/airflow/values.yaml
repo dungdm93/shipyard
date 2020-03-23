@@ -19,6 +19,9 @@ commons:
   command: []
   args: []
   env: []
+
+  labels: {}
+  podLabels: {}
   annotations: {}
   podAnnotations: {}
 

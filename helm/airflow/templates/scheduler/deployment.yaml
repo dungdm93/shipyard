@@ -6,6 +6,9 @@ metadata:
   name: {{ include "airflow.fullname" . }}-scheduler
   labels:
     {{- include "airflow.scheduler.labels" . | nindent 4 }}
+    {{- with $scheduler.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- toYaml $scheduler.annotations | nindent 4 }}
 spec:
@@ -17,11 +20,14 @@ spec:
     metadata:
       labels:
         {{- include "airflow.scheduler.selectorLabels" . | nindent 8 }}
+        {{- with $scheduler.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       annotations:
+        {{- include "airflow.checksum" . | nindent 8 }}
         {{- with $scheduler.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- include "airflow.checksum" . | nindent 8 }}
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
