@@ -8,6 +8,7 @@ imagePullSecrets: []
 airflow:
   core:
     executor: CeleryExecutor
+    load_examples: false
 
 # Commons k8s configurations. It can be overridden by
 # airflow components: webserver, scheduler, worker, flower
