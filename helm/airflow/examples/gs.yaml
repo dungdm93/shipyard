@@ -1,6 +1,3 @@
-serviceAccount:
-  create: false
-
 dags:
   fetcher: git
 

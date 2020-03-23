@@ -9,6 +9,8 @@ airflow:
   core:
     executor: CeleryExecutor
     load_examples: false
+  webserver:
+    expose_config: true
 
 # Commons k8s configurations. It can be overridden by
 # airflow components: webserver, scheduler, worker, flower
