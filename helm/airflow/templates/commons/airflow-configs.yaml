@@ -1,23 +1,17 @@
 {{- $airflow := .Values.airflow }}
 {{- $core := (dict "core" dict | mergeOverwrite $airflow).core }}
 {{- $celery := (dict "celery" dict | mergeOverwrite $airflow).celery }}
+{{- $kubernetes := (dict "kubernetes" dict | mergeOverwrite $airflow).kubernetes }}
 {{- $elasticsearch := (dict "elasticsearch" dict | mergeOverwrite $airflow).elasticsearch }}
 
 {{- $_ := set $core "dags_folder" .Values.dags.path }}
 {{- $_ := set $core "donot_pickle" .Values.dags.doNotPickle }}
 {{- $_ := set $core "sql_alchemy_conn" (include "airflow.database" .) }}
 
-{{- if eq $core.executor "CeleryExecutor" }}
-  {{- $_ := set $celery "broker_url" (include "airflow.celeryBroker" .) }}
-  {{- if not $celery.result_backend }}
-    {{- $_ := set $celery "result_backend" (include "airflow.celeryResultBackend" .) }}
-  {{- end }}
-{{- end }}
-
 {{- with .Values.logs -}}
 {{- $logsUrl := urlParse .path }}
 {{- $_ := set $core "logging_level" .level }}
-{{- if or (not $logsUrl.scheme) (eq $logsUrl.scheme "file") }}
+{{- if include "airflow.logs.local" . }}
   {{- $_ := set $core "base_log_folder" $logsUrl.path }}
   {{- $_ := set $core "remote_logging" false }}
 {{- else }}
@@ -32,6 +26,17 @@
     {{- $_ := set $core "remote_base_log_folder" .path }}
   {{- end }}
 {{- end }}
+{{- end }}
+
+{{- if eq $core.executor "CeleryExecutor" }}
+  {{- $_ := set $celery "broker_url" (include "airflow.celeryBroker" .) }}
+  {{- if not $celery.result_backend }}
+    {{- $_ := set $celery "result_backend" (include "airflow.celeryResultBackend" .) }}
+  {{- end }}
+{{- end }}
+
+{{- if eq $core.executor "KubernetesExecutor" }}
+  {{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
 {{- end }}
 ---
 apiVersion: v1
