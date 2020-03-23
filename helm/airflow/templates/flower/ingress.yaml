@@ -1,0 +1,38 @@
+{{- $flower := mergeOverwrite (deepCopy .Values.commons) .Values.flower -}}
+{{- if $flower.ingress.enabled -}}
+{{- $flowerService := printf "%s-flower" (include "airflow.fullname" .) -}}
+---
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ include "airflow.fullname" . }}-flower
+  labels:
+    {{- include "airflow.flower.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $flower.ingress.annotations | nindent 4 }}
+spec:
+{{- if $flower.ingress.tls }}
+  tls:
+  {{- range $flower.ingress.tls }}
+  - hosts:
+    {{- range .hosts }}
+    - {{ . }}
+    {{- end }}
+    secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range $flower.ingress.hosts }}
+  - host: {{ .host }}
+    http:
+      paths:
+      - path: {{ .path | default "/flower" }}
+        backend:
+          serviceName: {{ $flowerService }}
+          servicePort: flower
+  {{- end }}
+{{- end }}
