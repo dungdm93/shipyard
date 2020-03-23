@@ -57,9 +57,9 @@ spec:
         {{- end }}
           env:
             {{- toYaml $worker.env | nindent 12 }}
-          envFrom:
-            - configMapRef:
-                name: "{{ template "airflow.fullname" . }}-env"
+          # envFrom:
+          #   - configMapRef:
+          #       name: "{{ template "airflow.fullname" . }}-env"
           ports:
             - name: worker
               protocol: TCP

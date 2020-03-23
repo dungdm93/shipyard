@@ -1,4 +1,4 @@
-{{- if eq .Values.dags.fetcher "git" -}}
+{{- if eq .Values.dags.fetcher "git" }}
 {{- $gitsync := .Values.dags.git -}}
 ---
 apiVersion: v1

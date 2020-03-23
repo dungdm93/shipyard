@@ -66,6 +66,13 @@ Create the name of the service account to use
 Checksum pod annotations
 */}}
 {{- define "airflow.checksum" -}}
+checksum/airflow-configs: {{ include (print $.Template.BasePath "/commons/airflow-configs.yaml") . | sha256sum }}
+{{- if eq .Values.dags.fetcher "git" }}
+checksum/gitsync-configs: {{ include (print $.Template.BasePath "/commons/gitsync-configs.yaml") . | sha256sum }}
+{{- if .Values.dags.git.auth.sshKey }}
+checksum/gitsync-sshkey:  {{ include (print $.Template.BasePath "/commons/gitsync-sshkey.yaml") .  | sha256sum }}
+{{- end }}
+{{- end }}
 {{- end -}}
 
 {{/*

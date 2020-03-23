@@ -51,9 +51,9 @@ spec:
         {{- end }}
           env:
             {{- toYaml $scheduler.env | nindent 12 }}
-          envFrom:
-            - configMapRef:
-                name: "{{ template "airflow.fullname" . }}-env"
+          # envFrom:
+          #   - configMapRef:
+          #       name: "{{ template "airflow.fullname" . }}-env"
           volumeMounts:
             {{- include "airflow.volumeMounts" . | nindent 12 }}
           # Scheduler has no ports & healchecks

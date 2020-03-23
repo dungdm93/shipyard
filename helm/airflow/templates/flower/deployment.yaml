@@ -48,9 +48,9 @@ spec:
         {{- end }}
           env:
             {{- toYaml $flower.env | nindent 12 }}
-          envFrom:
-            - configMapRef:
-                name: "{{ template "airflow.fullname" . }}-env"
+          # envFrom:
+          #   - configMapRef:
+          #       name: "{{ template "airflow.fullname" . }}-env"
           ports:
             - name: flower
               protocol: TCP

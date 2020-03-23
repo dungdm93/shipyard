@@ -51,9 +51,9 @@ spec:
         {{- end }}
           env:
             {{- toYaml $webserver.env | nindent 12 }}
-          envFrom:
-            - configMapRef:
-                name: "{{ template "airflow.fullname" . }}-env"
+          # envFrom:
+          #   - configMapRef:
+          #       name: "{{ template "airflow.fullname" . }}-env"
           ports:
             - name: web
               protocol: TCP
