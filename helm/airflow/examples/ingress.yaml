@@ -1,0 +1,24 @@
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: airflow.example.com
+      path: /
+  tls:
+   - secretName: airflow.example.com-tls
+     hosts:
+       - airflow.example.com
+
+flower:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: airflow.example.com
+        path: /flower
+    tls:
+    - secretName: airflow.example.com-tls
+      hosts:
+        - airflow.example.com
