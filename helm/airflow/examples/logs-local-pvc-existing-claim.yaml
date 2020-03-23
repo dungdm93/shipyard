@@ -1,0 +1,7 @@
+logs:
+  path: /opt/airflow/logs
+
+  persistence:
+    enabled: true
+
+    existingClaim: external-airflow-logs-pvc

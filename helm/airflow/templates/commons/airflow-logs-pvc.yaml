@@ -1,0 +1,36 @@
+{{- define "airflow.logs.managedPvc" -}}
+{{- $logs  := .Values.logs -}}
+{{- $logsUrl := urlParse $logs.path -}}
+{{- if and $logsUrl.scheme (not (eq $logsUrl.scheme "file")) -}}
+{{- else if not $logs.persistence.enabled -}}
+{{- else if $logs.persistence.existingClaim -}}
+{{- else if $logs.persistence.inlineVolume -}}
+{{- else -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{- $logs  := .Values.logs -}}
+{{- if (include "airflow.logs.managedPvc" .) }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "airflow.fullname" . }}-logs
+  labels:
+    {{- include "airflow.labels" . | nindent 4 }}
+spec:
+{{- if kindIs "invalid" $logs.persistence.storageClass }}
+  # storageClass is null, using default provisioner
+{{- else if or (empty $logs.persistence.storageClass) (eq "-" $logs.persistence.storageClass) }}
+  storageClassName: "" # disables dynamic provisioning
+{{- else }}
+  storageClassName: {{ $logs.persistence.storageClass }}
+{{- end }}
+  resources:
+    requests:
+      storage: {{ $logs.persistence.size }}
+  accessModes:
+    - {{ $logs.persistence.accessMode }}
+  volumeMode: filesystem
+{{- end }}

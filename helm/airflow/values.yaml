@@ -92,7 +92,7 @@ dags:
     # Option 2: existing PVC
     existingClaim: null
 
-    # Option 3: using inline Volume like ConfigMap,...
+    # Option 3: using inline volume like ConfigMap,...
     inlineVolume: {}
 
 logs:
@@ -112,15 +112,19 @@ logs:
   # Storage configuration for local logs
   persistence:
     enabled: false
+
     subPath: ""
     subPathExpr: ""
 
-    pvc:
-      existingClaim: null
-      storageClass: default
-      accessMode: ReadWriteOnce
-      size: 1Gi
+    # Option 1: helm managed PVC
+    storageClass: null
+    accessMode: ReadWriteMany
+    size: 1G
 
+    # Option 2: existing PVC
+    existingClaim: null
+
+    # Option 3: using inline volume like NFS,...
     inlineVolume: {}
 
 postgresql:

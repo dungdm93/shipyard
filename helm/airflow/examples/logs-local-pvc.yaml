@@ -1,0 +1,9 @@
+logs:
+  path: /opt/airflow/logs
+
+  persistence:
+    enabled: true
+
+    storageClass: standard
+    accessMode: ReadWriteMany
+    size: 1G

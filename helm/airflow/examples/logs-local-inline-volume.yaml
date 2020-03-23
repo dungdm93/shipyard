@@ -1,0 +1,10 @@
+logs:
+  path: /opt/airflow/logs
+
+  persistence:
+    enabled: true
+
+    inlineVolume:
+      nfs:
+        server: 192.168.10.10
+        path:   /path/to/airflow/logs

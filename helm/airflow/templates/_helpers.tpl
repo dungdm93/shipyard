@@ -144,7 +144,7 @@ Execute a template in a subchart:
 https://github.com/helm/helm/issues/4535#issuecomment-477778391
 https://stackoverflow.com/a/52024583
 */}}
-{{- define "call-nested" }}
+{{- define "call-nested" -}}
 {{- $dot := index . 0 }}
 {{- $subchart := index . 1 | splitList "." }}
 {{- $template := index . 2 }}
@@ -153,7 +153,7 @@ https://stackoverflow.com/a/52024583
 {{- $values = index $values . }}
 {{- end }}
 {{- include $template (dict "Chart" (dict "Name" (last $subchart)) "Values" $values "Release" $dot.Release "Capabilities" $dot.Capabilities) }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Airflow volumeMounts
@@ -172,7 +172,7 @@ Airflow volumeMounts
   subPath: {{ .Values.dags.mount.subPath }}
 {{- end }}
 
-{{- $logsUrl := urlParse .Values.logs.path }}
+{{- $logsUrl := urlParse .Values.logs.path -}}
 {{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) .Values.logs.persistence.enabled }}
 - name: airflow-logs
   mountPath: {{ $logsUrl.path }}
@@ -220,9 +220,15 @@ Airflow volumes
 {{- end }}
 {{- end }}
 
-{{- $logsUrl := urlParse .Values.logs.path }}
-{{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) .Values.logs.persistence.enabled }}
+{{- $logs := .Values.logs -}}
+{{- $logsUrl := urlParse $logs.path -}}
+{{- if and (or (not $logsUrl.scheme) (eq $logsUrl.scheme "file")) $logs.persistence.enabled }}
 - name: airflow-logs
-  emptyDir: {}
+{{- if not $logs.persistence.inlineVolume }}
+  persistentVolumeClaim:
+    claimName: {{ $logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .)) }}
+{{- else }}
+  {{- toYaml $logs.persistence.inlineVolume | nindent 2 }}
+{{- end }}
 {{- end }}
 {{- end -}}
