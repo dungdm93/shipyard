@@ -73,12 +73,12 @@ dags:
   # * mount: using a share file system like S3FS,...
   fetcher: git
 
-  # Beaware, when use git fetcher, the real dags_folder is
-  # `{{.dags.path}}/repo/{{.dags.git.subpath}}`
+  # Beaware when use git fetcher, the real `dags_folder`
+  # will changing to `{{.dags.path}}/repo/{{.dags.git.subPath}}`
   git:
     repo:    ""
     branch:  master
-    subpath: ""
+    subPath: ""
 
     image:
       repository: k8s.gcr.io/git-sync
@@ -134,7 +134,6 @@ logs:
     enabled: false
 
     subPath: ""
-    subPathExpr: ""
 
     # Option 1: helm managed PVC
     storageClass: null

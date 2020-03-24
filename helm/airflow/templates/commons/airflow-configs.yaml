@@ -60,7 +60,7 @@
 
     {{- $_ := set $kubernetes "git_repo"    $gitsync.repo    }}
     {{- $_ := set $kubernetes "git_branch"  $gitsync.branch  }}
-    {{- $_ := set $kubernetes "git_subpath" $gitsync.subpath }}
+    {{- $_ := set $kubernetes "git_subpath" $gitsync.subPath }}
     {{- $_ := set $kubernetes "git_dags_folder_mount_point" .Values.dags.path }}
 
     {{- if $gitsync.auth.username }}

@@ -111,7 +111,7 @@ Get airflow dags folder
 */}}
 {{- define "airflow.dags.folder" -}}
 {{- if eq .fetcher "git" -}}
-  {{- clean (printf "%s/repo/%s" .path .git.subpath) }}
+  {{- clean (printf "%s/repo/%s" .path .git.subPath) }}
 {{- else -}}
   {{- .path }}
 {{- end -}}
@@ -240,9 +240,6 @@ Airflow volumeMounts
   mountPath: {{ include "airflow.logs.local" $logs }}
   {{- with $logs.persistence.subPath }}
   subPath: {{ . }}
-  {{- end }}
-  {{- with $logs.persistence.subPathExpr }}
-  subPathExpr: {{ . }}
   {{- end }}
 {{- end }}
 {{- end -}}

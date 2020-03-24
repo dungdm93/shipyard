@@ -4,4 +4,4 @@ dags:
   git:
     repo:    https://github.com/example/airflow-public
     branch:  master
-    subpath: dags
+    subPath: dags
