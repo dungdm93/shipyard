@@ -291,6 +291,6 @@ override.tf.json
 
 ### Custom ignore
 !.gitkeep
-/helm/*/out
+/helm/*/build
 /helm/**/charts/*.tgz
 /helm/**/Chart.lock

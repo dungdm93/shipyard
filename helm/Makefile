@@ -6,15 +6,15 @@ dep:
 	helm dependency update;
 
 gen:
-	@mkdir -p ./out;
-	@rm   -rf ./out/*;
+	@mkdir -p ./build;
+	@rm   -rf ./build/*;
 	helm template ${RELEASE} . \
 		--namespace=${NAMESPACE} \
 		--values=${VALUES} \
-		--output-dir=out/;
+		--output-dir=build;
 
 clean:
-	rm -rf ./out
+	rm -rf ./build
 
 diff:
 	helm diff upgrade ${RELEASE} . \
