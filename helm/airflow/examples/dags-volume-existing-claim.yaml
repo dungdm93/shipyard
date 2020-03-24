@@ -1,7 +1,7 @@
 dags:
-  fetcher: mount
+  fetcher: volume
 
-  mount:
+  volume:
     subPath: /dags
 
     existingClaim: external-airflow-dags-pvc

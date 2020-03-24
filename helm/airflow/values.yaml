@@ -75,7 +75,7 @@ dags:
   # DAGs fetcher, options:
   # * none: DAGs are embedded inside the Docker image
   # * git: sync DAGs from git repo
-  # * mount: using a share file system like S3FS,...
+  # * volume: using a share file system like S3FS,...
   fetcher: git
 
   # Beaware when use git fetcher, the real `dags_folder`
@@ -100,7 +100,7 @@ dags:
 
     syncInterval: 60
 
-  mount:
+  volume:
     subPath: ""
 
     # Option 1: helm managed PVC

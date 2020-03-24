@@ -1,6 +1,6 @@
 {{- $dags  := .Values.dags -}}
-{{- $mount := $dags.mount  -}}
-{{- if and (eq $dags.fetcher "mount") (not $mount.existingClaim) }}
+{{- $volume := $dags.volume  -}}
+{{- if and (eq $dags.fetcher "volume") (not $volume.existingClaim) }}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -9,17 +9,17 @@ metadata:
   labels:
     {{- include "airflow.labels" . | nindent 4 }}
 spec:
-{{- if kindIs "invalid" $mount.storageClass }}
+{{- if kindIs "invalid" $volume.storageClass }}
   # storageClass is null, using default provisioner
-{{- else if or (empty $mount.storageClass) (eq "-" $mount.storageClass) }}
+{{- else if or (empty $volume.storageClass) (eq "-" $volume.storageClass) }}
   storageClassName: "" # disables dynamic provisioning
 {{- else }}
-  storageClassName: {{ $mount.storageClass }}
+  storageClassName: {{ $volume.storageClass }}
 {{- end }}
   resources:
     requests:
-      storage: {{ $mount.size }}
+      storage: {{ $volume.size }}
   accessModes:
-    - {{ $mount.accessMode }}
+    - {{ $volume.accessMode }}
   volumeMode: filesystem
 {{- end }}

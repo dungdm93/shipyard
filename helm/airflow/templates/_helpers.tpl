@@ -244,10 +244,10 @@ Airflow volumeMounts
 {{- if eq .Values.dags.fetcher "git" }}
 - name: airflow-dags
   mountPath: {{ .Values.dags.path }}
-{{- else if eq .Values.dags.fetcher "mount" }}
+{{- else if eq .Values.dags.fetcher "volume" }}
 - name: airflow-dags
   mountPath: {{ .Values.dags.path }}
-  {{- with .Values.dags.mount.subPath }}
+  {{- with .Values.dags.volume.subPath }}
   subPath: {{ . }}
   {{- end }}
 {{- end }}
@@ -287,10 +287,10 @@ Airflow volumes
     - key:  {{ $gitsync.auth.externalSshKeySecret.key | default "gitSshKey" }}
       path: gitSshKey
 {{- end }}
-{{- else if eq $dags.fetcher "mount" }}
+{{- else if eq $dags.fetcher "volume" }}
 - name: airflow-dags
   persistentVolumeClaim:
-    claimName: {{ $dags.mount.existingClaim | default (printf "%s-dags" (include "airflow.fullname" .)) }}
+    claimName: {{ $dags.volume.existingClaim | default (printf "%s-dags" (include "airflow.fullname" .)) }}
 {{- end }}
 
 {{- $logs := .Values.logs -}}

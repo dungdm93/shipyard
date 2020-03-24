@@ -74,11 +74,11 @@
         {{- fail "Custom externalSshKeySecret.key is not support by KubernetesExecutor yet" }}
       {{- end }}
     {{- end }}
-  {{- else if eq $dags.fetcher "mount" }}
+  {{- else if eq $dags.fetcher "volume" }}
     {{- $_ := set $kubernetes "dags_in_image" false }}
 
-    {{- $_ := set $kubernetes "dags_volume_claim" ($dags.mount.existingClaim | default (printf "%s-dags" (include "airflow.fullname" .))) }}
-    {{- $_ := set $kubernetes "dags_volume_subpath" $dags.mount.subPath }}
+    {{- $_ := set $kubernetes "dags_volume_claim" ($dags.volume.existingClaim | default (printf "%s-dags" (include "airflow.fullname" .))) }}
+    {{- $_ := set $kubernetes "dags_volume_subpath" $dags.volume.subPath }}
   {{- end }}
 
   # Logs
