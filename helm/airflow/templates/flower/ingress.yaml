@@ -1,5 +1,5 @@
 {{- $flower := mergeOverwrite (deepCopy .Values.commons) .Values.flower -}}
-{{- if $flower.ingress.enabled -}}
+{{- if and (eq .Values.airflow.core.executor "CeleryExecutor") $flower.ingress.enabled }}
 {{- $flowerService := printf "%s-flower" (include "airflow.fullname" .) -}}
 ---
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
