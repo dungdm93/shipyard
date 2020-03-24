@@ -80,8 +80,10 @@ run_airflow_daemon() {
 }
 
 case "$1" in
-    webserver|scheduler|worker|flower)
+    scheduler)
         migrate_airflow_db
+        run_airflow_daemon "$@"
+    webserver|worker|flower)
         run_airflow_daemon "$@"
         ;;
     version)

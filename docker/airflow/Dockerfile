@@ -1,16 +1,14 @@
 FROM python:3.7-slim-stretch AS base
-
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+SHELL [ "/bin/bash", "-c" ]
 
 ENV AIRFLOW_HOME="/opt/airflow" \
     AIRFLOW_INSTALL_DIR="/usr/local/airflow"
 ENV PATH="${AIRFLOW_INSTALL_DIR}/bin:${PATH}" \
-    PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${AIRFLOW_INSTALL_DIR}/lib/python3.7/site-packages/"
+    PYTHONPATH="${PYTHONPATH}:${AIRFLOW_INSTALL_DIR}/lib/python3.7/site-packages/"
 
 RUN set -eux; \
-    groupadd -r --gid=999 docker; \
-    useradd  -ms "/bin/bash" --uid=1000 airflow; \
-    usermod  -aG docker airflow; \
+    useradd -ms "/bin/bash" --uid=1000 airflow; \
     mkdir -p "${AIRFLOW_HOME}"; \
     chown -R airflow: "${AIRFLOW_HOME}";
 
@@ -18,7 +16,7 @@ WORKDIR ${AIRFLOW_HOME}
 
 FROM base AS builder
 
-ARG AIRFLOW_VERSION=1.10.7
+ARG AIRFLOW_VERSION=1.10.9
 
 RUN set -eux; \
     apt-get update; \
@@ -35,13 +33,29 @@ RUN set -eux; \
         libev-dev
 
 RUN set -eux; \
+    function join { local IFS="$1"; echo "${*:2}"; }; \
+    AIRFLOW_PACKAGES=( \
+        # Executor
+        celery dask kubernetes \
+        # Database
+        mysql postgres mongo jdbc \
+        # Celery Broker
+        redis rabbitmq \
+        # Authentication
+        password ldap kerberos \
+        # Cloud Providers
+        aws azure gcp \
+        # BigData
+        hdfs hive presto \
+        # Others
+        async crypto ssh slack \
+    ); \
     mkdir -p ${AIRFLOW_INSTALL_DIR}; \
-    # Speed up cassandra-driver installation
-    export CASS_DRIVER_BUILD_CONCURRENCY=8; \
     pip install --prefix="${AIRFLOW_INSTALL_DIR}" \
-        "apache-airflow[all]==${AIRFLOW_VERSION}" \
-        "lz4" "python-snappy" \
-        "pymssql<3.0";
+        "librabbitmq" \
+        "lz4" "python-snappy"; \
+    pip install --prefix="${AIRFLOW_INSTALL_DIR}" \
+        "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
 
 FROM base
 
