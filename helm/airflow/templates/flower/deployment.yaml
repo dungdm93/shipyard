@@ -76,7 +76,7 @@ spec:
       volumes:
         - name: airflow-config
           configMap:
-            name: {{ include "airflow.fullname" . }}-configs
+            name: {{ include "airflow.fullname" . }}-config
     {{- with $flower.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -66,9 +66,9 @@ Create the name of the service account to use
 Checksum pod annotations
 */}}
 {{- define "airflow.checksum" -}}
-checksum/airflow-configs: {{ include (print $.Template.BasePath "/commons/airflow-configs.yaml") . | sha256sum }}
+checksum/airflow-config: {{ include (print $.Template.BasePath "/commons/airflow-config.yaml") . | sha256sum }}
 {{- if eq .Values.dags.fetcher "git" }}
-checksum/gitsync-configs: {{ include (print $.Template.BasePath "/commons/gitsync-configs.yaml") . | sha256sum }}
+checksum/gitsync-config: {{ include (print $.Template.BasePath "/commons/gitsync-config.yaml") . | sha256sum }}
 {{- if .Values.dags.git.auth.sshKey }}
 checksum/gitsync-sshkey:  {{ include (print $.Template.BasePath "/commons/gitsync-sshkey.yaml") .  | sha256sum }}
 {{- end }}
@@ -250,7 +250,7 @@ Airflow volumes
 {{- define "airflow.volumes" -}}
 - name: airflow-config
   configMap:
-    name: {{ include "airflow.fullname" . }}-configs
+    name: {{ include "airflow.fullname" . }}-config
 
 {{- $dags := .Values.dags -}}
 {{- if eq $dags.fetcher "git" }}
