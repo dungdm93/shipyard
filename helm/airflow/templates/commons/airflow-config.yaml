@@ -67,7 +67,7 @@
     {{- if $gitsync.auth.username }}
       {{- $_ := set $kubernetes "git_sync_credentials_secret" (printf "%s-gitsync" (include "airflow.fullname" .)) }}
     {{- else if $gitsync.auth.sshKey }}
-      {{- $_ := set $kubernetes "git_ssh_key_secret_name" (printf "%s-gitsync" (include "airflow.fullname" .)) }}
+      {{- $_ := set $kubernetes "git_ssh_key_secret_name" (printf "%s-gitsync-sshkey" (include "airflow.fullname" .)) }}
     {{- else if $gitsync.auth.externalSshKeySecret.name }}
       {{- $_ := set $kubernetes "git_ssh_key_secret_name" $gitsync.auth.externalSshKeySecret.name }}
       {{- if not (eq ($gitsync.auth.externalSshKeySecret.key | default "gitSshKey") "gitSshKey")}}

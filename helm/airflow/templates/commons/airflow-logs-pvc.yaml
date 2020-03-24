@@ -4,7 +4,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ template "airflow.fullname" . }}-logs
+  name: {{ include "airflow.fullname" . }}-logs
   labels:
     {{- include "airflow.labels" . | nindent 4 }}
 spec:

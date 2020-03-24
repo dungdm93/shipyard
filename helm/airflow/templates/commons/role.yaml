@@ -3,7 +3,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ template "airflow.fullname" . }}
+  name: {{ include "airflow.fullname" . }}
   labels:
     {{- include "airflow.labels" . | nindent 4 }}
 rules:
