@@ -1,0 +1,3 @@
+airflow:
+  core:
+    executor: KubernetesExecutor

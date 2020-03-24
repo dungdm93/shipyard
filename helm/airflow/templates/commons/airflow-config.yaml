@@ -44,10 +44,9 @@
   {{- $_ := set $kubernetes "worker_container_repository"        $worker.image.repository }}
   {{- $_ := set $kubernetes "worker_container_tag"               $worker.image.tag        }}
   {{- $_ := set $kubernetes "worker_container_image_pull_policy" .Values.imagePullPolicy  }}
+  {{- $_ := set $kubernetes "image_pull_secrets" (include "join-transform" (list "," .Values.imagePullSecrets ".name")) }}
   {{- $_ := set $kubernetes "worker_service_account_name" (include "airflow.serviceAccountName" .) }}
   {{- $_ := set $kubernetes "worker_annotations"          (toJson $worker.podAnnotations) }}
-  # image_pull_secrets
-  {{- $_ := set $kubernetes "delete_worker_pods" false }}
 
   {{- $_ := set $kubernetes "airflow_configmap" (printf "%s-config" (include "airflow.fullname" .)) }}
   # env_from_configmap_ref

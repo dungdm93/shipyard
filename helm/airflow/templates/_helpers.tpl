@@ -218,6 +218,25 @@ https://stackoverflow.com/a/52024583
 {{- end -}}
 
 {{/*
+Join a list with transformation
+*/}}
+{{- define "join-transform" -}}
+{{- $sep := index . 0 }}
+{{- $list := index . 1 }}
+{{- $fields := index . 2 }}
+{{- $res := list }}
+{{- range $e := $list -}}
+  {{- range $f := $fields | splitList "." -}}
+    {{- if $f }}
+      {{- $e = index $e $f }}
+    {{- end }}
+  {{- end -}}
+  {{- $res = append $res $e }}
+{{- end -}}
+{{- join $sep $res }}
+{{- end -}}
+
+{{/*
 Airflow volumeMounts
 */}}
 {{- define "airflow.volumeMounts" -}}
