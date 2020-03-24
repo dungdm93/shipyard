@@ -4,28 +4,29 @@
 {{- $kubernetes := (dict "kubernetes" dict | mergeOverwrite $airflow).kubernetes }}
 {{- $elasticsearch := (dict "elasticsearch" dict | mergeOverwrite $airflow).elasticsearch }}
 
-{{- $_ := set $core "dags_folder" (include "airflow.dags.folder" .Values.dags) }}
-{{- $_ := set $core "donot_pickle" .Values.dags.doNotPickle }}
+{{- $logs := .Values.logs }}
+{{- $dags := .Values.dags }}
+
+{{- $_ := set $core "dags_folder" (include "airflow.dags.folder" $dags) }}
+{{- $_ := set $core "donot_pickle" $dags.doNotPickle }}
 {{- $_ := set $core "sql_alchemy_conn" (include "airflow.database" .) }}
 
-{{- with .Values.logs -}}
-{{- $logsUrl := urlParse .path }}
-{{- $_ := set $core "logging_level" .level }}
-{{- if include "airflow.logs.local" . }}
+{{- $logsUrl := urlParse $logs.path }}
+{{- $_ := set $core "logging_level" $logs.level }}
+{{- if include "airflow.logs.local" $logs }}
   {{- $_ := set $core "base_log_folder" $logsUrl.path }}
   {{- $_ := set $core "remote_logging" false }}
 {{- else }}
   {{- $_ := set $core "remote_logging" true }}
-  {{- $_ := set $core "remote_log_conn_id" .remoteConnId }}
+  {{- $_ := set $core "remote_log_conn_id" $logs.remoteConnId }}
   {{- if eq $logsUrl.scheme "es" }}
     {{- $_ := unset $core "remote_base_log_folder" }}
     {{- $_ := set $elasticsearch "host" $logsUrl.host }}
   {{- else if eq $logsUrl.scheme "wasbs" }}
     {{- $_ := set $core "remote_base_log_folder" "//TODO" }}
   {{- else }}
-    {{- $_ := set $core "remote_base_log_folder" .path }}
+    {{- $_ := set $core "remote_base_log_folder" $logs.path }}
   {{- end }}
-{{- end }}
 {{- end }}
 
 {{- if eq $core.executor "CeleryExecutor" }}
@@ -52,16 +53,16 @@
   # env_from_secret_ref
 
   # DAGs
-  {{- if eq .Values.dags.fetcher "none" }}
+  {{- if eq $dags.fetcher "none" }}
     {{- $_ := set $kubernetes "dags_in_image" true }}
-  {{- else if eq .Values.dags.fetcher "git" }}
+  {{- else if eq $dags.fetcher "git" }}
     {{- $_ := set $kubernetes "dags_in_image" false }}
-    {{- $gitsync := .Values.dags.git -}}
+    {{- $gitsync := $dags.git -}}
 
     {{- $_ := set $kubernetes "git_repo"    $gitsync.repo    }}
     {{- $_ := set $kubernetes "git_branch"  $gitsync.branch  }}
     {{- $_ := set $kubernetes "git_subpath" $gitsync.subPath }}
-    {{- $_ := set $kubernetes "git_dags_folder_mount_point" .Values.dags.path }}
+    {{- $_ := set $kubernetes "git_dags_folder_mount_point" $dags.path }}
 
     {{- if $gitsync.auth.username }}
       {{- $_ := set $kubernetes "git_sync_credentials_secret" (printf "%s-gitsync" (include "airflow.fullname" .)) }}
@@ -73,8 +74,17 @@
         {{- fail "Custom externalSshKeySecret.key is not support by KubernetesExecutor yet" }}
       {{- end }}
     {{- end }}
-  {{- else if eq .Values.dags.fetcher "mount" }}
+  {{- else if eq $dags.fetcher "mount" }}
     {{- $_ := set $kubernetes "dags_in_image" false }}
+
+    {{- $_ := set $kubernetes "dags_volume_claim" ($dags.mount.existingClaim | default (printf "%s-dags" (include "airflow.fullname" .))) }}
+    {{- $_ := set $kubernetes "dags_volume_subpath" $dags.mount.subPath }}
+  {{- end }}
+
+  # Logs
+  {{- if include "airflow.logs.local.persistence" $logs }}
+    {{- $_ := set $kubernetes "logs_volume_claim" ($logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .))) }}
+    {{- $_ := set $kubernetes "logs_volume_subpath" $logs.persistence.subPath }}
   {{- end }}
 {{- end }}
 ---

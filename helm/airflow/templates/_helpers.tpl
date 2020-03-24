@@ -231,7 +231,9 @@ Airflow volumeMounts
 {{- else if eq .Values.dags.fetcher "mount" }}
 - name: airflow-dags
   mountPath: {{ .Values.dags.path }}
-  subPath: {{ .Values.dags.mount.subPath }}
+  {{- with .Values.dags.mount.subPath }}
+  subPath: {{ . }}
+  {{- end }}
 {{- end }}
 
 {{- $logs := .Values.logs -}}
