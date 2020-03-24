@@ -1,6 +1,6 @@
 {{- $dags  := .Values.dags -}}
 {{- $mount := $dags.mount  -}}
-{{- if and (eq $dags.fetcher "mount") (not $mount.existingClaim) (not $mount.inlineVolume) }}
+{{- if and (eq $dags.fetcher "mount") (not $mount.existingClaim) }}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

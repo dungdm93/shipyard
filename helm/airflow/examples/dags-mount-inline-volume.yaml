@@ -1,7 +1,0 @@
-dags:
-  fetcher: mount
-
-  mount:
-    inlineVolume:
-      configMap:
-        name: external-airflow-dags-cm

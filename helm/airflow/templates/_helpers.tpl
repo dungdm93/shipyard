@@ -98,10 +98,7 @@ true
 Check logs is persistence and PVC is managed by Helm
 */}}
 {{- define "airflow.logs.local.persistence.managedPvc" -}}
-{{- if not (include "airflow.logs.local.persistence" .) -}}
-{{- else if .persistence.existingClaim -}}
-{{- else if .persistence.inlineVolume -}}
-{{- else -}}
+{{- if and (include "airflow.logs.local.persistence" .) (not .persistence.existingClaim) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -292,22 +289,14 @@ Airflow volumes
 {{- end }}
 {{- else if eq $dags.fetcher "mount" }}
 - name: airflow-dags
-{{- if not $dags.mount.inlineVolume }}
   persistentVolumeClaim:
     claimName: {{ $dags.mount.existingClaim | default (printf "%s-dags" (include "airflow.fullname" .)) }}
-{{- else }}
-  {{- toYaml $dags.mount.inlineVolume | nindent 2 }}
-{{- end }}
 {{- end }}
 
 {{- $logs := .Values.logs -}}
 {{- if include "airflow.logs.local.persistence" $logs }}
 - name: airflow-logs
-{{- if not $logs.persistence.inlineVolume }}
   persistentVolumeClaim:
     claimName: {{ $logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .)) }}
-{{- else }}
-  {{- toYaml $logs.persistence.inlineVolume | nindent 2 }}
-{{- end }}
 {{- end }}
 {{- end -}}

@@ -111,9 +111,6 @@ dags:
     # Option 2: existing PVC
     existingClaim: null
 
-    # Option 3: using inline volume like ConfigMap,...
-    inlineVolume: {}
-
 logs:
   # Logging location configuration.
   # For remote logging:
@@ -147,9 +144,6 @@ logs:
 
     # Option 2: existing PVC
     existingClaim: null
-
-    # Option 3: using inline volume like NFS,...
-    inlineVolume: {}
 
 postgresql:
   enabled: true
