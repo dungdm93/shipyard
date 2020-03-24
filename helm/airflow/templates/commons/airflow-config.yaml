@@ -45,6 +45,7 @@
   {{- $_ := set $kubernetes "worker_container_tag"               $worker.image.tag        }}
   {{- $_ := set $kubernetes "worker_container_image_pull_policy" .Values.imagePullPolicy  }}
   {{- $_ := set $kubernetes "worker_service_account_name" (include "airflow.serviceAccountName" .) }}
+  {{- $_ := set $kubernetes "worker_annotations"          (toJson $worker.podAnnotations) }}
   # image_pull_secrets
   {{- $_ := set $kubernetes "delete_worker_pods" false }}
 
@@ -85,6 +86,17 @@
   {{- if include "airflow.logs.local.persistence" $logs }}
     {{- $_ := set $kubernetes "logs_volume_claim" ($logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .))) }}
     {{- $_ := set $kubernetes "logs_volume_subpath" $logs.persistence.subPath }}
+  {{- end }}
+
+  # Placement
+  {{- with $worker.affinity }}
+    {{- $_ := set $kubernetes "affinity" (toJson .) }}
+  {{- end }}
+  {{- with $worker.tolerations }}
+    {{- $_ := set $kubernetes "tolerations" (toJson .) }}
+  {{- end }}
+  {{- with $worker.nodeSelector }}
+    {{- $_ := dict "kubernetes_node_selectors" . | mergeOverwrite $airflow }}
   {{- end }}
 {{- end }}
 ---

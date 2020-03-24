@@ -9,6 +9,7 @@ airflow:
   core:
     executor: CeleryExecutor
     load_examples: false
+    load_default_connections: false
   webserver:
     expose_config: true
 
@@ -33,6 +34,10 @@ commons:
   schedulerName: null
   runtimeClassName: null
   priorityClassName: null
+
+  affinity: {}
+  tolerations: []
+  nodeSelector: {}
 
 webserver:
   args: [webserver]
