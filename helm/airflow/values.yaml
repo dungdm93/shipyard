@@ -73,6 +73,8 @@ dags:
   # * mount: using a share file system like S3FS,...
   fetcher: git
 
+  # Beaware, when use git fetcher, the real dags_folder is
+  # `{{.dags.path}}/repo/{{.dags.git.subpath}}`
   git:
     repo:    ""
     branch:  master

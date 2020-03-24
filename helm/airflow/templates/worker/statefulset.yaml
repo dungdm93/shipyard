@@ -75,16 +75,6 @@ spec:
             periodSeconds: 30
           resources:
             {{- toYaml $worker.resources | nindent 12 }}
-          {{- if eq .Values.dags.fetcher "git" }}
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - bash
-                  - -c
-                  - |
-                    {{- include "airflow.gitsync.postStart" . | nindent 20 }}
-          {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       priorityClassName:  {{ $worker.priorityClassName }}
       runtimeClassName:   {{ $worker.runtimeClassName }}

@@ -107,6 +107,17 @@ true
 {{- end -}}
 
 {{/*
+Get airflow dags folder
+*/}}
+{{- define "airflow.dags.folder" -}}
+{{- if eq .fetcher "git" -}}
+  {{- clean (printf "%s/repo/%s" .path .git.subpath) }}
+{{- else -}}
+  {{- .path }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 git-sync sidecar container
 */}}
 {{- define "airflow.gitsync.sidecar" -}}
@@ -147,15 +158,6 @@ chownData init container
   securityContext:
     runAsUser: 0  # root
 {{- end }}
-{{- end -}}
-
-{{/*
-git-sync postStart lifecycle
-*/}}
-{{- define "airflow.gitsync.postStart" -}}
-{{- $gitsync := .Values.dags.git -}}
-mkdir -p "{{ dir .Values.dags.path }}";
-ln -sfn "{{ clean (printf "/git/repo/%s" $gitsync.subpath) }}" "{{ .Values.dags.path }}";
 {{- end -}}
 
 {{/*
@@ -225,7 +227,7 @@ Airflow volumeMounts
 
 {{- if eq .Values.dags.fetcher "git" }}
 - name: airflow-dags
-  mountPath: /git
+  mountPath: {{ .Values.dags.path }}
 {{- else if eq .Values.dags.fetcher "mount" }}
 - name: airflow-dags
   mountPath: {{ .Values.dags.path }}

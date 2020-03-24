@@ -4,7 +4,7 @@
 {{- $kubernetes := (dict "kubernetes" dict | mergeOverwrite $airflow).kubernetes }}
 {{- $elasticsearch := (dict "elasticsearch" dict | mergeOverwrite $airflow).elasticsearch }}
 
-{{- $_ := set $core "dags_folder" .Values.dags.path }}
+{{- $_ := set $core "dags_folder" (include "airflow.dags.folder" .Values.dags) }}
 {{- $_ := set $core "donot_pickle" .Values.dags.doNotPickle }}
 {{- $_ := set $core "sql_alchemy_conn" (include "airflow.database" .) }}
 
@@ -43,7 +43,9 @@
   {{- $_ := set $kubernetes "worker_container_repository"        $worker.image.repository }}
   {{- $_ := set $kubernetes "worker_container_tag"               $worker.image.tag        }}
   {{- $_ := set $kubernetes "worker_container_image_pull_policy" .Values.imagePullPolicy  }}
+  {{- $_ := set $kubernetes "worker_service_account_name" (include "airflow.serviceAccountName" .) }}
   # image_pull_secrets
+  {{- $_ := set $kubernetes "delete_worker_pods" false }}
 
   {{- $_ := set $kubernetes "airflow_configmap" (printf "%s-configs" (include "airflow.fullname" .)) }}
   # env_from_configmap_ref
@@ -59,6 +61,7 @@
     {{- $_ := set $kubernetes "git_repo"    $gitsync.repo    }}
     {{- $_ := set $kubernetes "git_branch"  $gitsync.branch  }}
     {{- $_ := set $kubernetes "git_subpath" $gitsync.subpath }}
+    {{- $_ := set $kubernetes "git_dags_folder_mount_point" .Values.dags.path }}
 
     {{- if $gitsync.auth.username }}
       {{- $_ := set $kubernetes "git_sync_credentials_secret" (printf "%s-gitsync" (include "airflow.fullname" .)) }}
