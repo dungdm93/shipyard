@@ -1,5 +1,6 @@
 {{- $airflow := .Values.airflow }}
 {{- $core := (dict "core" dict | mergeOverwrite $airflow).core }}
+{{- $logging := (dict "logging" dict | mergeOverwrite $airflow).logging }}
 {{- $celery := (dict "celery" dict | mergeOverwrite $airflow).celery }}
 {{- $kubernetes := (dict "kubernetes" dict | mergeOverwrite $airflow).kubernetes }}
 {{- $elasticsearch := (dict "elasticsearch" dict | mergeOverwrite $airflow).elasticsearch }}
@@ -12,20 +13,20 @@
 {{- $_ := set $core "sql_alchemy_conn" (include "airflow.database" .) }}
 
 {{- $logsUrl := urlParse $logs.path }}
-{{- $_ := set $core "logging_level" $logs.level }}
+{{- $_ := set $logging "logging_level" $logs.level }}
 {{- if include "airflow.logs.local" $logs }}
-  {{- $_ := set $core "base_log_folder" $logsUrl.path }}
-  {{- $_ := set $core "remote_logging" false }}
+  {{- $_ := set $logging "base_log_folder" $logsUrl.path }}
+  {{- $_ := set $logging "remote_logging" false }}
 {{- else }}
-  {{- $_ := set $core "remote_logging" true }}
-  {{- $_ := set $core "remote_log_conn_id" $logs.remoteConnId }}
+  {{- $_ := set $logging "remote_logging" true }}
+  {{- $_ := set $logging "remote_log_conn_id" $logs.remoteConnId }}
   {{- if eq $logsUrl.scheme "es" }}
-    {{- $_ := unset $core "remote_base_log_folder" }}
+    {{- $_ := unset $logging "remote_base_log_folder" }}
     {{- $_ := set $elasticsearch "host" $logsUrl.host }}
   {{- else if eq $logsUrl.scheme "wasbs" }}
-    {{- $_ := set $core "remote_base_log_folder" "//TODO" }}
+    {{- $_ := set $logging "remote_base_log_folder" "//TODO" }}
   {{- else }}
-    {{- $_ := set $core "remote_base_log_folder" $logs.path }}
+    {{- $_ := set $logging "remote_base_log_folder" $logs.path }}
   {{- end }}
 {{- end }}
 
