@@ -39,6 +39,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           # TODO ports & healthchecks
+          volumeMounts:
+            {{- include "presto.volumeMounts" . | nindent 12 }}
           resources:
             {{- toYaml $worker.resources | nindent 12 }}
           securityContext:
@@ -49,6 +51,8 @@ spec:
       schedulerName:      {{ $worker.schedulerName }}
       securityContext:
         {{- toYaml $worker.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- include "presto.worker.volumes" . | nindent 8 }}
     {{- with $worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

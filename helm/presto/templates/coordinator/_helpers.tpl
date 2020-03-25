@@ -13,3 +13,16 @@ Coordinator selector labels
 {{ include "presto.selectorLabels" . }}
 app.kubernetes.io/component: coordinator
 {{- end -}}
+
+{{/*
+Coordinator volumes
+*/}}
+{{- define "presto.coordinator.volumes" -}}
+- name: presto-config
+  configMap:
+    name: {{ include "presto.fullname" . }}-config
+    items:
+    - key:  coordinator-config.properties
+      path: config.properties
+{{ include "presto.volumes" . }}
+{{- end -}}

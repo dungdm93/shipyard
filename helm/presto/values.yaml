@@ -27,6 +27,7 @@ presto:
     - -Djdk.nio.maxCachedBufferSize=2000000
   log.properties:
     io.prestosql: INFO
+  # https://prestosql.io/docs/current/admin/properties.html
   config.properties: {}
 
 catalog: {}

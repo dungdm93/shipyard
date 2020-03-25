@@ -63,6 +63,31 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
+Presto volumeMounts
+*/}}
+{{- define "presto.volumeMounts" -}}
+- name: presto-config
+  mountPath: /etc/presto/config.properties
+  subPath: config.properties
+- name: presto-properties
+  mountPath: /etc/presto
+- name: presto-catalog
+  mountPath: /etc/presto/catalog
+{{- end -}}
+
+{{/*
+Presto volumes
+*/}}
+{{- define "presto.volumes" -}}
+- name: presto-properties
+  configMap:
+    name: {{ include "presto.fullname" . }}-properties
+- name: presto-catalog
+  configMap:
+    name: {{ include "presto.fullname" . }}-catalog
+{{- end -}}
+
+{{/*
 Checksum pod annotations
 */}}
 {{- define "presto.checksum" -}}
