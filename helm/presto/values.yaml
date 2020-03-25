@@ -7,6 +7,28 @@ image:
   pullPolicy: IfNotPresent
   pullSecrets: []
 
+presto:
+  node.properties:
+    node.environment: kubernetes
+    node.data-dir: /data/presto
+    plugin.dir: /usr/lib/presto/plugin
+  jvm.config:
+    - -server
+    - -Xmx16G
+    - -XX:-UseBiasedLocking
+    - -XX:+UseG1GC
+    - -XX:G1HeapRegionSize=32M
+    - -XX:+ExplicitGCInvokesConcurrent
+    - -XX:+HeapDumpOnOutOfMemoryError
+    - -XX:+ExitOnOutOfMemoryError
+    - -XX:+UseGCOverheadLimit
+    - -XX:ReservedCodeCacheSize=512M
+    - -Djdk.attach.allowAttachSelf=true
+    - -Djdk.nio.maxCachedBufferSize=2000000
+  log.properties:
+    io.prestosql: INFO
+  config.properties: {}
+
 commons:
   replicas: null
   command: []

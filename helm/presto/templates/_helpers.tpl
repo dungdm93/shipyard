@@ -67,3 +67,15 @@ Checksum pod annotations
 */}}
 {{- define "presto.checksum" -}}
 {{- end -}}
+
+{{/*
+Remove entry with empty value from dict
+*/}}
+{{- define "dict.cleanup" -}}
+{{- $dict := . }}
+{{- range $k, $v := $dict -}}
+  {{- if not $v -}}
+    {{- $_ := unset $dict $k }}
+  {{- end -}}
+{{- end -}}
+{{- end -}}

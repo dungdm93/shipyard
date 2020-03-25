@@ -1,0 +1,27 @@
+{{- $presto := .Values.presto }}
+{{- $config := index $presto "config.properties" }}
+
+{{- $_ := include "dict.cleanup" $config }}
+{{- $_ := set $config "http-server.http.port" 8080 }}
+{{- $_ := set $config "discovery-server.enabled" true }}
+{{- $_ := set $config "discovery.uri" (printf "http://%s:8080" (include "presto.fullname" .)) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "presto.fullname" . }}-config
+  labels:
+    {{- include "presto.labels" . | nindent 4 }}
+data:
+  coordinator-config.properties: |
+    coordinator=true
+    node-scheduler.include-coordinator=false
+    {{- range $key, $value := $config }}
+    {{ $key }}={{ $value }}
+    {{- end }}
+
+  worker-config.properties: |
+    coordinator=false
+    {{- range $key, $value := $config }}
+    {{ $key }}={{ $value }}
+    {{- end }}

@@ -1,0 +1,29 @@
+{{- $presto := .Values.presto }}
+{{- $node := index $presto "node.properties" }}
+{{- $jvm  := index $presto "jvm.config" }}
+{{- $log  := index $presto "log.properties" }}
+
+{{- $_ := include "dict.cleanup" $node }}
+{{- $_ := include "dict.cleanup" $log  }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "presto.fullname" . }}-properties
+  labels:
+    {{- include "presto.labels" . | nindent 4 }}
+data:
+  node.properties: |
+    {{- range $key, $value := $node }}
+    {{ $key }}={{ $value }}
+    {{- end }}
+
+  jvm.config: |
+    {{- range $option := $jvm }}
+    {{ $option }}
+    {{- end }}
+
+  log.properties: |
+    {{- range $key, $value := $log }}
+    {{ $key }}={{ $value }}
+    {{- end }}
