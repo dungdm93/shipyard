@@ -3,8 +3,10 @@
 
 {{- $_ := include "dict.cleanup" $config }}
 {{- $_ := set $config "http-server.http.port" 8080 }}
-{{- $_ := set $config "discovery-server.enabled" true }}
-{{- $_ := set $config "discovery.uri" (printf "http://%s:8080" (include "presto.fullname" .)) }}
+{{- $_ := unset $config "coordinator" }}
+{{- $_ := unset $config "node-scheduler.include-coordinator" }}
+{{- $_ := unset $config "discovery-server.enabled" }}
+{{- $_ := unset $config "discovery.uri" }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -16,12 +18,15 @@ data:
   coordinator-config.properties: |
     coordinator=true
     node-scheduler.include-coordinator=false
+    discovery-server.enabled=true
+    discovery.uri={{ printf "http://%s:8080" (include "presto.fullname" .) }}
     {{- range $key, $value := $config }}
     {{ $key }}={{ $value }}
     {{- end }}
 
   worker-config.properties: |
     coordinator=false
+    discovery.uri={{ printf "http://%s:8080" (include "presto.fullname" .) }}
     {{- range $key, $value := $config }}
     {{ $key }}={{ $value }}
     {{- end }}

@@ -19,10 +19,16 @@ Coordinator volumes
 */}}
 {{- define "presto.coordinator.volumes" -}}
 - name: presto-config
+  projected:
+    sources:
+    - configMap:
+        name: {{ include "presto.fullname" . }}-properties
+    - configMap:
+        name: {{ include "presto.fullname" . }}-config
+        items:
+        - key:  coordinator-config.properties
+          path: config.properties
+- name: presto-catalog
   configMap:
-    name: {{ include "presto.fullname" . }}-config
-    items:
-    - key:  coordinator-config.properties
-      path: config.properties
-{{ include "presto.volumes" . }}
+    name: {{ include "presto.fullname" . }}-catalog
 {{- end -}}
