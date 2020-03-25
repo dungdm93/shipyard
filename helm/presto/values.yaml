@@ -29,6 +29,13 @@ presto:
     io.prestosql: INFO
   config.properties: {}
 
+catalog: {}
+  # memory.properties: |
+  #   connector.name=memory
+  # tpcds.properties: |
+  #   connector.name=tpcds
+  #   tpcds.splits-per-node=4
+
 commons:
   replicas: null
   command: []

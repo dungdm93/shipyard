@@ -1,0 +1,6 @@
+catalog:
+  memory.properties: |
+    connector.name=memory
+  tpcds.properties: |
+    connector.name=tpcds
+    tpcds.splits-per-node=4
