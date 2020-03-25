@@ -18,7 +18,7 @@ airflow:
 commons:
   image:
     repository: hub.teko.vn/data/airflow
-    tag: 1.10.7-all
+    tag: 1.10.9
   replicas: null
   command: []
   args: []
