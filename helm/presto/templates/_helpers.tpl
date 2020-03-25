@@ -66,6 +66,9 @@ Create the name of the service account to use
 Checksum pod annotations
 */}}
 {{- define "presto.checksum" -}}
+checksum/presto-properties: {{ include (print $.Template.BasePath "/commons/presto-properties.yaml") . | sha256sum }}
+checksum/presto-config:     {{ include (print $.Template.BasePath "/commons/presto-config.yaml") .     | sha256sum }}
+checksum/presto-catalog:    {{ include (print $.Template.BasePath "/commons/presto-catalog.yaml") .    | sha256sum }}
 {{- end -}}
 
 {{/*
