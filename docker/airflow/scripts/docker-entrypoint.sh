@@ -20,7 +20,7 @@ wait_for() {
     done
 }
 
-migrate_airflow_db() {
+wait_for_database() {
     local DB_URL=$(airflow-tools get-config core sql_alchemy_conn)
     local DB_TYPE=$(airflow-tools parse-url "$DB_URL" --scheme)
 
@@ -43,12 +43,37 @@ migrate_airflow_db() {
 
         wait_for $DB_HOST $DB_PORT
     fi
+}
+
+wait_for_celery_broker() {
+    local BROKER_URL=$(airflow-tools get-config celery broker_url)
+
+    local BROKER_TYPE=$(airflow-tools parse-url "$BROKER_URL" --scheme)
+    local BROKER_HOST=$(airflow-tools parse-url "$BROKER_URL" --host)
+    local BROKER_PORT=$(airflow-tools parse-url "$BROKER_URL" --port)
+
+    if [[ -z "$BROKER_PORT" ]]; then
+        case $BROKER_TYPE in
+            *amqp*)
+                BROKER_PORT=5672;;
+            *redis*)
+                BROKER_PORT=6379;;
+        esac
+    fi
+
+    wait_for $BROKER_HOST $BROKER_PORT
+}
+
+migrate_db() {
+    wait_for_database
 
     # TODO: disable examples while db migration in order to suppress some unexpected errors
     AIRFLOW__CORE__LOAD_EXAMPLES=False airflow upgradedb
 }
 
-run_airflow_daemon() {
+run_daemon() {
+    wait_for_database
+
     local EXECUTOR=$(airflow-tools get-config core executor)
 
     if [ "$EXECUTOR" = "LocalExecutor" ] || [ "$EXECUTOR" = "SequentialExecutor" ]; then
@@ -58,22 +83,7 @@ run_airflow_daemon() {
 
     if [ "$EXECUTOR" = "CeleryExecutor" ]; then
         # With the "Celery" executors, peform check broker_url
-        local BROKER_URL=$(airflow-tools get-config celery broker_url)
-
-        local BROKER_TYPE=$(airflow-tools parse-url "$BROKER_URL" --scheme)
-        local BROKER_HOST=$(airflow-tools parse-url "$BROKER_URL" --host)
-        local BROKER_PORT=$(airflow-tools parse-url "$BROKER_URL" --port)
-
-        if [[ -z "$BROKER_PORT" ]]; then
-            case $BROKER_TYPE in
-                *amqp*)
-                    BROKER_PORT=5672;;
-                *redis*)
-                    BROKER_PORT=6379;;
-            esac
-        fi
-
-        wait_for $BROKER_HOST $BROKER_PORT
+        wait_for_celery_broker
     fi
 
     exec airflow "$@"
@@ -81,10 +91,11 @@ run_airflow_daemon() {
 
 case "$1" in
     scheduler)
-        migrate_airflow_db
-        run_airflow_daemon "$@"
+        migrate_db
+        run_daemon "$@"
+        ;;
     webserver|worker|flower)
-        run_airflow_daemon "$@"
+        run_daemon "$@"
         ;;
     version)
         exec airflow "$@"

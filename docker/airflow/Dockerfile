@@ -40,7 +40,8 @@ RUN set -eux; \
         # Database
         mysql postgres mongo jdbc \
         # Celery Broker
-        redis rabbitmq \
+        # rabbitmq installed bellow
+        redis \
         # Authentication
         password ldap kerberos \
         # Cloud Providers
@@ -52,10 +53,8 @@ RUN set -eux; \
     ); \
     mkdir -p ${AIRFLOW_INSTALL_DIR}; \
     pip install --prefix="${AIRFLOW_INSTALL_DIR}" \
-        "librabbitmq" \
-        "lz4" "python-snappy"; \
-    pip install --prefix="${AIRFLOW_INSTALL_DIR}" \
-        "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
+        "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}" \
+        "lz4" "python-snappy";
 
 FROM base
 
@@ -80,9 +79,14 @@ RUN set -eux; \
         /usr/share/doc \
         /usr/share/doc-base
 
+RUN set -eux; \
+    pip install --no-cache-dir \
+        # TODO: error while pip install with --prefix
+        "librabbitmq";
+
 COPY --from=builder "${AIRFLOW_INSTALL_DIR}" "${AIRFLOW_INSTALL_DIR}"
 COPY ./scripts/* /usr/local/bin/
 
 ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
-EXPOSE 8080 5555 8793
+EXPOSE 8080 8793 5555
 USER airflow
