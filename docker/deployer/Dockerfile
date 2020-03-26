@@ -2,14 +2,18 @@ FROM  ubuntu:18.04
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL [ "/bin/bash", "-c" ]
 
+RUN { \
+        echo 'APT::Install-Suggests   "false";';   \
+        echo 'APT::Install-Recommends "false";';   \
+    } > /etc/apt/apt.conf.d/60user
+
 RUN set -eux; \
     apt-get update; \
     apt-get install -y \
-        bash-completion \
-        openssh-client \
-        gnupg \
-        curl \
-        git; \
+        ca-certificates gnupg openssl openssh-client \
+        bash-completion iproute2 curl \
+        net-tools telnet iputils-* dnsutils \
+        git vim gettext-base; \
     rm -rf /var/lib/apt/lists/*;
 
 COPY ./settings/ssh.config /root/.ssh/config
