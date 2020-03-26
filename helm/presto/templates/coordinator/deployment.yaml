@@ -45,12 +45,7 @@ spec:
           volumeMounts:
             {{- include "presto.volumeMounts" . | nindent 12 }}
           livenessProbe:
-            httpGet:
-              path: /v1/cluster
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /v1/cluster
+            tcpSocket:
               port: http
           resources:
             {{- toYaml $coordinator.resources | nindent 12 }}
