@@ -35,13 +35,20 @@ RUN set -eux; \
 # Install helm plugins
 # RUN set -eux; \
 #     helm plugin install https://github.com/databus23/helm-diff --version=v3.1.1; \
+#     helm plugin install https://github.com/chartmuseum/helm-push.git; \
 #     helm plugin install https://github.com/futuresimple/helm-secrets; \
+#     helm plugin install https://github.com/aslafy-z/helm-git; \
 #     helm plugin install https://github.com/hypnoglow/helm-s3; \
-#     helm plugin install https://github.com/hayorov/helm-gcs;  \
-#     helm plugin install https://github.com/aslafy-z/helm-git;
+#     helm plugin install https://github.com/hayorov/helm-gcs;
 RUN set -eux; \
-    export HELM_PLUGIN_HOME="${XDG_DATA_HOME:-$HOME/.local/share/helm}/plugins"; \
-    mkdir -p "${HELM_PLUGIN_HOME}"; cd "${HELM_PLUGIN_HOME}"; \
+    source <(helm env); \
+    mkdir -p "${HELM_PLUGINS}"; cd "${HELM_PLUGINS}"; \
+    \
+    echo "Installing helm-push plugin"; \
+    HELM_PUSH_VERSION=v0.8.1; \
+    mkdir -p helm-push; \
+    curl -sSL "https://github.com/chartmuseum/helm-push/releases/download/${HELM_PUSH_VERSION}/helm-push_${HELM_PUSH_VERSION#v}_linux_amd64.tar.gz" \
+        | tar -xzvf - -C helm-push; \
     \
     echo "Installing helm-diff plugin"; \
     HELM_DIFF_VERSION=v3.1.1; \
@@ -73,13 +80,13 @@ RUN set -eux; \
     rm -rf helm-git/{tests,*.json};
 
 # Install rke
-ENV RKE_VERSION=v1.0.4
+ENV RKE_VERSION=v1.0.5
 RUN curl -sSL "https://github.com/rancher/rke/releases/download/${RKE_VERSION}/rke_linux-amd64" \
           -o /usr/local/bin/rke; \
     chmod +x /usr/local/bin/rke;
 
 # Install helmfile
-ENV HELMFILE_VERSION=v0.102.0
+ENV HELMFILE_VERSION=v0.104.0
 RUN curl -sSL "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" \
           -o /usr/local/bin/helmfile; \
     chmod +x /usr/local/bin/helmfile;
