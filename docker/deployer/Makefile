@@ -1,4 +1,4 @@
-VARIANT := base
+VARIANT ?= base
 IMAGE   := hub.teko.vn/library/deployer:${VARIANT}
 
 ifeq (${VARIANT}, base)
