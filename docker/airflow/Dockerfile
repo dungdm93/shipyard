@@ -36,7 +36,7 @@ RUN set -eux; \
     function join { local IFS="$1"; echo "${*:2}"; }; \
     AIRFLOW_PACKAGES=( \
         # Executor
-        celery dask kubernetes \
+        celery dask docker kubernetes \
         # Database
         mysql postgres mongo jdbc \
         # Celery Broker
@@ -49,7 +49,7 @@ RUN set -eux; \
         # BigData
         hdfs hive presto \
         # Others
-        async crypto ssh slack \
+        async crypto ssh slack sendgrid \
     ); \
     mkdir -p ${AIRFLOW_INSTALL_DIR}; \
     pip install --prefix="${AIRFLOW_INSTALL_DIR}" \
