@@ -14,7 +14,13 @@ indent_style = tab
 [*.{tf,tpl}]
 indent_size = 2
 
-[*.{js,ts,json,yml,yaml}]
+[*.{js,ts,json}]
+indent_size = 2
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.hcl]
 indent_size = 2
 
 [*.md]

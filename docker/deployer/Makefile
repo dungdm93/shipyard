@@ -3,13 +3,15 @@ IMAGE   := hub.teko.vn/library/deployer:${VARIANT}
 
 ifeq (${VARIANT}, base)
 	DOCKERFILE := Dockerfile
+	CONTEXT    := ./
 else
 	DOCKERFILE := ${VARIANT}/Dockerfile
+	CONTEXT    := ./${VARIANT}
 endif
 
 build:
 	docker build --pull --file ${DOCKERFILE} \
-		--tag ${IMAGE} .
+		--tag ${IMAGE} ${CONTEXT}
 
 push:
 	docker push ${IMAGE}
