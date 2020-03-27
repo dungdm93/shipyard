@@ -34,6 +34,6 @@ show:
 destroy:
 	helm uninstall ${RELEASE} --namespace=${NAMESPACE}
 
-push:
+push: dep
 	# TODO: BasicAuth https://github.com/chartmuseum/helm-push#basic-auth
 	helm push . teko
