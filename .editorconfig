@@ -11,16 +11,13 @@ trim_trailing_whitespace = true
 [Makefile]
 indent_style = tab
 
-[*.{tf,tpl}]
+[*.{tf,hcl,tpl}]
 indent_size = 2
 
 [*.{js,ts,json}]
 indent_size = 2
 
 [*.{yml,yaml}]
-indent_size = 2
-
-[*.hcl]
 indent_size = 2
 
 [*.md]
