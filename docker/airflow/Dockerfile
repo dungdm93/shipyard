@@ -43,7 +43,7 @@ RUN set -eux; \
         # rabbitmq installed bellow
         redis \
         # Authentication
-        password ldap kerberos \
+        password ldap kerberos google_auth github_enterprise \
         # Cloud Providers
         aws azure gcp \
         # BigData
