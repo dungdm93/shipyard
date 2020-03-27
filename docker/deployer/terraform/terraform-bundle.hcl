@@ -6,25 +6,25 @@ terraform {
 # Define which provider plugins are to be included
 providers {
   # Amazon AWS
-  aws = ["~> 2.50"]
+  # aws = ["~> 2.50"]
 
   # Google Cloud Platform
   google = ["~> 2.20", "~> 3.10"]
 
   # Microsoft Azure
-  azurerm = ["~> 2.0"]
+  # azurerm = ["~> 2.0"]
 
   # Oracle Cloud Infrastructure
-  oci = ["~> 3.60"]
+  # oci = ["~> 3.60"]
 
   # OpenStack
-  openstack = ["~> 1.26"]
+  # openstack = ["~> 1.26"]
 
   # VMware vSphere
-  vsphere = ["~> 1.15"]
+  # vsphere = ["~> 1.15"]
 
   # Alibaba Cloud
-  alicloud = ["~> 1.75"]
+  # alicloud = ["~> 1.75"]
 
   # Cloudflare
   cloudflare = ["~> 2.4"]
@@ -36,5 +36,5 @@ providers {
   mysql = ["~> 1.9"]
 
   # RabbitMQ
-  rabbitmq = ["1.1"]
+  # rabbitmq = ["1.1"]
 }
