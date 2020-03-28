@@ -1,0 +1,8 @@
+#!/bin/sh -e
+exec 2>&1
+
+if [ "$(id -u)" = "0" ]; then
+    exec chpst -u airflow airflow scheduler
+else
+    exec airflow scheduler
+fi

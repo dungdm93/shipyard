@@ -75,13 +75,10 @@ run_daemon() {
     wait_for_database
 
     local EXECUTOR=$(airflow-tools get-config core executor)
+    EXECUTOR="${EXECUTOR^^}"        # uppercase
+    EXECUTOR="${EXECUTOR%EXECUTOR}" # remove EXECUTOR suffix
 
-    if [ "$EXECUTOR" = "LocalExecutor" ] || [ "$EXECUTOR" = "SequentialExecutor" ]; then
-        # With the "Local" and "Sequential" executors it should all run in one container.
-        airflow scheduler &
-    fi
-
-    if [ "$EXECUTOR" = "CeleryExecutor" ]; then
+    if [ "$EXECUTOR" = "CELERY" ]; then
         # With the "Celery" executors, peform check broker_url
         wait_for_celery_broker
     fi
@@ -89,7 +86,31 @@ run_daemon() {
     exec airflow "$@"
 }
 
+run_aio() {
+    wait_for_database
+
+    ln -sfn /etc/airflow/webserver /etc/service/webserver
+    ln -sfn /etc/airflow/scheduler /etc/service/scheduler
+
+    local EXECUTOR=$(airflow-tools get-config core executor)
+    EXECUTOR="${EXECUTOR^^}"        # uppercase
+    EXECUTOR="${EXECUTOR%EXECUTOR}" # remove EXECUTOR suffix
+
+    if [ "$EXECUTOR" = "CELERY" ]; then
+        ln -sfn /etc/airflow/worker /etc/service/worker
+        ln -sfn /etc/airflow/flower /etc/service/flower
+
+        wait_for_celery_broker
+    fi
+
+    exec runsvdir -P /etc/service/
+}
+
 case "$1" in
+    ""|aio)
+        migrate_db
+        run_aio
+        ;;
     scheduler)
         migrate_db
         run_daemon "$@"

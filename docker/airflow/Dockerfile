@@ -61,7 +61,7 @@ FROM base
 RUN set -eux; \
     apt-get update; \
     apt-get install -yqq --no-install-recommends \
-        curl rsync netcat locales \
+        curl runit rsync netcat locales \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libev4 libssl1.1 libisal2 libnss3 \
         libmariadbclient18; \
@@ -69,6 +69,9 @@ RUN set -eux; \
     sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen; \
     locale-gen; \
     update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8; \
+    rm -rf /etc/service; \
+    mkdir -p /etc/service; \
+    chown -R airflow: /etc/service; \
     \
     apt-get clean; \
     rm -rf \
@@ -86,6 +89,7 @@ RUN set -eux; \
 
 COPY --from=builder "${AIRFLOW_INSTALL_DIR}" "${AIRFLOW_INSTALL_DIR}"
 COPY ./scripts/* /usr/local/bin/
+COPY --chown=airflow:airflow ./runit /etc/airflow
 
 ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
 EXPOSE 8080 8793 5555
