@@ -1,0 +1,28 @@
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "airflow.fullname" . }}
+  {{- if .Values.metrics.serviceMonitor.namespace }}
+  namespace: {{ .Values.metrics.serviceMonitor.namespace }}
+  {{- end }}
+  labels:
+    {{- include "airflow.labels" . | nindent 4 }}
+    {{- if .Values.metrics.serviceMonitor.labels }}
+    {{- toYaml .Values.metrics.serviceMonitor.labels | nindent 4}}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "airflow.webserver.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: web
+      path: /admin/metrics
+      {{- $extraConfigs := omit .Values.metrics.serviceMonitor "enabled" "namespace" "labels" }}
+      {{- if $extraConfigs }}
+      {{- toYaml $extraConfigs | nindent 6 }}
+      {{- end }}
+{{- end }}
