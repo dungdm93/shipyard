@@ -54,7 +54,7 @@ RUN set -eux; \
     mkdir -p ${AIRFLOW_INSTALL_DIR}; \
     pip install --prefix="${AIRFLOW_INSTALL_DIR}" \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}" \
-        "lz4" "python-snappy";
+        "lz4" "python-snappy" "airflow-exporter";
 
 FROM base
 
