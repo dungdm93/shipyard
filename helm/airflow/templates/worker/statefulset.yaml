@@ -1,5 +1,5 @@
 {{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
-{{- if eq .Values.airflow.core.executor "CeleryExecutor" }}
+{{- if eq (include "airflow.normalizeExecutor" .) "CeleryExecutor" }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet

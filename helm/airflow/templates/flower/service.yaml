@@ -1,5 +1,5 @@
 {{- $flower := mergeOverwrite (deepCopy .Values.commons) .Values.flower -}}
-{{- if eq .Values.airflow.core.executor "CeleryExecutor" }}
+{{- if eq (include "airflow.normalizeExecutor" .) "CeleryExecutor" }}
 ---
 apiVersion: v1
 kind: Service

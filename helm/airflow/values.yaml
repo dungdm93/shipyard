@@ -5,9 +5,23 @@ imagePullPolicy: IfNotPresent
 imagePullSecrets: []
 # - name: regcred
 
+# The executor class that airflow should use. Choices include
+# SequentialExecutor, LocalExecutor, CeleryExecutor, DaskExecutor, KubernetesExecutor
+executor: CeleryExecutor
+
+# Airflow uses Fernet to encrypt passwords in the connection configuration.
+# Generate fernetKey with:
+# ```python
+# from cryptography.fernet import Fernet
+# fernet_key= Fernet.generate_key()
+# print(fernet_key.decode())
+# ```
+# More info at:
+# - https://airflow.apache.org/docs/stable/security.html#securing-connections
+fernetKey: ""
+
 airflow:
   core:
-    executor: CeleryExecutor
     load_examples: false
     load_default_connections: false
   webserver:

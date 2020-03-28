@@ -5,6 +5,9 @@
 {{- $kubernetes := (dict "kubernetes" dict | mergeOverwrite $airflow).kubernetes }}
 {{- $elasticsearch := (dict "elasticsearch" dict | mergeOverwrite $airflow).elasticsearch }}
 
+{{- $_ := set $core "executor"  (include "airflow.normalizeExecutor" .) }}
+{{- $_ := set $core "fernet_key" .Values.fernetKey }}
+
 {{- $logs := .Values.logs }}
 {{- $dags := .Values.dags }}
 

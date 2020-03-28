@@ -158,6 +158,14 @@ chownData init container
 {{- end -}}
 
 {{/*
+Airflow normalize executor
+*/}}
+{{- define "airflow.normalizeExecutor" -}}
+{{- $executor := .Values.executor | lower | trimSuffix "executor" -}}
+{{- $executor | title }}Executor
+{{- end -}}
+
+{{/*
 Airflow database connection url
 */}}
 {{- define "airflow.database" -}}
