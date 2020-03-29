@@ -39,6 +39,28 @@ affinity: {}
 tolerations: []
 nodeSelector: {}
 
+postgresql:
+  enabled: true
+
+  postgresqlUsername: postgres
+  postgresqlPassword: hive-metastore
+  postgresqlDatabase: hive-metastore
+
+  replication:
+    enabled: false
+
+  persistence:
+    enabled: true
+
+externalDatabase:
+  type:
+  url:
+  host:
+  port:
+  username:
+  password:
+  database:
+
 serviceAccount:
   create: true
   annotations: {}

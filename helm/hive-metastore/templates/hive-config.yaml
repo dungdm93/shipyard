@@ -1,5 +1,19 @@
 {{- $hiveSite := index .Values.hiveConfig "hive-site.xml" }}
+{{- $dbDriverMap := (include "hive-metastore.dbDriverMap" .) | fromYaml }}
 
+{{- if .Values.postgresql.enabled }}
+{{- $pg := .Values.postgresql }}
+{{- $pgHost := include "call-nested" (list . "postgresql" "postgresql.fullname") }}
+{{- $pgURL  := dict "type" "postgres" "host" $pgHost "port" $pg.service.port "database" $pg.postgresqlDatabase }}
+
+{{- $_ := set $hiveSite "hive.metastore.db.type" "postgres" }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionURL" (include "hive-metastore.dbConnectionURL" $pgURL) }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionDriverName" $dbDriverMap.postgres }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionUserName"   $pg.postgresqlUsername }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionPassword"   $pg.postgresqlPassword }}
+{{- else }}
+# TODO
+{{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -69,3 +69,50 @@ Checksum pod annotations
 checksum/hive-config:   {{ include (print $.Template.BasePath "/hive-config.yaml") .   | sha256sum }}
 checksum/hadoop-config: {{ include (print $.Template.BasePath "/hadoop-config.yaml") . | sha256sum }}
 {{- end -}}
+
+{{/*
+Database driver mapping
+*/}}
+{{- define "hive-metastore.dbDriverMap" -}}
+postgres: org.postgresql.Driver
+mysql:    com.mysql.cj.jdbc.Driver
+// mysql-8:  com.mysql.cj.jdbc.Driver
+// mysql-5:  com.mysql.jdbc.Driver
+mssql:    com.microsoft.sqlserver.jdbc.SQLServerDriver
+oracle:   oracle.jdbc.OracleDriver
+{{- end -}}
+
+{{/*
+Database connection URL
+*/}}
+{{- define "hive-metastore.dbConnectionURL" -}}
+{{- if .url -}}
+{{ .url }}
+{{- else if eq .type "postgres" -}}
+jdbc:postgresql://{{.host}}:{{.port | default 5432}}/{{.database}}
+{{- else if eq .type "mysql" -}}
+jdbc:mysql://{{.host}}:{{.port | default 3306}}/{{.database}}
+{{- else if eq .type "mssql" -}}
+jdbc:sqlserver://{{.host}}:{{.port | default 1433}};databaseName={{.database}}
+{{- else if eq .type "oracle" -}}
+jdbc:oracle:thin://{{.host}}:{{.port | default 1521}}/{{.database}}
+{{- else }}
+{{- fail (printf "unknow db type %s, use .url instead" .type) }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Execute a template in a subchart:
+https://github.com/helm/helm/issues/4535#issuecomment-477778391
+https://stackoverflow.com/a/52024583
+*/}}
+{{- define "call-nested" -}}
+{{- $dot := index . 0 }}
+{{- $subchart := index . 1 | splitList "." }}
+{{- $template := index . 2 }}
+{{- $values := $dot.Values }}
+{{- range $subchart }}
+{{- $values = index $values . }}
+{{- end }}
+{{- include $template (dict "Chart" (dict "Name" (last $subchart)) "Values" $values "Release" $dot.Release "Capabilities" $dot.Capabilities) }}
+{{- end -}}
