@@ -1,3 +1,3 @@
-RELEASE   ?= pinwheel
+RELEASE   ?= hornet
 
 include ../Makefile
