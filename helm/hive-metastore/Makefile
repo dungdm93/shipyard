@@ -1,0 +1,3 @@
+RELEASE   ?= pinwheel
+
+include ../Makefile
