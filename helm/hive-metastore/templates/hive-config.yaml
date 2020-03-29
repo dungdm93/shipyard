@@ -12,7 +12,13 @@
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionUserName"   $pg.postgresqlUsername }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionPassword"   $pg.postgresqlPassword }}
 {{- else }}
-# TODO
+{{- $db := .Values.externalDatabase }}
+
+{{- $_ := set $hiveSite "hive.metastore.db.type" $db.type }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionURL" (include "hive-metastore.dbConnectionURL" $db) }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionDriverName" (index $dbDriverMap $db.type) }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionUserName"   $db.username }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionPassword"   $db.password }}
 {{- end }}
 ---
 apiVersion: v1

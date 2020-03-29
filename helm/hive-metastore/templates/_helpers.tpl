@@ -97,7 +97,7 @@ jdbc:sqlserver://{{.host}}:{{.port | default 1433}};databaseName={{.database}}
 {{- else if eq .type "oracle" -}}
 jdbc:oracle:thin://{{.host}}:{{.port | default 1521}}/{{.database}}
 {{- else }}
-{{- fail (printf "unknow db type %s, use .url instead" .type) }}
+{{- fail (printf "unknow db type '%s', use .url instead" .type) }}
 {{- end -}}
 {{- end -}}
 

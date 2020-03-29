@@ -57,9 +57,9 @@ externalDatabase:
   url:
   host:
   port:
+  database:
   username:
   password:
-  database:
 
 serviceAccount:
   create: true

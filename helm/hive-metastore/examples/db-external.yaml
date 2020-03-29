@@ -1,0 +1,10 @@
+postgresql:
+  enabled: false
+
+externalDatabase:
+  type: mysql
+  host: mysql-host
+  port:
+  username: root
+  password: foobar
+  database: hive
