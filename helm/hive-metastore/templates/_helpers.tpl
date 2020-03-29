@@ -66,4 +66,6 @@ Create the name of the service account to use
 Checksum pod annotations
 */}}
 {{- define "hive-metastore.checksum" -}}
+checksum/hive-config:   {{ include (print $.Template.BasePath "/hive-config.yaml") .   | sha256sum }}
+checksum/hadoop-config: {{ include (print $.Template.BasePath "/hadoop-config.yaml") . | sha256sum }}
 {{- end -}}
