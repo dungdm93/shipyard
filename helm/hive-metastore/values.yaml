@@ -8,6 +8,14 @@ image:
   pullSecrets: []
   # - name: regcred
 
+hiveConfig:
+  path: /opt/hive/conf/
+  hive-site.xml: {}
+
+hadoopConfig:
+  path: /opt/hadoop/etc/hadoop/
+  hdfs-site.xml: {}
+
 securityContext: {}
   # capabilities:
   #   drop:

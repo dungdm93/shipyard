@@ -1,0 +1,21 @@
+{{- $hiveSite := index .Values.hiveConfig "hive-site.xml" }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hive-metastore.fullname" . }}-hadoop-config
+  labels:
+    {{- include "hive-metastore.labels" . | nindent 4 }}
+data:
+  hive-site.xml: |
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+    <configuration>
+    {{- range $name, $value := $hiveSite }}
+      <property>
+        <name>{{ $name }}</name>
+        <value>{{ $value }}</value>
+      </property>
+    {{ end }}
+    </configuration>
