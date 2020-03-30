@@ -61,6 +61,37 @@ externalDatabase:
   username:
   password:
 
+warehouse:
+  dir:
+
+filesystem:
+  ## Hadoop HDFS
+  hdfs:
+
+  ## Amazon S3
+  ## https://hadoop.apache.org/docs/current/hadoop-aws/tools/hadoop-aws/index.html
+  s3a:
+
+  ## Google Cloud Storage
+  ## https://github.com/GoogleCloudDataproc/hadoop-connectors/blob/master/gcs/CONFIGURATION.md
+  gcs:
+
+  ## Microsoft Azure Blob Storage
+  ## https://hadoop.apache.org/docs/current/hadoop-azure/index.html
+  wasbs:
+
+  ## Microsoft Azure Data Lake
+  ## https://hadoop.apache.org/docs/current/hadoop-azure-datalake/index.html
+  adl:
+
+  ## OpenStack Swift
+  ## https://hadoop.apache.org/docs/current/hadoop-openstack/index.html
+  swift:
+
+  ## Alibaba Aliyun OSS
+  ## https://hadoop.apache.org/docs/current/hadoop-aliyun/tools/hadoop-aliyun/index.html
+  oss:
+
 serviceAccount:
   create: true
   annotations: {}

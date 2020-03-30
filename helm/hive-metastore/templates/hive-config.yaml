@@ -1,6 +1,6 @@
 {{- $hiveSite := index .Values.hiveConfig "hive-site.xml" }}
-{{- $dbDriverMap := (include "hive-metastore.dbDriverMap" .) | fromYaml }}
 
+{{- $dbDriverMap := (include "hive-metastore.dbDriverMap" .) | fromYaml }}
 {{- if .Values.postgresql.enabled }}
 {{- $pg := .Values.postgresql }}
 {{- $pgHost := include "call-nested" (list . "postgresql" "postgresql.fullname") }}
@@ -20,6 +20,8 @@
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionUserName"   $db.username }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionPassword"   $db.password }}
 {{- end }}
+
+{{- $_ := set $hiveSite "hive.metastore.warehouse.dir" .Values.warehouse.dir }}
 ---
 apiVersion: v1
 kind: ConfigMap
