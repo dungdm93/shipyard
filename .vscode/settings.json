@@ -1,6 +1,7 @@
 {
   "files.associations": {
-    "*.tpl": "go"
+    "*.tpl": "go",
+    "Dockerfile.*": "dockerfile",
   },
   "editor.autoIndent": "advanced"
 }
