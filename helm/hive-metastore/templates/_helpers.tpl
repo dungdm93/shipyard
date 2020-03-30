@@ -97,7 +97,7 @@ jdbc:sqlserver://{{.host}}:{{.port | default 1433}};databaseName={{.database}}
 {{- else if eq .type "oracle" -}}
 jdbc:oracle:thin://{{.host}}:{{.port | default 1521}}/{{.database}}
 {{- else }}
-{{- fail (printf "unknow db type '%s', use .url instead" .type) }}
+{{- fail (printf "unknow db type %s, use .url instead" .type) }}
 {{- end -}}
 {{- end -}}
 
@@ -115,4 +115,16 @@ https://stackoverflow.com/a/52024583
 {{- $values = index $values . }}
 {{- end }}
 {{- include $template (dict "Chart" (dict "Name" (last $subchart)) "Values" $values "Release" $dot.Release "Capabilities" $dot.Capabilities) }}
+{{- end -}}
+
+{{/*
+Remove empty-value entry from dict
+*/}}
+{{- define "dict-cleanup" -}}
+{{- $dict := . }}
+{{- range $k, $v := $dict -}}
+  {{- if not $v -}}
+    {{- $_ := unset $dict $k }}
+  {{- end -}}
+{{- end -}}
 {{- end -}}

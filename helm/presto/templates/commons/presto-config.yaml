@@ -1,7 +1,7 @@
 {{- $presto := .Values.presto }}
 {{- $config := index $presto "config.properties" }}
 
-{{- $_ := include "dict.cleanup" $config }}
+{{- $_ := include "dict-cleanup" $config }}
 {{- $_ := set $config "http-server.http.port" 8080 }}
 {{- $_ := unset $config "coordinator" }}
 {{- $_ := unset $config "node-scheduler.include-coordinator" }}

@@ -71,6 +71,24 @@ filesystem:
   ## Amazon S3
   ## https://hadoop.apache.org/docs/current/hadoop-aws/tools/hadoop-aws/index.html
   s3a:
+    enabled: false
+    impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+    endpoint:
+    pathStyleAccess: true
+    credentialsProvider: org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider
+
+    accessKey:
+    secretKey:
+    sessionToken:
+
+    sseKey: null
+    sseAlg: null
+
+    # Per-bucket configuration
+    buckets: {}
+      # nightly:
+      #   accessKey: admin
+      #   secretKey: foobar
 
   ## Google Cloud Storage
   ## https://github.com/GoogleCloudDataproc/hadoop-connectors/blob/master/gcs/CONFIGURATION.md

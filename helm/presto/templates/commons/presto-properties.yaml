@@ -3,8 +3,8 @@
 {{- $jvm  := index $presto "jvm.config" }}
 {{- $log  := index $presto "log.properties" }}
 
-{{- $_ := include "dict.cleanup" $node }}
-{{- $_ := include "dict.cleanup" $log  }}
+{{- $_ := include "dict-cleanup" $node }}
+{{- $_ := include "dict-cleanup" $log  }}
 ---
 apiVersion: v1
 kind: ConfigMap

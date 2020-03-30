@@ -82,9 +82,9 @@ checksum/presto-catalog:    {{ include (print $.Template.BasePath "/commons/pres
 {{- end -}}
 
 {{/*
-Remove entry with empty value from dict
+Remove empty-value entry from dict
 */}}
-{{- define "dict.cleanup" -}}
+{{- define "dict-cleanup" -}}
 {{- $dict := . }}
 {{- range $k, $v := $dict -}}
   {{- if not $v -}}

@@ -1,0 +1,7 @@
+filesystem:
+  s3a:
+    enabled: true
+    endpoint: http://minio.dwh-storage:9000
+
+    accessKey: admin
+    secretKey: Teko@123

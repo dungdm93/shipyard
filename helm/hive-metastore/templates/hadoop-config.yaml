@@ -1,4 +1,15 @@
 {{- $hdfsSite := index .Values.hadoopConfig "hdfs-site.xml" }}
+
+{{- if .Values.filesystem.s3a.enabled }}
+  {{- $s3a  := .Values.filesystem.s3a }}
+  {{- $conf := include "hive-metastore.filesystem.s3a" (list "global" $s3a) | fromYaml }}
+  {{- $_ := mergeOverwrite $hdfsSite $conf }}
+
+  {{- range $bucketName, $bucketAttr := $s3a.buckets }}
+    {{- $conf := include "hive-metastore.filesystem.s3a" (list $bucketName $bucketAttr) | fromYaml }}
+    {{- $_ := mergeOverwrite $hdfsSite $conf }}
+  {{- end }}
+{{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap
