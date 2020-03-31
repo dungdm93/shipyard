@@ -11,6 +11,12 @@
   {{- end }}
 {{- end }}
 
+{{- if .Values.filesystem.gs.enabled }}
+  {{- $gs := .Values.filesystem.gs }}
+  {{- $props := include "hive-metastore.filesystem.gs" $gs | fromYaml }}
+  {{- $_ := mergeOverwrite $coreSite $props }}
+{{- end }}
+
 {{- if .Values.filesystem.wasb.enabled }}
   {{- $wasb := .Values.filesystem.wasb }}
   {{- range $accountName, $accessKey := $wasb.accounts }}
@@ -52,7 +58,13 @@ data:
     {{- range $name, $value := $coreSite }}
       <property>
         <name>{{ $name }}</name>
+        {{- if toString $value | contains "\n" }}
+        <value>
+          {{- $value | trim | nindent 10 }}
+        </value>
+        {{- else }}
         <value>{{ $value }}</value>
+        {{- end }}
       </property>
     {{ end }}
     </configuration>

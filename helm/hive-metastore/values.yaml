@@ -93,7 +93,32 @@ filesystem:
 
   ## Google Cloud Storage
   ## https://github.com/GoogleCloudDataproc/hadoop-connectors/blob/master/gcs/CONFIGURATION.md
-  gcs:
+  ## URL gs://<bucket>/<path>
+  gs:
+    enabled: false
+
+    ## Authentication via ServiceAccount
+    serviceAccount:
+      enabled: true
+
+      # Require when method 1 or method 3 is being used
+      email:
+
+      ## Method 1: Using private key
+      privateKeyId:
+      privateKey:
+
+      ## Method 2: using a json keyfile
+      jsonKeyfile:
+
+      ## Method 3: using a P12 certificate
+      keyfile:
+
+    ## Authentication via Client Secret
+    client:
+      id:
+      secret:
+      file:
 
   ## Microsoft Azure Storage Blob
   ## https://hadoop.apache.org/docs/current/hadoop-azure/index.html

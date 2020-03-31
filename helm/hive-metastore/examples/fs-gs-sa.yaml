@@ -1,0 +1,11 @@
+filesystem:
+  gs:
+    enabled: true
+    serviceAccount:
+      enabled: true
+      email:        sa-user@gcp-project.iam.gserviceaccount.com
+      privateKeyId: 6taY5NaJaXS7YvMOOoROw3luBDES8uzy
+      privateKey: |
+        -----BEGIN PRIVATE KEY-----
+        MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDBoLnMgo0N+GLZ
+        -----END PRIVATE KEY-----
