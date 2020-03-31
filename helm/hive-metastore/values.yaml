@@ -14,7 +14,7 @@ hiveConfig:
 
 hadoopConfig:
   path: /opt/hadoop/etc/hadoop/
-  hdfs-site.xml: {}
+  core-site.xml: {}
 
 securityContext: {}
   # capabilities:
@@ -94,9 +94,9 @@ filesystem:
   ## https://github.com/GoogleCloudDataproc/hadoop-connectors/blob/master/gcs/CONFIGURATION.md
   gcs:
 
-  ## Microsoft Azure Blob Storage
+  ## Microsoft Azure Storage Blob
   ## https://hadoop.apache.org/docs/current/hadoop-azure/index.html
-  wasbs:
+  wasb:
 
   ## Microsoft Azure Data Lake
   ## https://hadoop.apache.org/docs/current/hadoop-azure-datalake/index.html

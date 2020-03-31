@@ -1,13 +1,13 @@
-{{- $hdfsSite := index .Values.hadoopConfig "hdfs-site.xml" }}
+{{- $coreSite := index .Values.hadoopConfig "core-site.xml" }}
 
 {{- if .Values.filesystem.s3a.enabled }}
   {{- $s3a  := .Values.filesystem.s3a }}
   {{- $conf := include "hive-metastore.filesystem.s3a" (list "global" $s3a) | fromYaml }}
-  {{- $_ := mergeOverwrite $hdfsSite $conf }}
+  {{- $_ := mergeOverwrite $coreSite $conf }}
 
   {{- range $bucketName, $bucketAttr := $s3a.buckets }}
     {{- $conf := include "hive-metastore.filesystem.s3a" (list $bucketName $bucketAttr) | fromYaml }}
-    {{- $_ := mergeOverwrite $hdfsSite $conf }}
+    {{- $_ := mergeOverwrite $coreSite $conf }}
   {{- end }}
 {{- end }}
 ---
@@ -18,11 +18,11 @@ metadata:
   labels:
     {{- include "hive-metastore.labels" . | nindent 4 }}
 data:
-  hdfs-site.xml: |
+  core-site.xml: |
     <?xml version="1.0" encoding="UTF-8"?>
     <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
     <configuration>
-    {{- range $name, $value := $hdfsSite }}
+    {{- range $name, $value := $coreSite }}
       <property>
         <name>{{ $name }}</name>
         <value>{{ $value }}</value>
