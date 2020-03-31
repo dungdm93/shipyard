@@ -97,7 +97,7 @@ filesystem:
 
   ## Microsoft Azure Storage Blob
   ## https://hadoop.apache.org/docs/current/hadoop-azure/index.html
-  ## URL wasb[s]://<container-name>@<account-name>.blob.core.windows.net/<path>
+  ## URL wasb[s]://<container>@<account>.blob.core.windows.net/<path>
   wasb:
     enabled: false
     accounts: {}
@@ -105,7 +105,7 @@ filesystem:
 
   ## Microsoft Azure Data Lake
   ## https://hadoop.apache.org/docs/current/hadoop-azure-datalake/index.html
-  ## URL adl://<account-name>.azuredatalakestore.net/<path>
+  ## URL adl://<account>.azuredatalakestore.net/<path>
   adl:
     enabled: false
     # One of: RefreshToken, ClientCredential, Msi, DeviceCode
@@ -137,7 +137,17 @@ filesystem:
 
   ## OpenStack Swift
   ## https://hadoop.apache.org/docs/current/hadoop-openstack/index.html
+  ## URL swift://<container>.<hostname>/<path>
   swift:
+    enabled: false
+    services: {}
+      # name:
+      #   authUrl:
+      #   tenant:
+      #   region:
+      #   username:
+      #   password:
+      #   apikey:
 
   ## Alibaba Aliyun OSS
   ## https://hadoop.apache.org/docs/current/hadoop-aliyun/tools/hadoop-aliyun/index.html

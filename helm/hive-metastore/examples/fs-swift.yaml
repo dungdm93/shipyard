@@ -1,0 +1,22 @@
+filesystem:
+  swift:
+    enabled: true
+    services:
+      rackspace:
+        authUrl: https://auth.api.rackspacecloud.com/v2.0/tokens
+        region: DFW
+        username: user4
+        apikey: fe806aa86dfffe2f6ed8
+
+      rackspaceuk:
+        authUrl: https://lon.identity.api.rackspacecloud.com/v2.0/tokens
+        username: user4
+        password: your-super-secret-password
+        public: true
+
+      hpcloud:
+        authUrl: https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/tokens
+        tenant: FE806AA86
+        username: FE806AA86DFFFE2F6ED8
+        password: secret-password-goes-here
+        public: true
