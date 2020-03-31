@@ -10,6 +10,17 @@
     {{- $_ := mergeOverwrite $coreSite $props }}
   {{- end }}
 {{- end }}
+
+{{- if .Values.filesystem.adl.enabled }}
+  {{- $adl   := .Values.filesystem.adl }}
+  {{- $props := include "hive-metastore.filesystem.adl" (list "" $adl) | fromYaml }}
+  {{- $_ := mergeOverwrite $coreSite $props }}
+
+  {{- range $accName, $accProps := $adl.accounts }}
+    {{- $props := include "hive-metastore.filesystem.adl" (list $accName $accProps) | fromYaml }}
+    {{- $_ := mergeOverwrite $coreSite $props }}
+  {{- end }}
+{{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap

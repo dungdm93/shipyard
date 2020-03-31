@@ -1,0 +1,6 @@
+filesystem:
+  adl:
+    enabled: true
+    accessTokenProvider: RefreshToken
+    clientId:     foo
+    refreshToken: bar

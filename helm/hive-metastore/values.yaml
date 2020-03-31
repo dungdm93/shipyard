@@ -70,6 +70,7 @@ filesystem:
 
   ## Amazon S3
   ## https://hadoop.apache.org/docs/current/hadoop-aws/tools/hadoop-aws/index.html
+  ## URL: s3a://<bucket>/<path>
   s3a:
     enabled: false
     impl: org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -100,7 +101,30 @@ filesystem:
 
   ## Microsoft Azure Data Lake
   ## https://hadoop.apache.org/docs/current/hadoop-azure-datalake/index.html
+  ## URL: adl://<account-name>.azuredatalakestore.net/<path>
   adl:
+    enabled: false
+    # One of: RefreshToken, ClientCredential, Msi, DeviceCode
+    accessTokenProvider: RefreshToken
+
+    # When accessTokenProvider is RefreshToken
+    clientId:
+    refreshToken:
+
+    # When accessTokenProvider is ClientCredential. `clientId` included
+    refreshUrl:
+    credential:
+
+    # When accessTokenProvider is Msi (Managed Service Identity) and port != 50342
+    msiPort:
+
+    # When accessTokenProvider is DeviceCode
+    devicecodeClientappid:
+
+    accounts: {}
+      # foobar:
+      #   clientId: YOUR-CLIENT-ID
+      #   refreshtoken: YOUR-REFRESH-TOKEN
 
   ## Microsoft Azure Blob Filesystem
   ##   a.k.a Azure Data Lake Storage Gen2
