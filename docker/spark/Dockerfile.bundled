@@ -35,9 +35,9 @@ LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        openjdk-8-jre-headless krb5-user \
+        openjdk-8-jre-headless ca-certificates libc6 \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
-        libssl1.1 libisal2 libnss3; \
+        libssl1.1 libisal2 libnss3 libpam-modules krb5-user procps; \
     ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so; \
     ln -s libssl.so.1.1    /usr/lib/x86_64-linux-gnu/libssl.so;    \
     rm -rf /var/cache/apt/*;

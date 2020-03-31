@@ -2,7 +2,7 @@ PYTHON_VERSION ?= 3.7
 
 IMAGE_REPO ?= hub.teko.vn/data/spark
 
-BASE_TAG   ?= 2.4.4
+BASE_TAG   ?= 2.4.5
 BASE_IMAGE := ${IMAGE_REPO}:${BASE_TAG}
 
 TARGET_TAG   ?= ${BASE_TAG}-python-${PYTHON_VERSION}
