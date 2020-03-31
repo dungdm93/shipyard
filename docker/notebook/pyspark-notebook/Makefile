@@ -1,4 +1,4 @@
-IMAGE_TAG    ?= 2.4.4
+IMAGE_TAG    ?= 2.4.5-hadoop-3.2.1
 SOURCE_IMAGE := hub.teko.vn/data/spark:${IMAGE_TAG}
 TARGET_IMAGE := hub.teko.vn/data/pyspark-notebook:${IMAGE_TAG}
 
@@ -18,10 +18,3 @@ run:
 		-e GRANT_SUDO=yes \
 		-e JUPYTER_ENABLE_LAB=yes \
 		${TARGET_IMAGE}
-
-
-# Spark bundled (w/ Hadoop)
-# $ make build
-#
-# Spark standalone (w/o Hadoop)
-# $ make build IMAGE_TAG=2.4.4-hadoop-3.2.1

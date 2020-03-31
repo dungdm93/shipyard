@@ -35,43 +35,42 @@ RUN set -eux; \
         python-dotenv \
         papermill     \
         boost         \
+        pyarrow       \
         psycopg2      \
         mysqlclient   \
         pyodbc        \
         cx_oracle;    \
-    pip install --no-cache-dir \
-        pyarrow==0.15.*; \
     \
     cleanup.sh conda npm home; \
     fix-permissions $CONDA_DIR /home/$NB_USER;
 
 # Widgets & visualization
-RUN set -eux; \
-    # ipywidgets ipyleaflet pythreejs bqplot
-    conda install -y -c conda-forge \
-        ipyleaflet=0.11.4 pythreejs bqplot; \
-    jupyter labextension install \
-        jupyter-leaflet@0.11.4 jupyter-threejs bqplot; \
-    \
-    # plotly
-    conda install -y -c plotly \
-        plotly plotly-orca plotly-geo psutil requests; \
-    jupyter labextension install jupyterlab-plotly plotlywidget; \
-    \
-    # altair
-    conda install -y -c conda-forge altair; \
-    \
-    # jupyterlab-sidecar
-    pip install sidecar; \
-    jupyter labextension install @jupyter-widgets/jupyterlab-sidecar; \
-    \
-    cleanup.sh conda npm home; \
-    fix-permissions $CONDA_DIR /home/$NB_USER;
+# RUN set -eux; \
+#     # ipywidgets ipyleaflet pythreejs bqplot
+#     conda install -y -c conda-forge \
+#         ipyleaflet pythreejs bqplot; \
+#     jupyter labextension install \
+#         jupyter-leaflet jupyter-threejs bqplot; \
+#     \
+#     # plotly
+#     conda install -y -c plotly \
+#         plotly plotly-orca plotly-geo psutil requests; \
+#     jupyter labextension install jupyterlab-plotly plotlywidget; \
+#     \
+#     # altair
+#     conda install -y -c conda-forge altair; \
+#     \
+#     # jupyterlab-sidecar
+#     pip install sidecar; \
+#     jupyter labextension install @jupyter-widgets/jupyterlab-sidecar; \
+#     \
+#     cleanup.sh conda npm home; \
+#     fix-permissions $CONDA_DIR /home/$NB_USER;
 
-# Tools
-RUN set -eux; \
-    conda install -y -c conda-forge jupyterlab-git; \
-    jupyter labextension install jupyterlab-drawio; \
-    \
-    cleanup.sh conda npm home; \
-    fix-permissions $CONDA_DIR /home/$NB_USER;
+# Tools: out-of-date & not compatible
+# RUN set -eux; \
+#     conda install -y -c conda-forge jupyterlab-git; \
+#     jupyter labextension install jupyterlab-drawio; \
+#     \
+#     cleanup.sh conda npm home; \
+#     fix-permissions $CONDA_DIR /home/$NB_USER;
