@@ -14,10 +14,10 @@ sseAlg: server-side-encryption-algorithm
 
 {{- define "hive-metastore.filesystem.s3a" -}}
 {{- $bucket := index . 0 -}}
-{{- $config := index . 1 -}}
-{{- $prefix := eq $bucket "global" | ternary "fs.s3a" (printf "fs.s3a.bucket.%s" $bucket) }}
+{{- $props  := index . 1 -}}
+{{- $prefix := eq $bucket "" | ternary "fs.s3a" (printf "fs.s3a.bucket.%s" $bucket) }}
 {{- $keyMap := include "hive-metastore.filesystem.s3a.map" . | fromYaml }}
-{{- range $key, $value := $config }}
+{{- range $key, $value := $props }}
 {{- if and (or $value (kindIs "bool" $value)) (hasKey $keyMap $key) }}
 {{ $prefix }}.{{ index $keyMap $key }}: {{ $value }}
 {{- end }}

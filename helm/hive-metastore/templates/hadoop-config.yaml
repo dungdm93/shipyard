@@ -1,13 +1,13 @@
 {{- $coreSite := index .Values.hadoopConfig "core-site.xml" }}
 
 {{- if .Values.filesystem.s3a.enabled }}
-  {{- $s3a  := .Values.filesystem.s3a }}
-  {{- $conf := include "hive-metastore.filesystem.s3a" (list "global" $s3a) | fromYaml }}
-  {{- $_ := mergeOverwrite $coreSite $conf }}
+  {{- $s3a   := .Values.filesystem.s3a }}
+  {{- $props := include "hive-metastore.filesystem.s3a" (list "" $s3a) | fromYaml }}
+  {{- $_ := mergeOverwrite $coreSite $props }}
 
-  {{- range $bucketName, $bucketAttr := $s3a.buckets }}
-    {{- $conf := include "hive-metastore.filesystem.s3a" (list $bucketName $bucketAttr) | fromYaml }}
-    {{- $_ := mergeOverwrite $coreSite $conf }}
+  {{- range $bucketName, $bucketProps := $s3a.buckets }}
+    {{- $props := include "hive-metastore.filesystem.s3a" (list $bucketName $bucketProps) | fromYaml }}
+    {{- $_ := mergeOverwrite $coreSite $props }}
   {{- end }}
 {{- end }}
 ---
