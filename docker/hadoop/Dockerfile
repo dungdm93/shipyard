@@ -18,7 +18,8 @@ RUN set -eux; \
     curl -LO "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"; \
     curl -L  "${APACHE_DIST}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc" \
            | gpg --batch --verify - "hadoop-${HADOOP_VERSION}.tar.gz";
-RUN tar -xf  "hadoop-${HADOOP_VERSION}.tar.gz" --no-same-owner; \
+RUN tar -xf  "hadoop-${HADOOP_VERSION}.tar.gz" --no-same-owner \
+        --exclude="hadoop-*/share/doc"; \
     mv       "hadoop-${HADOOP_VERSION}" "hadoop";
 
 
