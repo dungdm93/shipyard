@@ -11,6 +11,13 @@
   {{- end }}
 {{- end }}
 
+{{- if .Values.filesystem.wasb.enabled }}
+  {{- $wasb := .Values.filesystem.wasb }}
+  {{- range $accountName, $accessKey := $wasb.accounts }}
+    {{- $_ := set $coreSite (printf "fs.azure.account.key.%s.blob.core.windows.net" $accountName) $accessKey }}
+  {{- end }}
+{{- end }}
+
 {{- if .Values.filesystem.adl.enabled }}
   {{- $adl   := .Values.filesystem.adl }}
   {{- $props := include "hive-metastore.filesystem.adl" (list "" $adl) | fromYaml }}

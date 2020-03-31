@@ -70,7 +70,7 @@ filesystem:
 
   ## Amazon S3
   ## https://hadoop.apache.org/docs/current/hadoop-aws/tools/hadoop-aws/index.html
-  ## URL: s3a://<bucket>/<path>
+  ## URL s3a://<bucket>/<path>
   s3a:
     enabled: false
     impl: org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -97,11 +97,15 @@ filesystem:
 
   ## Microsoft Azure Storage Blob
   ## https://hadoop.apache.org/docs/current/hadoop-azure/index.html
+  ## URL wasb[s]://<container-name>@<account-name>.blob.core.windows.net/<path>
   wasb:
+    enabled: false
+    accounts: {}
+      # account: access-key
 
   ## Microsoft Azure Data Lake
   ## https://hadoop.apache.org/docs/current/hadoop-azure-datalake/index.html
-  ## URL: adl://<account-name>.azuredatalakestore.net/<path>
+  ## URL adl://<account-name>.azuredatalakestore.net/<path>
   adl:
     enabled: false
     # One of: RefreshToken, ClientCredential, Msi, DeviceCode
