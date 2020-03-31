@@ -102,6 +102,11 @@ filesystem:
   ## https://hadoop.apache.org/docs/current/hadoop-azure-datalake/index.html
   adl:
 
+  ## Microsoft Azure Blob Filesystem
+  ##   a.k.a Azure Data Lake Storage Gen2
+  ## https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-abfs-driver
+  abfs:
+
   ## OpenStack Swift
   ## https://hadoop.apache.org/docs/current/hadoop-openstack/index.html
   swift:
