@@ -80,7 +80,7 @@ warehouse:
 
 filesystem:
   ## Hadoop HDFS
-  hdfs:
+  hdfs: {}
 
   ## Amazon S3
   ## https://hadoop.apache.org/docs/current/hadoop-aws/tools/hadoop-aws/index.html
@@ -173,6 +173,7 @@ filesystem:
   ##   a.k.a Azure Data Lake Storage Gen2
   ## https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-abfs-driver
   abfs:
+    enabled: false
 
   ## OpenStack Swift
   ## https://hadoop.apache.org/docs/current/hadoop-openstack/index.html
@@ -191,6 +192,7 @@ filesystem:
   ## Alibaba Aliyun OSS
   ## https://hadoop.apache.org/docs/current/hadoop-aliyun/tools/hadoop-aliyun/index.html
   oss:
+    enabled: false
 
 serviceAccount:
   create: true

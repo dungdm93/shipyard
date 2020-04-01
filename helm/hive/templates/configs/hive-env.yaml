@@ -1,0 +1,19 @@
+{{- $hdToolMap := include "hive.hdToolMap" . | fromYaml }}
+{{- $hadoopTools := list }}
+
+{{- range $fs, $props := .Values.filesystem }}
+  {{- if $props.enabled }}
+    {{- if hasKey $hdToolMap $fs }}
+      {{- $hadoopTools = append $hadoopTools (index $hdToolMap $fs) }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hive.fullname" . }}-hive-env
+  labels:
+    {{- include "hive.labels" . | nindent 4 }}
+data:
+  HADOOP_OPTIONAL_TOOLS: {{ join "," $hadoopTools }}

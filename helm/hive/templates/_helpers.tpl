@@ -88,8 +88,20 @@ Hive volumes
 Checksum pod annotations
 */}}
 {{- define "hive.checksum" -}}
-checksum/hive-config:   {{ include (print $.Template.BasePath "/configs/hive-config.yaml") .   | sha256sum }}
 checksum/hadoop-config: {{ include (print $.Template.BasePath "/configs/hadoop-config.yaml") . | sha256sum }}
+checksum/hive-config:   {{ include (print $.Template.BasePath "/configs/hive-config.yaml") .   | sha256sum }}
+checksum/hive-env:      {{ include (print $.Template.BasePath "/configs/hive-env.yaml") .      | sha256sum }}
+{{- end -}}
+
+{{/*
+Hadoop optional tools mapping
+*/}}
+{{- define "hive.hdToolMap" -}}
+s3a:   hadoop-aws
+wasb:  hadoop-azure
+adl:   hadoop-azure-datalake
+swift: hadoop-openstack
+oss:   hadoop-aliyun
 {{- end -}}
 
 {{/*
