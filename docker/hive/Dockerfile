@@ -27,10 +27,15 @@ RUN tar -xf  "apache-hive-${HIVE_VERSION}-bin.tar.gz" --no-same-owner; \
 
 FROM hub.teko.vn/data/hadoop:${HADOOP_VERSION}
 
+# Tools
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y netcat; \
+    rm -rf /var/cache/apt/*;
+
 ENV HIVE_HOME=/opt/hive
 
 COPY --from=downloader /build/hive  ${HIVE_HOME}
-# COPY                   ./configs/*  ${SPARK_HOME}/conf/
 # COPY ./entrypoint.sh /opt/
 
 ENV PATH="${HIVE_HOME}/bin:${PATH}"
