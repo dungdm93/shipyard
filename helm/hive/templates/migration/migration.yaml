@@ -1,0 +1,79 @@
+{{- if .Values.migration.enabled }}
+{{- $migration := mergeOverwrite (deepCopy .Values.commons) .Values.migration -}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: {{ include "hive.fullname" . }}-migration-
+  labels:
+    {{- include "hive.migration.labels" . | nindent 4 }}
+    {{- with $migration.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    # helm.sh/hook: "post-install,post-upgrade"
+    # helm.sh/hook-delete-policy: "before-hook-creation"
+    {{- with $migration.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ttlSecondsAfterFinished: 86400 # 1 day
+  activeDeadlineSeconds:   180   # 3 mins
+  backoffLimit: 3                # retry 3 times
+  template:
+    metadata:
+      labels:
+        {{- include "hive.migration.selectorLabels" . | nindent 8 }}
+        {{- with $migration.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "hive.checksum" . | nindent 8 }}
+        {{- with $migration.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      restartPolicy: OnFailure
+      containers:
+      - name: hive-migration
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["/usr/local/bin/hive-migration.sh"]
+        env:
+          {{- toYaml $migration.env | nindent 10}}
+        volumeMounts:
+          {{- include "hive.volumeMounts" . | nindent 10 }}
+          - name: hive-scripts
+            mountPath: /usr/local/bin/
+        resources:
+          {{- toYaml $migration.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml $migration.securityContext | nindent 10 }}
+      serviceAccountName: {{ include "hive.serviceAccountName" . }}
+      priorityClassName:  {{ $migration.priorityClassName }}
+      runtimeClassName:   {{ $migration.runtimeClassName }}
+      schedulerName:      {{ $migration.schedulerName }}
+      securityContext:
+        {{- toYaml $migration.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- include "hive.volumes" . | nindent 8 }}
+        - name: hive-scripts
+          configMap:
+            name: {{ include "hive.fullname" . }}-hive-scripts
+    {{- with $migration.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $migration.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $migration.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- end }}

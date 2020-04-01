@@ -98,26 +98,37 @@ Database driver mapping
 {{- define "hive.dbDriverMap" -}}
 postgres: org.postgresql.Driver
 mysql:    com.mysql.cj.jdbc.Driver
-// mysql-8:  com.mysql.cj.jdbc.Driver
-// mysql-5:  com.mysql.jdbc.Driver
+# mysql-8:  com.mysql.cj.jdbc.Driver
+# mysql-5:  com.mysql.jdbc.Driver
 mssql:    com.microsoft.sqlserver.jdbc.SQLServerDriver
 oracle:   oracle.jdbc.OracleDriver
+{{- end -}}
+
+{{/*
+Database port mapping
+*/}}
+{{- define "hive.dbPortMap" -}}
+postgres: 5432
+mysql:    3306
+mssql:    1433
+oracle:   1521
 {{- end -}}
 
 {{/*
 Database connection URL
 */}}
 {{- define "hive.dbConnectionURL" -}}
+{{- $dbPortMap := include "hive.dbPortMap" . | fromYaml }}
 {{- if .url -}}
 {{ .url }}
 {{- else if eq .type "postgres" -}}
-jdbc:postgresql://{{.host}}:{{.port | default 5432}}/{{.database}}
+jdbc:postgresql://{{.host}}:{{.port | default (index $dbPortMap .type)}}/{{.database}}
 {{- else if eq .type "mysql" -}}
-jdbc:mysql://{{.host}}:{{.port | default 3306}}/{{.database}}
+jdbc:mysql://{{.host}}:{{.port | default (index $dbPortMap .type)}}/{{.database}}
 {{- else if eq .type "mssql" -}}
-jdbc:sqlserver://{{.host}}:{{.port | default 1433}};databaseName={{.database}}
+jdbc:sqlserver://{{.host}}:{{.port | default (index $dbPortMap .type)}};databaseName={{.database}}
 {{- else if eq .type "oracle" -}}
-jdbc:oracle:thin://{{.host}}:{{.port | default 1521}}/{{.database}}
+jdbc:oracle:thin://{{.host}}:{{.port | default (index $dbPortMap .type)}}/{{.database}}
 {{- else }}
 {{- fail (printf "unknow db type %s, use .url instead" .type) }}
 {{- end -}}

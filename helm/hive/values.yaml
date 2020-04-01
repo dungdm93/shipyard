@@ -50,6 +50,9 @@ hiveserver2:
   service:
     port: 10000
 
+migration:
+  enabled: true
+
 postgresql:
   enabled: true
 
