@@ -9,11 +9,17 @@ metadata:
     {{- include "hive.labels" . | nindent 4 }}
 data:
   wait-for: |
-    #!/bin/sh
+    #!/bin/bash
     : ${NRETRY:=30}
-    local host=$1 port=$2
+    host=$1
+    port=$2
 
-    local i=0
+    if ! command -v nc >/dev/null 2>&1; then
+      echo >&2 "[$(date -Iseconds)] nc command not found"
+      exit 1
+    fi
+
+    i=0
     while ! nc -z "$host" "$port" >/dev/null 2>&1; do
         ((i+=1))
 

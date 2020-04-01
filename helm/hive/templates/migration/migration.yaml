@@ -4,7 +4,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: {{ include "hive.fullname" . }}-migration-
+  name: {{ include "hive.fullname" . }}-migration
   labels:
     {{- include "hive.migration.labels" . | nindent 4 }}
     {{- with $migration.labels }}
@@ -64,6 +64,7 @@ spec:
         - name: hive-scripts
           configMap:
             name: {{ include "hive.fullname" . }}-hive-scripts
+            defaultMode: 0755
     {{- with $migration.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
