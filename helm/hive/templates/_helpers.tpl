@@ -63,6 +63,28 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
+Hive volumeMounts
+*/}}
+{{- define "hive.volumeMounts" -}}
+- name: hive-config
+  mountPath: {{ .Values.hiveConfig.path }}
+- name: hadoop-config
+  mountPath: {{ .Values.hadoopConfig.path }}
+{{- end -}}
+
+{{/*
+Hive volumes
+*/}}
+{{- define "hive.volumes" -}}
+- name: hive-config
+  configMap:
+    name: {{ include "hive.fullname" . }}-hive-config
+- name: hadoop-config
+  configMap:
+    name: {{ include "hive.fullname" . }}-hadoop-config
+{{- end -}}
+
+{{/*
 Checksum pod annotations
 */}}
 {{- define "hive.checksum" -}}
