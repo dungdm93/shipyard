@@ -1,0 +1,20 @@
+{{- $metastore := mergeOverwrite (deepCopy .Values.commons) .Values.metastore -}}
+{{- $msService := $metastore.service -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hive.fullname" . }}-metastore
+  labels:
+    {{- include "hive.metastore.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $msService.annotations | nindent 4 }}
+spec:
+  type: {{ $msService.type }}
+  selector:
+    {{- include "hive.metastore.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ $msService.port }}
+      targetPort: metastore
+      protocol: TCP
+      name: metastore

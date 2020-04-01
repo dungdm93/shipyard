@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "hive-metastore.name" -}}
+{{- define "hive.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "hive-metastore.fullname" -}}
+{{- define "hive.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "hive-metastore.chart" -}}
+{{- define "hive.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "hive-metastore.labels" -}}
-helm.sh/chart: {{ include "hive-metastore.chart" . }}
-{{ include "hive-metastore.selectorLabels" . }}
+{{- define "hive.labels" -}}
+helm.sh/chart: {{ include "hive.chart" . }}
+{{ include "hive.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -46,17 +46,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "hive-metastore.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "hive-metastore.name" . }}
+{{- define "hive.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "hive.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "hive-metastore.serviceAccountName" -}}
+{{- define "hive.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default (include "hive-metastore.fullname" .) .Values.serviceAccount.name }}
+    {{ default (include "hive.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
@@ -65,15 +65,15 @@ Create the name of the service account to use
 {{/*
 Checksum pod annotations
 */}}
-{{- define "hive-metastore.checksum" -}}
-checksum/hive-config:   {{ include (print $.Template.BasePath "/hive-config.yaml") .   | sha256sum }}
-checksum/hadoop-config: {{ include (print $.Template.BasePath "/hadoop-config.yaml") . | sha256sum }}
+{{- define "hive.checksum" -}}
+checksum/hive-config:   {{ include (print $.Template.BasePath "/configs/hive-config.yaml") .   | sha256sum }}
+checksum/hadoop-config: {{ include (print $.Template.BasePath "/configs/hadoop-config.yaml") . | sha256sum }}
 {{- end -}}
 
 {{/*
 Database driver mapping
 */}}
-{{- define "hive-metastore.dbDriverMap" -}}
+{{- define "hive.dbDriverMap" -}}
 postgres: org.postgresql.Driver
 mysql:    com.mysql.cj.jdbc.Driver
 // mysql-8:  com.mysql.cj.jdbc.Driver
@@ -85,7 +85,7 @@ oracle:   oracle.jdbc.OracleDriver
 {{/*
 Database connection URL
 */}}
-{{- define "hive-metastore.dbConnectionURL" -}}
+{{- define "hive.dbConnectionURL" -}}
 {{- if .url -}}
 {{ .url }}
 {{- else if eq .type "postgres" -}}

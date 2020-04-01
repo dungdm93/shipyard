@@ -1,0 +1,73 @@
+{{- $metastore := mergeOverwrite (deepCopy .Values.commons) .Values.metastore -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hive.fullname" . }}-metastore
+  labels:
+    {{- include "hive.metastore.labels" . | nindent 4 }}
+    {{- with $metastore.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $metastore.annotations | nindent 4 }}
+spec:
+  replicas: {{ $metastore.replicas }}
+  selector:
+    matchLabels:
+      {{- include "hive.metastore.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hive.metastore.selectorLabels" . | nindent 8 }}
+        {{- with $metastore.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "hive.checksum" . | nindent 8 }}
+        {{- with $metastore.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: hive-metastore
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [hive]
+          args: [--service, metastore, --verbose]
+          env:
+            {{- toYaml $metastore.env | nindent 12 }}
+          ports:
+            - name: metastore
+              protocol: TCP
+              containerPort: 9083
+          livenessProbe:
+            tcpSocket:
+              port: metastore
+          resources:
+            {{- toYaml $metastore.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $metastore.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "hive.serviceAccountName" . }}
+      priorityClassName:  {{ $metastore.priorityClassName }}
+      runtimeClassName:   {{ $metastore.runtimeClassName }}
+      schedulerName:      {{ $metastore.schedulerName }}
+      securityContext:
+        {{- toYaml $metastore.podSecurityContext | nindent 8 }}
+    {{- with $metastore.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $metastore.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $metastore.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

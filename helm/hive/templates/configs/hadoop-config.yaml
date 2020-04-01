@@ -2,18 +2,18 @@
 
 {{- if .Values.filesystem.s3a.enabled }}
   {{- $s3a   := .Values.filesystem.s3a }}
-  {{- $props := include "hive-metastore.filesystem.s3a" (list "" $s3a) | fromYaml }}
+  {{- $props := include "hive.filesystem.s3a" (list "" $s3a) | fromYaml }}
   {{- $_ := mergeOverwrite $coreSite $props }}
 
   {{- range $bucketName, $bucketProps := $s3a.buckets }}
-    {{- $props := include "hive-metastore.filesystem.s3a" (list $bucketName $bucketProps) | fromYaml }}
+    {{- $props := include "hive.filesystem.s3a" (list $bucketName $bucketProps) | fromYaml }}
     {{- $_ := mergeOverwrite $coreSite $props }}
   {{- end }}
 {{- end }}
 
 {{- if .Values.filesystem.gs.enabled }}
   {{- $gs := .Values.filesystem.gs }}
-  {{- $props := include "hive-metastore.filesystem.gs" $gs | fromYaml }}
+  {{- $props := include "hive.filesystem.gs" $gs | fromYaml }}
   {{- $_ := mergeOverwrite $coreSite $props }}
 {{- end }}
 
@@ -26,11 +26,11 @@
 
 {{- if .Values.filesystem.adl.enabled }}
   {{- $adl   := .Values.filesystem.adl }}
-  {{- $props := include "hive-metastore.filesystem.adl" (list "" $adl) | fromYaml }}
+  {{- $props := include "hive.filesystem.adl" (list "" $adl) | fromYaml }}
   {{- $_ := mergeOverwrite $coreSite $props }}
 
   {{- range $accName, $accProps := $adl.accounts }}
-    {{- $props := include "hive-metastore.filesystem.adl" (list $accName $accProps) | fromYaml }}
+    {{- $props := include "hive.filesystem.adl" (list $accName $accProps) | fromYaml }}
     {{- $_ := mergeOverwrite $coreSite $props }}
   {{- end }}
 {{- end }}
@@ -39,7 +39,7 @@
   {{- $swift := .Values.filesystem.swift }}
 
   {{- range $serviceName, $serviceProps := $swift.services }}
-    {{- $props := include "hive-metastore.filesystem.swift" (list $serviceName $serviceProps) | fromYaml }}
+    {{- $props := include "hive.filesystem.swift" (list $serviceName $serviceProps) | fromYaml }}
     {{- $_ := mergeOverwrite $coreSite $props }}
   {{- end }}
 {{- end }}
@@ -47,9 +47,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "hive-metastore.fullname" . }}-hadoop-config
+  name: {{ include "hive.fullname" . }}-hadoop-config
   labels:
-    {{- include "hive-metastore.labels" . | nindent 4 }}
+    {{- include "hive.labels" . | nindent 4 }}
 data:
   core-site.xml: |
     <?xml version="1.0" encoding="UTF-8"?>

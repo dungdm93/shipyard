@@ -1,13 +1,13 @@
 {{- $hiveSite := index .Values.hiveConfig "hive-site.xml" }}
 
-{{- $dbDriverMap := (include "hive-metastore.dbDriverMap" .) | fromYaml }}
+{{- $dbDriverMap := (include "hive.dbDriverMap" .) | fromYaml }}
 {{- if .Values.postgresql.enabled }}
 {{- $pg := .Values.postgresql }}
 {{- $pgHost := include "call-nested" (list . "postgresql" "postgresql.fullname") }}
 {{- $pgURL  := dict "type" "postgres" "host" $pgHost "port" $pg.service.port "database" $pg.postgresqlDatabase }}
 
 {{- $_ := set $hiveSite "hive.metastore.db.type" "postgres" }}
-{{- $_ := set $hiveSite "javax.jdo.option.ConnectionURL" (include "hive-metastore.dbConnectionURL" $pgURL) }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionURL" (include "hive.dbConnectionURL" $pgURL) }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionDriverName" $dbDriverMap.postgres }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionUserName"   $pg.postgresqlUsername }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionPassword"   $pg.postgresqlPassword }}
@@ -15,7 +15,7 @@
 {{- $db := .Values.externalDatabase }}
 
 {{- $_ := set $hiveSite "hive.metastore.db.type" $db.type }}
-{{- $_ := set $hiveSite "javax.jdo.option.ConnectionURL" (include "hive-metastore.dbConnectionURL" $db) }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionURL" (include "hive.dbConnectionURL" $db) }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionDriverName" (index $dbDriverMap $db.type) }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionUserName"   $db.username }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionPassword"   $db.password }}
@@ -26,9 +26,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "hive-metastore.fullname" . }}-hadoop-config
+  name: {{ include "hive.fullname" . }}-hadoop-config
   labels:
-    {{- include "hive-metastore.labels" . | nindent 4 }}
+    {{- include "hive.labels" . | nindent 4 }}
 data:
   hive-site.xml: |
     <?xml version="1.0" encoding="UTF-8" standalone="no"?>

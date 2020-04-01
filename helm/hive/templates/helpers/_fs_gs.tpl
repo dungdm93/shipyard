@@ -1,4 +1,4 @@
-{{- define "hive-metastore.filesystem.gs.saMap" -}}
+{{- define "hive.filesystem.gs.saMap" -}}
 email:        email
 privateKeyId: private.key.id
 privateKey:   private.key
@@ -6,12 +6,12 @@ jsonKeyfile:  json.keyfile
 keyfile:      keyfile
 {{- end }}
 
-{{- define "hive-metastore.filesystem.gs" -}}
+{{- define "hive.filesystem.gs" -}}
 {{- $gs := . }}
 {{- if $gs.serviceAccount.enabled }}
 # Authentication via ServiceAccount
 fs.gs.auth.service.account.enable: true
-  {{- $keyMap := include "hive-metastore.filesystem.gs.saMap" . | fromYaml }}
+  {{- $keyMap := include "hive.filesystem.gs.saMap" . | fromYaml }}
 
   {{- range $key := list "email" "privateKeyId" "privateKey" "jsonKeyfile" "keyfile" }}
     {{- $value := index $gs.serviceAccount $key }}

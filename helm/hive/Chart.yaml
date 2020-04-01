@@ -1,6 +1,6 @@
 apiVersion: v2
-name: hive-metastore
-description: hive-metastore helm chart
+name: hive
+description: hive helm chart
 icon: https://upload.wikimedia.org/wikipedia/commons/b/bb/Apache_Hive_logo.svg
 type: application
 version: 0.1.0
