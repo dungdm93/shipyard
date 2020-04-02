@@ -38,8 +38,8 @@ spec:
         - name: hive-metastore
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [hive]
-          args: [--service, metastore, --verbose]
+          command: [/usr/local/bin/docker-entrypoint.sh]
+          args: [hive, --service, metastore, --verbose]
           env:
             {{- toYaml $metastore.env | nindent 12 }}
           envFrom:

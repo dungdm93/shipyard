@@ -1,4 +1,3 @@
-{{- if .Values.migration.enabled }}
 {{- $dbPortMap := include "hive.dbPortMap" . | fromYaml }}
 ---
 apiVersion: v1
@@ -32,9 +31,10 @@ data:
         sleep 1
     done
 
-  hive-migration.sh: |
+  docker-entrypoint.sh: |
     #!/bin/bash
     set -euo pipefail
+    HERE=$(dirname "${BASH_SOURCE[0]}")
 
     DB_TYPE="{{ .Values.postgresql.enabled | ternary "postgres" .Values.externalDatabase.type }}"
     {{- if ($pg := .Values.postgresql).enabled }}
@@ -46,10 +46,10 @@ data:
     {{- end }}
 
     if [ -n "$DB_HOST" ]; then
-      wait-for $DB_HOST $DB_PORT
+      "${HERE}/wait-for" "$DB_HOST" "$DB_PORT"
     fi
 
     schematool -dbType "${DB_TYPE}" -upgradeSchema -verbose ||
     schematool -dbType "${DB_TYPE}" -initSchema -verbose
 
-{{- end }}
+    exec "$@"

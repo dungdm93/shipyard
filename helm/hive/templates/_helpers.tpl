@@ -66,22 +66,28 @@ Create the name of the service account to use
 Hive volumeMounts
 */}}
 {{- define "hive.volumeMounts" -}}
-- name: hive-config
-  mountPath: {{ .Values.hiveConfig.path }}
 - name: hadoop-config
   mountPath: {{ .Values.hadoopConfig.path }}
+- name: hive-config
+  mountPath: {{ .Values.hiveConfig.path }}
+- name: hive-scripts
+  mountPath: /usr/local/bin/
 {{- end -}}
 
 {{/*
 Hive volumes
 */}}
 {{- define "hive.volumes" -}}
-- name: hive-config
-  configMap:
-    name: {{ include "hive.fullname" . }}-hive-config
 - name: hadoop-config
   configMap:
     name: {{ include "hive.fullname" . }}-hadoop-config
+- name: hive-config
+  configMap:
+    name: {{ include "hive.fullname" . }}-hive-config
+- name: hive-scripts
+  configMap:
+    name: {{ include "hive.fullname" . }}-hive-scripts
+    defaultMode: 0755
 {{- end -}}
 
 {{/*
@@ -91,6 +97,7 @@ Checksum pod annotations
 checksum/hadoop-config: {{ include (print $.Template.BasePath "/configs/hadoop-config.yaml") . | sha256sum }}
 checksum/hive-config:   {{ include (print $.Template.BasePath "/configs/hive-config.yaml") .   | sha256sum }}
 checksum/hive-env:      {{ include (print $.Template.BasePath "/configs/hive-env.yaml") .      | sha256sum }}
+checksum/hive-scripts:  {{ include (print $.Template.BasePath "/configs/hive-scripts.yaml") .  | sha256sum }}
 {{- end -}}
 
 {{/*
