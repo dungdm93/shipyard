@@ -21,6 +21,10 @@
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionPassword"   $db.password }}
 {{- end }}
 
+{{- $metastore := mergeOverwrite (deepCopy .Values.commons) .Values.metastore -}}
+{{- $msHost := printf "%s-metastore" (include "hive.fullname" .) }}
+{{- $msPort := $metastore.service.port }}
+{{- $_ := set $hiveSite "hive.metastore.uris" (printf "thrift://%s:%s" $msHost (toString $msPort)) }}
 {{- $_ := set $hiveSite "hive.metastore.warehouse.dir" .Values.warehouse.dir }}
 ---
 apiVersion: v1
