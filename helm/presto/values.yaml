@@ -39,9 +39,6 @@ catalog: {}
 
 commons:
   replicas: null
-  command: []
-  args: []
-  env: []
 
   labels: {}
   podLabels: {}
