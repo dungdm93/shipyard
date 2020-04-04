@@ -1,0 +1,25 @@
+pipelineStages:
+- cri: {}
+
+syslogService:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+priorityClassName: addons-critical
+
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+  pspEnabled: true
+
+serviceMonitor:
+  enabled: true
