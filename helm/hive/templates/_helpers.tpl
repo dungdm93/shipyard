@@ -71,7 +71,7 @@ Hive volumeMounts
 - name: hive-config
   mountPath: {{ .Values.hiveConfig.path }}
 - name: hive-scripts
-  mountPath: /usr/local/bin/
+  mountPath: /usr/local/scripts/
 {{- end -}}
 
 {{/*

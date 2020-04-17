@@ -28,10 +28,10 @@ data:
         fi
 
         echo "[$(date -Iseconds)] waiting for $host:$port... $i/$NRETRY"
-        sleep 1
+        sleep 3
     done
 
-  docker-entrypoint.sh: |
+  metastore-entrypoint.sh: |
     #!/bin/bash
     set -euo pipefail
     HERE=$(dirname "${BASH_SOURCE[0]}")
@@ -52,4 +52,16 @@ data:
     schematool -dbType "${DB_TYPE}" -upgradeSchema -verbose ||
     schematool -dbType "${DB_TYPE}" -initSchema -verbose
 
-    exec "$@"
+    exec hive --service metastore --verbose --hiveconf hive.root.logger={{ .Values.logLevel }},console
+
+  hiveserver2-entrypoint.sh: |
+    #!/bin/bash
+    set -euo pipefail
+    HERE=$(dirname "${BASH_SOURCE[0]}")
+
+    METASTORE_HOST="{{ include "hive.fullname" . }}-metastore"
+    METASTORE_PORT="{{ .Values.metastore.service.port }}"
+
+    "${HERE}/wait-for" "$METASTORE_HOST" "$METASTORE_PORT"
+
+    exec hive --service hiveserver2 --hiveconf hive.root.logger={{ .Values.logLevel }},console

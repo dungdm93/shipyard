@@ -1,5 +1,6 @@
 nameOverride: ""
 fullnameOverride: ""
+logLevel: INFO
 
 image:
   repository: hub.teko.vn/data/hive
