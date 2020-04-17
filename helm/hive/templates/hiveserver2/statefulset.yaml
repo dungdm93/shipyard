@@ -48,10 +48,10 @@ spec:
           - configMapRef:
               name: {{ include "hive.fullname" . }}-hive-env
           ports:
-            - name: hiveserver2
+            - name: hs2
               protocol: TCP
               containerPort: 10000
-            - name: hiveserver2-webui
+            - name: hs2-webui
               protocol: TCP
               containerPort: 10002
           volumeMounts:

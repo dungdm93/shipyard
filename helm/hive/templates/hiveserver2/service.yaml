@@ -16,11 +16,11 @@ spec:
     {{- include "hive.hiveserver2.selectorLabels" . | nindent 4 }}
   ports:
     - port: {{ $hs2Service.port }}
-      targetPort: hiveserver2
+      targetPort: hs2
       protocol: TCP
-      name: hiveserver2
+      name: hs2
     - port: {{ $hs2Service.portWebUI }}
-      targetPort: hiveserver2-webui
+      targetPort: hs2-webui
       protocol: TCP
-      name: hiveserver2-webui
+      name: hs2-webui
 {{- end }}
