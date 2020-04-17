@@ -47,8 +47,10 @@ metastore:
     port: 9083
 
 hiveserver2:
+  enabled: true
   service:
     port: 10000
+    portWebUI: 10002
 
 postgresql:
   enabled: true

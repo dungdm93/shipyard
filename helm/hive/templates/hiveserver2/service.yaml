@@ -1,0 +1,26 @@
+{{- $hiveserver2 := mergeOverwrite (deepCopy .Values.commons) .Values.hiveserver2 -}}
+{{- $hs2Service := $hiveserver2.service -}}
+{{- if $hiveserver2.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hive.fullname" . }}-hiveserver2
+  labels:
+    {{- include "hive.hiveserver2.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $hs2Service.annotations | nindent 4 }}
+spec:
+  type: {{ $hs2Service.type }}
+  selector:
+    {{- include "hive.hiveserver2.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ $hs2Service.port }}
+      targetPort: hiveserver2
+      protocol: TCP
+      name: hiveserver2
+    - port: {{ $hs2Service.portWebUI }}
+      targetPort: hiveserver2-webui
+      protocol: TCP
+      name: hiveserver2-webui
+{{- end }}
