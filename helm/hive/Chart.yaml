@@ -3,7 +3,7 @@ name: hive
 description: hive helm chart
 icon: https://upload.wikimedia.org/wikipedia/commons/b/bb/Apache_Hive_logo.svg
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: 3.1.2
 # kubeVersion: ^1.15
 dependencies:
