@@ -1,0 +1,17 @@
+config:
+  schema_config:
+    configs:
+    - store: boltdb
+      object_store: s3
+      schema: v11
+      index:
+        prefix: index_
+      chunks:
+  storage_config:
+    boltdb:
+      directory: /data/loki/index
+    aws:
+      # no trailing /
+      # no support sub-folder yet
+      s3: http://username:password@minio.dwh-storage:9000/kube-logs
+      s3forcepathstyle: true
