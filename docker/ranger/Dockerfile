@@ -30,3 +30,6 @@ RUN set -eux; \
     rm -rf   "apache-ranger-${RANGER_VERSION}.tar.gz";
 
 WORKDIR /build/ranger
+
+# mvn dependency:go-offline = mvn dependency:resolve dependency:resolve-plugins
+RUN mvn dependency:go-offline
