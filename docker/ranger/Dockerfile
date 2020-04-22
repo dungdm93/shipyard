@@ -1,5 +1,6 @@
-# OpenJDK 1.8
-FROM maven:3.6-jdk-8-slim AS builder
+# maven:3.6-jdk-8-slim (OpenJDK 1.8)
+ARG MAVEN_IMAGE_SHA256=sha256:0d749fe156abc8f4d3d005aef2e2d43462e0b9f9c5eef32bf4af50b6d62ddc48
+FROM maven@${MAVEN_IMAGE_SHA256} AS builder
 SHELL ["/bin/bash", "-c"]
 
 RUN set -eux; \
@@ -39,7 +40,9 @@ RUN mvn dependency:go-offline
 ARG SKIP_TESTS=true
 RUN mvn -Pall -DskipTests=${SKIP_TESTS} clean compile package assembly:assembly
 
-FROM alpine:3.10 AS target
+FROM ubuntu:bionic AS dist
+LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+SHELL ["/bin/bash", "-c"]
 
-COPY --from=builder /build/ranger/target/*.tar.gz /build/
-WORKDIR /build
+COPY --from=builder /build/ranger/target/*.tar.gz /dist/
+WORKDIR /dist
