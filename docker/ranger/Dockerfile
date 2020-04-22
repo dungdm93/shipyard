@@ -33,3 +33,13 @@ WORKDIR /build/ranger
 
 # mvn dependency:go-offline = mvn dependency:resolve dependency:resolve-plugins
 RUN mvn dependency:go-offline
+
+# Move to above
+SHELL ["/bin/bash", "-c"]
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y \
+        python
+
+ARG SKIP_TESTS=true
+RUN mvn -Pall -DskipTests=${SKIP_TESTS} clean compile package assembly:assembly
