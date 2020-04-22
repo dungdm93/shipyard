@@ -1,10 +1,12 @@
 # OpenJDK 1.8
 FROM maven:3.6-jdk-8-slim AS builder
+SHELL ["/bin/bash", "-c"]
 
 RUN set -eux; \
     apt-get update; \
     apt-get install -y \
         build-essential \
+        python     \
         fontconfig \
         curl wget \
         git
@@ -34,16 +36,10 @@ WORKDIR /build/ranger
 # mvn dependency:go-offline = mvn dependency:resolve dependency:resolve-plugins
 RUN mvn dependency:go-offline
 
-# Move to above
-SHELL ["/bin/bash", "-c"]
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y \
-        python
-
 ARG SKIP_TESTS=true
 RUN mvn -Pall -DskipTests=${SKIP_TESTS} clean compile package assembly:assembly
 
 FROM alpine:3.10 AS target
 
 COPY --from=builder /build/ranger/target/*.tar.gz /build/
+WORKDIR /build
