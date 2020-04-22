@@ -43,3 +43,7 @@ RUN set -eux; \
 
 ARG SKIP_TESTS=true
 RUN mvn -Pall -DskipTests=${SKIP_TESTS} clean compile package assembly:assembly
+
+FROM alpine:3.10 AS target
+
+COPY --from=builder /build/ranger/target/*.tar.gz /build/
