@@ -29,6 +29,15 @@ COPY --chown=$NB_UID:$NB_GID ./configs/jupyter/* ${CONDA_DIR}/etc/jupyter
 ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip" \
     PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
 
+RUN set -eux; \
+    conda install -c conda-forge -y jupyterlab-git; \
+    jupyter labextension install jupyterlab-drawio; \
+    jupyter labextension install @krassowski/jupyterlab-lsp; \
+    pip install jupyter-lsp python-language-server[all]; \
+    \
+    cleanup.sh conda npm home; \
+    fix-permissions $CONDA_DIR /home/$NB_USER;
+
 # Database drivers
 RUN set -eux; \
     conda install -y \
@@ -63,14 +72,6 @@ RUN set -eux; \
 #     # jupyterlab-sidecar
 #     pip install sidecar; \
 #     jupyter labextension install @jupyter-widgets/jupyterlab-sidecar; \
-#     \
-#     cleanup.sh conda npm home; \
-#     fix-permissions $CONDA_DIR /home/$NB_USER;
-
-# Tools: out-of-date & not compatible
-# RUN set -eux; \
-#     conda install -y -c conda-forge jupyterlab-git; \
-#     jupyter labextension install jupyterlab-drawio; \
 #     \
 #     cleanup.sh conda npm home; \
 #     fix-permissions $CONDA_DIR /home/$NB_USER;
