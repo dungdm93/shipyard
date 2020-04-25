@@ -49,6 +49,7 @@ RUN set -eux; \
         mysqlclient   \
         pyodbc        \
         cx_oracle;    \
+    pip install presto-client; \
     \
     cleanup.sh conda npm home; \
     fix-permissions $CONDA_DIR /home/$NB_USER;
