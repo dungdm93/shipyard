@@ -12,7 +12,7 @@ metadata:
   annotations:
     {{- toYaml $coordinator.annotations | nindent 4 }}
 spec:
-  replicas: {{ $coordinator.replicas }}
+  replicas: 1
   selector:
     matchLabels:
       {{- include "presto.coordinator.selectorLabels" . | nindent 6 }}

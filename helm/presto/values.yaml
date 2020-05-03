@@ -38,8 +38,6 @@ catalog: {}
   #   tpcds.splits-per-node=4
 
 commons:
-  replicas: null
-
   labels: {}
   podLabels: {}
   annotations: {}
@@ -58,7 +56,8 @@ commons:
   nodeSelector: {}
 
 coordinator: {}
-worker: {}
+worker:
+  replicas: null
 
 serviceAccount:
   # Specifies whether a service account should be created
