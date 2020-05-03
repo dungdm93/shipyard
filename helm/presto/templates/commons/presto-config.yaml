@@ -1,5 +1,5 @@
 {{- $presto := .Values.presto }}
-{{- $config := index $presto "config.properties" }}
+{{- $config := index $presto "config.properties" | default dict }}
 
 {{- $_ := include "dict-cleanup" $config }}
 {{- $_ := set $config "http-server.http.port" 8080 }}

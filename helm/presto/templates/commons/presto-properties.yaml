@@ -2,9 +2,6 @@
 {{- $node := index $presto "node.properties" }}
 {{- $jvm  := index $presto "jvm.config" }}
 {{- $log  := index $presto "log.properties" }}
-
-{{- $_ := include "dict-cleanup" $node }}
-{{- $_ := include "dict-cleanup" $log  }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -13,17 +10,22 @@ metadata:
   labels:
     {{- include "presto.labels" . | nindent 4 }}
 data:
-  node.properties: |
-    {{- range $key, $value := $node }}
+{{- range $file, $content := .Values.presto }}
+{{- if eq $file "config.properties" -}}
+  {{/* See presto-config file */}}
+{{- else if kindIs "map" $content }}
+  {{- $_ := include "dict-cleanup" $content }}
+  {{ $file }}: |
+    {{- range $key, $value := $content }}
     {{ $key }}={{ $value }}
     {{- end }}
-
-  jvm.config: |
-    {{- range $option := $jvm }}
+{{- else if kindIs "slice" $content }}
+  {{ $file }}: |
+    {{- range $option := $content }}
     {{ $option }}
     {{- end }}
-
-  log.properties: |
-    {{- range $key, $value := $log }}
-    {{ $key }}={{ $value }}
-    {{- end }}
+{{- else if $content }}
+  {{ $file }}: |
+    {{- $content | nindent 4 }}
+{{- end }}
+{{- end }}
