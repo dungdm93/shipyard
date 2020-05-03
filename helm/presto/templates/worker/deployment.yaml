@@ -12,7 +12,9 @@ metadata:
   annotations:
     {{- toYaml $worker.annotations | nindent 4 }}
 spec:
-  replicas: {{ $worker.replicas }}
+  {{- with $worker.replicas }}
+  replicas: {{ . }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "presto.worker.selectorLabels" . | nindent 6 }}
