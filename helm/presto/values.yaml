@@ -37,6 +37,46 @@ catalog: {}
   #   connector.name=tpcds
   #   tpcds.splits-per-node=4
 
+authen:
+  # Option: custom | kerberos | ldap | passwordFile
+  type: custom
+
+  kerberos:
+    config: /etc/krb5.conf
+    keytab:
+    # ref: https://web.mit.edu/kerberos/krb5-1.12/doc/appdev/gssapi.html#name-types
+    nameType: # HOSTBASED_SERVICE (default) | USER_NAME
+    serviceName:
+    principalHostname:
+
+  ldap:
+    url:
+    userBaseDN:
+    userBindPattern:
+    groupAuthPattern:
+    cacheTtl:
+
+    # Presto server can use dedicated LDAP service user for doing user group membership queries.
+    bindDN:
+    bindPassword:
+
+  passwordFile:
+    path:
+    refreshPeriod:
+    cacheSize:
+
+systemAccessControl:
+  # Option: custom | allow-all | read-only | file
+  name: allow-all
+
+  file:
+    refreshPeriod:
+    rules:
+      catalogs: []
+      queries: []
+      impersonation: []
+    existingRulesPath:
+
 commons:
   labels: {}
   podLabels: {}
