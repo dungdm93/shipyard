@@ -19,7 +19,7 @@ RUN set -eux; \
 COPY ./settings/ssh.config /root/.ssh/config
 
 # Install kubectl
-ENV KUBECTL_VERSION=v1.17.3
+ENV KUBECTL_VERSION=v1.18.2
 RUN set -eux; \
     curl -sSL "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
           -o /usr/local/bin/kubectl; \
@@ -27,7 +27,7 @@ RUN set -eux; \
     kubectl completion bash > /etc/bash_completion.d/kubectl;
 
 # Install helm
-ENV HELM_VERSION=v3.1.1
+ENV HELM_VERSION=v3.2.0
 RUN set -eux; \
     curl -sSL "https://github.com/helm/helm/raw/master/scripts/get-helm-3" | bash -s -- --version "${HELM_VERSION}"; \
     helm completion bash > /etc/bash_completion.d/helm;
@@ -73,20 +73,20 @@ RUN set -eux; \
     chmod +x "helm-gcs/scripts/pull.sh"; \
     \
     echo "Installing helm-git plugin"; \
-    HELM_GIT_VERSION=v0.5.0; \
+    HELM_GIT_VERSION=v0.7.0; \
     curl -sSL "https://github.com/aslafy-z/helm-git/archive/${HELM_GIT_VERSION}.tar.gz" \
         | tar -xzvf -; \
     mv "helm-git-${HELM_GIT_VERSION#v}" "helm-git"; \
     rm -rf helm-git/{tests,*.json};
 
 # Install rke
-ENV RKE_VERSION=v1.0.5
+ENV RKE_VERSION=v1.0.7
 RUN curl -sSL "https://github.com/rancher/rke/releases/download/${RKE_VERSION}/rke_linux-amd64" \
           -o /usr/local/bin/rke; \
     chmod +x /usr/local/bin/rke;
 
 # Install helmfile
-ENV HELMFILE_VERSION=v0.104.0
+ENV HELMFILE_VERSION=v0.114.0
 RUN curl -sSL "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" \
           -o /usr/local/bin/helmfile; \
     chmod +x /usr/local/bin/helmfile;
