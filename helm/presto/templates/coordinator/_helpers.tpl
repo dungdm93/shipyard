@@ -18,6 +18,7 @@ app.kubernetes.io/component: coordinator
 Coordinator volumes
 */}}
 {{- define "presto.coordinator.volumes" -}}
+{{- $coordinator := mergeOverwrite (deepCopy .Values.commons) .Values.coordinator -}}
 - name: presto-config
   projected:
     sources:
@@ -31,4 +32,22 @@ Coordinator volumes
 - name: presto-catalog
   configMap:
     name: {{ include "presto.fullname" . }}-catalog
+{{- with $coordinator.extraVolumes }}
+{{ toYaml . }}
+{{- end }}
+{{- end -}}
+
+
+{{/*
+Coordinator volumeMounts
+*/}}
+{{- define "presto.coordinator.volumeMounts" -}}
+{{- $coordinator := mergeOverwrite (deepCopy .Values.commons) .Values.coordinator -}}
+- name: presto-config
+  mountPath: /etc/presto
+- name: presto-catalog
+  mountPath: /etc/presto/catalog
+{{- with $coordinator.extraVolumeMounts }}
+{{ toYaml . }}
+{{- end }}
 {{- end -}}

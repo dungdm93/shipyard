@@ -1,0 +1,8 @@
+commons:
+  extraVolumeMounts:
+  - name: certificate
+    mountPath: /etc/pki/k8s
+  extraVolumes:
+  - name: certificate
+    secret:
+      secretName: presto-tls

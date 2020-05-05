@@ -18,6 +18,7 @@ app.kubernetes.io/component: worker
 Worker volumes
 */}}
 {{- define "presto.worker.volumes" -}}
+{{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
 - name: presto-config
   projected:
     sources:
@@ -31,4 +32,21 @@ Worker volumes
 - name: presto-catalog
   configMap:
     name: {{ include "presto.fullname" . }}-catalog
+{{- with $worker.extraVolumes }}
+{{ toYaml . }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Coordinator volumeMounts
+*/}}
+{{- define "presto.worker.volumeMounts" -}}
+{{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
+- name: presto-config
+  mountPath: /etc/presto
+- name: presto-catalog
+  mountPath: /etc/presto/catalog
+{{- with $worker.extraVolumeMounts }}
+{{ toYaml . }}
+{{- end }}
 {{- end -}}

@@ -45,7 +45,7 @@ spec:
               protocol: TCP
               containerPort: 8080
           volumeMounts:
-            {{- include "presto.volumeMounts" . | nindent 12 }}
+            {{- include "presto.worker.volumeMounts" . | nindent 12 }}
           livenessProbe:
             tcpSocket:
               port: http
