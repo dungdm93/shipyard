@@ -78,6 +78,9 @@ systemAccessControl:
     existingRulesPath:
 
 commons:
+  command: []
+  args: []
+
   labels: {}
   podLabels: {}
   annotations: {}

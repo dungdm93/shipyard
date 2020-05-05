@@ -38,6 +38,14 @@ spec:
         - name: presto-coordinator
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with $coordinator.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with $coordinator.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
           ports:
             - name: http
               protocol: TCP
