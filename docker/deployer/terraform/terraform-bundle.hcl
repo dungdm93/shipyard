@@ -9,7 +9,7 @@ providers {
   # aws = ["~> 2.50"]
 
   # Google Cloud Platform
-  google = ["~> 2.20", "~> 3.10"]
+  google = ["~> 2.20", "~> 3.20"]
 
   # Microsoft Azure
   # azurerm = ["~> 2.0"]

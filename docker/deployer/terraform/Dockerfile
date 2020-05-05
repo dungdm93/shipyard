@@ -2,8 +2,10 @@ FROM golang:1.14-alpine AS bundler
 
 RUN apk add -U git unzip;
 
+ARG GO111MODULE=on
+ARG TERRAFORM_VERSION=v0.12.24
 RUN set -eux; \
-    go get -d  github.com/hashicorp/terraform; \
+    go get -d  github.com/hashicorp/terraform@${TERRAFORM_VERSION}; \
     go install github.com/hashicorp/terraform/tools/terraform-bundle
 
 COPY terraform-bundle.hcl /terraform/
