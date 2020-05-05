@@ -1,3 +1,5 @@
+{{- $httpServer := .Values.httpServer }}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,9 +9,17 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+  {{- if $httpServer.http.enabled }}
+    - port: {{ .Values.service.httpPort }}
       targetPort: http
       protocol: TCP
       name: http
+  {{- end }}
+  {{- if $httpServer.https.enabled }}
+    - port: {{ .Values.service.httpsPort }}
+      targetPort: https
+      protocol: TCP
+      name: https
+  {{- end }}
   selector:
     {{- include "presto.coordinator.selectorLabels" . | nindent 4 }}

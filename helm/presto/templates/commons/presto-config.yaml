@@ -1,12 +1,22 @@
 {{- $presto := .Values.presto }}
 {{- $config := index $presto "config.properties" | default dict }}
 
-{{- $_ := include "dict-cleanup" $config }}
-{{- $_ := set $config "http-server.http.port" 8080 }}
 {{- $_ := unset $config "coordinator" }}
 {{- $_ := unset $config "node-scheduler.include-coordinator" }}
 {{- $_ := unset $config "discovery-server.enabled" }}
 {{- $_ := unset $config "discovery.uri" }}
+
+{{- $httpServer := .Values.httpServer }}
+{{- $_ := set $config "http-server.http.enabled"  $httpServer.http.enabled  }}
+{{- $_ := set $config "http-server.http.port"     $httpServer.http.port  }}
+{{- $_ := set $config "http-server.https.enabled" $httpServer.https.enabled }}
+{{- $_ := set $config "http-server.https.port"    $httpServer.https.port }}
+{{- $_ := set $config "http-server.https.keystore.path"   $httpServer.keystore.path }}
+{{- $_ := set $config "http-server.https.keystore.key"    $httpServer.keystore.key  }}
+{{- $_ := set $config "http-server.https.truststore.path" $httpServer.truststore.path }}
+{{- $_ := set $config "http-server.https.truststore.key"  $httpServer.truststore.key  }}
+
+{{- $_ := include "dict-cleanup" $config }}
 ---
 apiVersion: v1
 kind: ConfigMap

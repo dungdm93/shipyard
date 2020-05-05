@@ -1,0 +1,14 @@
+httpServer:
+  https:
+    enabled: true
+    port: 8443
+
+ingress:
+  enabled: true
+  hosts:
+    - host: presto.local
+      paths: [/]
+  tls:
+  - secretName: presto.local-tls
+    hosts:
+      - presto.local
