@@ -1,0 +1,8 @@
+commons:
+  command:
+  - bash
+  - -c
+  - |
+    set -e;
+    cat /etc/pki/k8s/{tls.crt,tls.key} > /tmp/keystore.pem;
+    exec /usr/lib/presto/bin/run-presto;
