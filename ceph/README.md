@@ -17,6 +17,8 @@ Ceph is an open-source software storage platform, uniquely delivers object, bloc
     * [ref](https://docs.ceph.com/docs/master/rados/configuration/ms-ref/#async-messenger-options)
 * [ ] `crimson-osd` (base on [`seastar`](http://seastar.io/) C++ framework)
     * [YouTube](https://youtu.be/FuFmMB9rbRA)
+* [ ] RGW project Zipper
+    * [Mail list](https://www.spinics.net/lists/ceph-devel/msg45153.html)
 * [x] Manager Dashboard (Sine Nautilus - 14.2)
     * [YouTube](https://youtu.be/eBxyULifdxA)
 * [x] NFS Gateway using [Ganesha](http://nfs-ganesha.github.io/)
