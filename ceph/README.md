@@ -24,6 +24,9 @@ Ceph is an open-source software storage platform, uniquely delivers object, bloc
 * [x] NFS Gateway using [Ganesha](http://nfs-ganesha.github.io/)
 * [ ] SMB Gateway using [Samba](https://www.samba.org/)
 * [x] iSCSI Gateway
+* Orchestrator module
+    * [x] cephadm
+    * [x] Rook
 
 ### 1.2 References
 * What's new in Ceph *Nautilus*: [Event](https://archive.fosdem.org/2019/schedule/event/ceph_project_status_update/)
