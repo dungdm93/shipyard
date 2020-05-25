@@ -37,4 +37,8 @@ providers {
 
   # RabbitMQ
   # rabbitmq = ["1.1"]
+
+  ##### TODO: Custom plugins #####
+  # minio = ["1.1.0"]
+  # nexus = ["1.6.0"]
 }
