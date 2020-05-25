@@ -27,7 +27,7 @@ RUN set -eux; \
     kubectl completion bash > /etc/bash_completion.d/kubectl;
 
 # Install helm
-ENV HELM_VERSION=v3.2.0
+ENV HELM_VERSION=v3.2.1
 RUN set -eux; \
     curl -sSL "https://github.com/helm/helm/raw/master/scripts/get-helm-3" | bash -s -- --version "${HELM_VERSION}"; \
     helm completion bash > /etc/bash_completion.d/helm;
@@ -51,7 +51,7 @@ RUN set -eux; \
         | tar -xzvf - -C helm-push; \
     \
     echo "Installing helm-diff plugin"; \
-    HELM_DIFF_VERSION=v3.1.1; \
+    HELM_DIFF_VERSION=v3.0.0-rc.7; \
     curl -sSL "https://github.com/databus23/helm-diff/releases/download/${HELM_DIFF_VERSION}/helm-diff-linux.tgz" \
         | tar -xzvf -; \
     mv diff helm-diff; \
@@ -86,7 +86,7 @@ RUN curl -sSL "https://github.com/rancher/rke/releases/download/${RKE_VERSION}/r
     chmod +x /usr/local/bin/rke;
 
 # Install helmfile
-ENV HELMFILE_VERSION=v0.114.0
+ENV HELMFILE_VERSION=v0.116.0
 RUN curl -sSL "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" \
           -o /usr/local/bin/helmfile; \
     chmod +x /usr/local/bin/helmfile;
