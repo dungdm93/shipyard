@@ -10,20 +10,28 @@ Ceph is an open-source software storage platform, uniquely delivers object, bloc
 ![Ceph Architecture](https://docs.ceph.com/docs/master/_images/stack.png)
 
 ### 1.1 Features
-* [x] `BlueStore` RADOS backend (Since Jewel - 10.2)
-* [x] `Beast` Ceph RGW HTTP Frontend (Since Mimic 13.2)
-* [x] [`msgr2` protocol](https://docs.ceph.com/docs/master/dev/msgr2/)
-* [ ] `DPDK`/`RDMA` Async Messenger
-    * [ref](https://docs.ceph.com/docs/master/rados/configuration/ms-ref/#async-messenger-options)
-* [ ] `crimson-osd` (base on [`seastar`](http://seastar.io/) C++ framework)
-    * [YouTube](https://youtu.be/FuFmMB9rbRA)
-* [ ] RGW project Zipper
-    * [Mail list](https://www.spinics.net/lists/ceph-devel/msg45153.html)
-* [x] Manager Dashboard (Sine Nautilus - 14.2)
-    * [YouTube](https://youtu.be/eBxyULifdxA)
-* [x] NFS Gateway using [Ganesha](http://nfs-ganesha.github.io/)
-* [ ] SMB Gateway using [Samba](https://www.samba.org/)
-* [x] iSCSI Gateway
+* RADOS backend
+    * [x] `FileStore` *Obsoleted*
+    * [x] `BlueStore` Production (Since Jewel)
+    * [ ] `Seastore` Early states
+* OSD:
+    * [x] [`msgr2` protocol](https://docs.ceph.com/docs/master/dev/msgr2/)
+    * [ ] `DPDK`/`RDMA` Async Messenger
+        * [ref](https://docs.ceph.com/docs/master/rados/configuration/ms-ref/#async-messenger-options)
+    * [ ] `crimson-osd` (base on [`seastar`](http://seastar.io/) C++ framework)
+        * [YouTube](https://youtu.be/FuFmMB9rbRA)
+* MGR:
+    * [x] Manager Dashboard (Sine Nautilus)
+        * [YouTube](https://youtu.be/eBxyULifdxA)
+* Ceph RGW
+    * [ ] `Civetweb` HTTP Frontend (Since Firefly, Obsoleted now)
+    * [x] `Beast` HTTP Frontend (Since Mimic)
+    * [ ] Project Zipper
+        * [Mail list](https://www.spinics.net/lists/ceph-devel/msg45153.html)
+* Gateways
+    * [x] NFS Gateway using [Ganesha](http://nfs-ganesha.github.io/)
+    * [ ] SMB Gateway using [Samba](https://www.samba.org/)
+    * [x] iSCSI Gateway
 * Orchestrator module
     * [x] cephadm
     * [x] Rook
