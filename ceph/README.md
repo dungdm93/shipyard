@@ -6,10 +6,11 @@
 ======
 Ceph is an open-source software storage platform, uniquely delivers object, block, and file storage in one unified system.
 
-## 1. Architecture
+## 1. Overview
+### 1.1 Architecture
 ![Ceph Architecture](https://docs.ceph.com/docs/master/_images/stack.png)
 
-### 1.1 Features
+### 1.2 Features
 * RADOS backend
     * [x] `FileStore` *Obsoleted*
     * [x] `BlueStore` Production (Since Jewel)
@@ -37,6 +38,6 @@ Ceph is an open-source software storage platform, uniquely delivers object, bloc
     * [x] cephadm
     * [x] Rook
 
-### 1.2 References
+### 1.3 References
 * What's new in Ceph *Nautilus*: [Event](https://archive.fosdem.org/2019/schedule/event/ceph_project_status_update/)
 * What's new in Ceph *Octopus*: [Slide](https://www.msi.umn.edu/sites/default/files/doug.pdf)
