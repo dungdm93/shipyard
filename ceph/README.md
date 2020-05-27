@@ -20,6 +20,7 @@ Ceph is an open-source software storage platform, uniquely delivers object, bloc
         * [ref](https://docs.ceph.com/docs/master/rados/configuration/ms-ref/#async-messenger-options)
     * [ ] `crimson-osd` (base on [`seastar`](http://seastar.io/) C++ framework)
         * [YouTube](https://youtu.be/FuFmMB9rbRA)
+        * [Status](https://github.com/ceph/ceph-notes/blob/master/crimson/status.rst)
 * MGR:
     * [x] Manager Dashboard (Sine Nautilus)
         * [YouTube](https://youtu.be/eBxyULifdxA)
