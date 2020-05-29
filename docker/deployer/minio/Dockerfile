@@ -1,4 +1,4 @@
-FROM hub.teko.vn/library/deployer:base
+FROM hub.teko.vn/tools/deployer:base
 
 # Install mc (minio client)
 RUN curl -sSL "https://dl.min.io/client/mc/release/linux-amd64/mc" \

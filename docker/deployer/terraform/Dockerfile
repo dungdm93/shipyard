@@ -26,7 +26,7 @@ RUN set -eux; \
     tar -xzf -;
 
 ####################
-FROM hub.teko.vn/library/deployer:base
+FROM hub.teko.vn/tools/deployer:base
 
 COPY --from=bundler /terraform/bundle/terraform            /usr/local/bin/
 COPY --from=bundler /terraform/bundle/terraform-provider-* /root/.terraform.d/plugins/
