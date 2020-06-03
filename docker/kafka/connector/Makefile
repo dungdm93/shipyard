@@ -1,4 +1,4 @@
-CONFLUENT_VERSION := 5.4.0
+CONFLUENT_VERSION := 5.5.0
 BASE_IMAGE := confluentinc/cp-kafka-connect:${CONFLUENT_VERSION}
 IMAGE := hub.teko.vn/data/kafka/connector:${CONFLUENT_VERSION}
 
