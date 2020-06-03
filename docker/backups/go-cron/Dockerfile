@@ -22,4 +22,5 @@ RUN set -eux; \
     mc --autocompletion;
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+COPY ./scripts              /usr/scripts/
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
