@@ -11,9 +11,10 @@ RUN set -eux; \
 FROM ${BASE_IMAGE}
 
 RUN set -eux; \
-    confluent-hub install debezium/debezium-connector-mysql:1.0.0      --no-prompt; \
-    confluent-hub install debezium/debezium-connector-postgresql:1.0.0 --no-prompt; \
-    confluent-hub install debezium/debezium-connector-sqlserver:1.0.0  --no-prompt; \
-    confluent-hub install debezium/debezium-connector-mongodb:1.0.0    --no-prompt;
+    confluent-hub install debezium/debezium-connector-mysql:1.1.0      --no-prompt; \
+    confluent-hub install debezium/debezium-connector-postgresql:1.1.0 --no-prompt; \
+    confluent-hub install debezium/debezium-connector-sqlserver:1.1.0  --no-prompt; \
+    confluent-hub install debezium/debezium-connector-mongodb:1.1.0    --no-prompt; \
+    confluent-hub install confluentinc/kafka-connect-datagen:0.3.2     --no-prompt;
 
 COPY --from=downloader /app/jars/ /usr/share/java/kafka-connect-jdbc
