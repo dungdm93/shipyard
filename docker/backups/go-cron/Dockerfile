@@ -23,4 +23,4 @@ RUN set -eux; \
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 COPY ./scripts              /usr/scripts/
-ENTRYPOINT [ "/docker-entrypoint.sh" ]
+# ENTRYPOINT [ "/docker-entrypoint.sh" ]
