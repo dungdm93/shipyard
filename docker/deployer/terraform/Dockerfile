@@ -10,7 +10,7 @@ COPY terraform-bundle.hcl /terraform/
 WORKDIR /terraform
 
 ENV PROVIDER_MINIO_VERSION=v1.1.0 \
-    PROVIDER_NEXUS_VERSION=v1.6.0
+    PROVIDER_NEXUS_VERSION=v1.8.1
 
 RUN set -eux; \
     terraform-bundle package terraform-bundle.hcl; \
