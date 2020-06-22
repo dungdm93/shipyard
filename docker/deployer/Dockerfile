@@ -6,11 +6,15 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
         ca-certificates gnupg openssl openssh-client \
-        bash-completion iproute2 curl \
+        bash-completion iproute2 curl git \
         net-tools telnet iputils-* dnsutils \
-        git vim gettext-base; \
+        tree vim-tiny gettext-base jq; \
+    update-alternatives --install /usr/bin/vim vim /usr/bin/vim.tiny 1; \
+    curl -sSL https://github.com/mikefarah/yq/releases/download/3.3.2/yq_linux_amd64 -o /usr/bin/yq; \
+    chmod +x  /usr/bin/yq; \
+    \
     rm -rf /var/lib/apt/lists/*;
 
 COPY ./settings/ssh.config /root/.ssh/config
