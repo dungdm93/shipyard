@@ -1,5 +1,5 @@
 VARIANT ?= base
-IMAGE   := hub.teko.vn/tools/deployer:${VARIANT}
+IMAGE   := hub.teko.vn/tools/${VARIANT}
 
 ifeq (${VARIANT}, base)
 	DOCKERFILE := Dockerfile
