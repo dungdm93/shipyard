@@ -8,7 +8,7 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         ca-certificates gnupg openssl openssh-client \
-        bash-completion iproute2 curl git \
+        bash-completion netcat iproute2 curl git make \
         net-tools telnet iputils-* dnsutils \
         tree vim-tiny gettext-base jq; \
     update-alternatives --install /usr/bin/vim vim /usr/bin/vim.tiny 1; \
@@ -17,4 +17,4 @@ RUN set -eux; \
     \
     rm -rf /var/lib/apt/lists/*;
 
-COPY ./settings/ssh.config /root/.ssh/config
+COPY ./rootfs /
