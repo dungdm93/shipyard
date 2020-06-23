@@ -10,8 +10,7 @@ RUN set -eux; \
         ca-certificates gnupg openssl openssh-client \
         bash-completion netcat iproute2 curl git make \
         net-tools telnet iputils-* dnsutils \
-        tree vim-tiny gettext-base jq; \
-    update-alternatives --install /usr/bin/vim vim /usr/bin/vim.tiny 1; \
+        tree vim gettext-base jq; \
     curl -sSL https://github.com/mikefarah/yq/releases/download/3.3.2/yq_linux_amd64 -o /usr/bin/yq; \
     chmod +x  /usr/bin/yq; \
     yq shell-completion > /etc/bash_completion.d/yq; \
