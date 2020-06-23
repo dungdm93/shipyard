@@ -3,7 +3,7 @@ FROM golang:1.14-alpine AS bundler
 RUN apk add -U git curl unzip;
 
 ARG GO111MODULE=on
-ARG TERRAFORM_VERSION=v0.12.24
+ARG TERRAFORM_VERSION=v0.12.26
 RUN go get -u github.com/hashicorp/terraform/tools/terraform-bundle@${TERRAFORM_VERSION}
 
 COPY terraform-bundle.hcl /terraform/
@@ -26,7 +26,7 @@ RUN set -eux; \
     tar -xzf -;
 
 ####################
-FROM hub.teko.vn/tools/deployer:base
+FROM hub.teko.vn/tools/base
 
 COPY --from=bundler /terraform/bundle/terraform            /usr/local/bin/
 COPY --from=bundler /terraform/bundle/terraform-provider-* /root/.terraform.d/plugins/
