@@ -28,7 +28,8 @@ RUN set -eux; \
 ####################
 FROM hub.teko.vn/tools/base
 
-COPY --from=bundler /terraform/bundle/terraform            /usr/local/bin/
 COPY --from=bundler /terraform/bundle/terraform-provider-* /root/.terraform.d/plugins/
+COPY --from=bundler /terraform/bundle/terraform            /usr/local/bin/
+COPY                ./scripts                              /usr/local/bin/
 
 RUN terraform -install-autocomplete
