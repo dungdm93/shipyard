@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/deployer:base
+FROM hub.teko.vn/tools/base
 
 # Install Google Cloud SDK
 RUN set -eux; \

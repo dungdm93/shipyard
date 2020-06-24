@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/deployer:kubectl
+FROM hub.teko.vn/tools/kubectl
 
 # Install rke
 ENV RKE_VERSION=v1.1.3

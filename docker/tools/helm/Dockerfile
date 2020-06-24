@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/deployer:kubectl
+FROM hub.teko.vn/tools/kubectl
 
 # Install helm
 ENV HELM_VERSION=v3.2.1

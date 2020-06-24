@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/deployer:base
+FROM hub.teko.vn/tools/base
 
 RUN set -eux; \
     source /etc/os-release; \
