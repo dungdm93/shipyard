@@ -1,7 +1,7 @@
 FROM hub.teko.vn/tools/kubectl
 
 # Install helm
-ENV HELM_VERSION=v3.2.1
+ENV HELM_VERSION=v3.2.4
 RUN set -eux; \
     curl -sSL "https://github.com/helm/helm/raw/master/scripts/get-helm-3" | bash -s -- --version "${HELM_VERSION}"; \
     helm completion bash > /etc/bash_completion.d/helm;
@@ -54,7 +54,7 @@ RUN set -eux; \
     rm -rf helm-git/{tests,*.json};
 
 # Install helmfile
-ENV HELMFILE_VERSION=v0.116.0
+ENV HELMFILE_VERSION=v0.114.0
 RUN curl -sSL "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" \
           -o /usr/local/bin/helmfile; \
     chmod +x /usr/local/bin/helmfile;
