@@ -1,10 +1,21 @@
+installCRDs: true
+global:
+  priorityClassName: addons-critical
+  rbac:
+    create: true
+  podSecurityPolicy:
+    enabled: true
+    useAppArmor: true
+  leaderElection:
+    namespace: cert-manager
+
+serviceAccount:
+  create: true
+
 extraArgs: ["--enable-certificate-owner-ref"]
 ingressShim:
   defaultIssuerKind: ClusterIssuer
   defaultIssuerName: letsencrypt
-prometheus:
-  servicemonitor:
-    enabled: true
 
 resources: &resources
   requests:
@@ -12,7 +23,18 @@ resources: &resources
     memory: 32Mi
 
 webhook:
+  enabled: true
   resources: *resources
+  serviceAccount:
+    create: true
 
 cainjector:
+  enabled: true
   resources: *resources
+  serviceAccount:
+    create: true
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true

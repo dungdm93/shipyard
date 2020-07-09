@@ -2,7 +2,7 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt
+  name: letsencrypt-issuer
 spec:
   acme:
     # The ACME server URL
@@ -11,7 +11,7 @@ spec:
     #  Production: https://acme-v02.api.letsencrypt.org/directory
     #              https://acme-v01.api.letsencrypt.org/directory
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: devops@kites.rocks
+    email:  devops@dungdm93.me
     privateKeySecretRef:
       name: letsencrypt
     solvers:

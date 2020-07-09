@@ -1,8 +1,8 @@
 ---
 apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
+kind: Issuer
 metadata:
-  name: selfsigning-issuer
+  name: selfsigned-issuer
 spec:
   selfSigned: {}
 ---
@@ -10,11 +10,11 @@ spec:
 # apiVersion: cert-manager.io/v1alpha2
 # kind: Certificate
 # metadata:
-#   name: example-crt
+#   name: ca
 # spec:
 #   secretName: selfsigned-cert
-#   commonName: selfsigned-root-ca
+#   commonName: dungdm93.me
 #   isCA: true
 #   issuerRef:
-#     name: selfsigning-issuer
-#     kind: ClusterIssuer
+#     name: selfsigned-issuer
+#     kind: Issuer

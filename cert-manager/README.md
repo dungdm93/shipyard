@@ -25,12 +25,6 @@
 
 ### 2.2 Installation
 ```bash
-# Install the CustomResourceDefinition resources separately
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/00-crds.yaml
-
-# Create the namespace for cert-manager
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/01-namespace.yaml
-
 # Add the Jetstack Helm repository
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
@@ -40,7 +34,8 @@ helm upgrade --install \
     cert-manager jetstack/cert-manager \
   --namespace=cert-manager \
   --version=v0.12.0 \
-  --values=values.yaml
+  --values=values.yaml \
+  --create-namespace
 ```
 
 * [ref](https://docs.cert-manager.io/en/latest/getting-started/install/kubernetes.html#steps)
@@ -57,3 +52,6 @@ kubectl apply -f issuers/letsencrypt.yaml
 Certificates can be issued
 * *manually* via `Certificate` resource <sup>[(e.g.)](examples/certificate.yaml)</sup> or
 * *automatically* for `Ingress` resources <sup>[(e.g.)](examples/ingress.yaml)</sup>
+
+### 2.3 CA + SelfSigned Certificates
+![ca+selfsigned](./ca+selfsigned.png)
