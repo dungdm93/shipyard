@@ -54,4 +54,12 @@ Certificates can be issued
 * *automatically* for `Ingress` resources <sup>[(e.g.)](examples/ingress.yaml)</sup>
 
 ### 2.3 CA + SelfSigned Certificates
-![ca+selfsigned](./ca+selfsigned.png)
+* Uisng `cert-manager` to generate CA Key and self-signed Certificate
+    ![ca+selfsigned](./ca+selfsigned.png)
+
+* Using OpenSSL to generate CA Key and self-signed Certificate
+    ```bash
+    openssl genrsa -out ca.key 2048
+    openssl req -new -x509 -key ca.key -out ca.crt
+    ```
+    [ref](https://gist.github.com/Soarez/9688998#ca-key-and-self-signed-certificate)
