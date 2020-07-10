@@ -60,6 +60,6 @@ Certificates can be issued
 * Using OpenSSL to generate CA Key and self-signed Certificate
     ```bash
     openssl genrsa -out ca.key 2048
-    openssl req -new -x509 -key ca.key -out ca.crt
+    openssl req -new -x509 -key ca.key -out ca.crt -days 3650
     ```
     [ref](https://gist.github.com/Soarez/9688998#ca-key-and-self-signed-certificate)
