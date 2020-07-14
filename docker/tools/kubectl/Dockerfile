@@ -27,7 +27,8 @@ ENV PATH="/root/.krew/bin:$PATH"
 
 # https://github.com/kubernetes-sigs/krew-index/blob/master/plugins.md
 RUN kubectl krew install \
-        ctx ns tree \
+        ctx ns \
+        tree view-secret \
         # ingress-nginx \
         # kudo kuttl virt \
         # sniff trace \
