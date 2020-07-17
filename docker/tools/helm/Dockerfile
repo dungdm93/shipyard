@@ -55,6 +55,7 @@ RUN set -eux; \
 
 # Install helmfile
 ENV HELMFILE_VERSION=v0.114.0
-RUN curl -sSL "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" \
+RUN set -eux; \
+    curl -sSL "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" \
           -o /usr/local/bin/helmfile; \
     chmod +x /usr/local/bin/helmfile;
