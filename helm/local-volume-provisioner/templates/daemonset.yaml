@@ -19,6 +19,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ template "provisioner.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       serviceAccountName: {{ template "provisioner.serviceAccountName" . }}
 {{- if .Values.daemonset.priorityClassName }}
