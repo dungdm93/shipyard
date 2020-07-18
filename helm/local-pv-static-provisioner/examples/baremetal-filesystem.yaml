@@ -1,0 +1,7 @@
+# ln -s /dev/sdb /mnt/disks/sdb
+classes:
+- name: local-storage
+  hostDir: /mnt/disks
+  volumeMode: Filesystem
+  fsType: ext4
+  storageClass: true
