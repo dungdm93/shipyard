@@ -16,6 +16,11 @@
 * [x] [Credentials Store - Vault SPI](https://github.com/keycloak/keycloak-community/blob/master/design/secure-credentials-store.md)
     * [docs](https://www.keycloak.org/docs/latest/server_admin/index.html#_vault-administration) | [spi](https://github.com/keycloak/keycloak/blob/master/server-spi/src/main/java/org/keycloak/vault/VaultProvider.java)
 * [ ] WebAuthn
+* [OpenID Connect Single Logout](https://curity.io/resources/architect/openid-connect/openid-connect-logout/)
+    * [ ] Front-channel Logout
+        * [spec](https://openid.net/specs/openid-connect-frontchannel-1_0.html) | [JIRA](https://issues.redhat.com/browse/KEYCLOAK-2939)
+    * [ ] Back-channel Logout
+        * [spec](https://openid.net/specs/openid-connect-backchannel-1_0.html) | [JIRA](https://issues.redhat.com/browse/KEYCLOAK-2940)
 
 ### 1.2 References
 * [Specifications](https://github.com/keycloak/keycloak-community/tree/master/specifications)
