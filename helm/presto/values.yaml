@@ -12,17 +12,18 @@ presto:
     node.environment: kubernetes
     node.data-dir: /data/presto
     plugin.dir: /usr/lib/presto/plugin
+  # Default values from: https://github.com/prestosql/presto/blob/master/docker/default/etc/jvm.config
   jvm.config: |
     -server
-    -Xmx16G
+    -Xmx1G
     -XX:-UseBiasedLocking
     -XX:+UseG1GC
     -XX:G1HeapRegionSize=32M
     -XX:+ExplicitGCInvokesConcurrent
     -XX:+HeapDumpOnOutOfMemoryError
-    -XX:+ExitOnOutOfMemoryError
     -XX:+UseGCOverheadLimit
-    -XX:ReservedCodeCacheSize=512M
+    -XX:+ExitOnOutOfMemoryError
+    -XX:ReservedCodeCacheSize=256M
     -Djdk.attach.allowAttachSelf=true
     -Djdk.nio.maxCachedBufferSize=2000000
   log.properties:
