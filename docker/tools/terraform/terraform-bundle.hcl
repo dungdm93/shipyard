@@ -38,7 +38,11 @@ providers {
   # RabbitMQ
   # rabbitmq = ["1.1"]
 
+  # Hashicorp Vault
+  vault = ["~> 2.12"]
+
   ##### TODO: Custom plugins #####
   # minio = ["1.1.0"]
   # nexus = ["1.6.0"]
+  # keycloak = ["1.20.0"]
 }
