@@ -1,6 +1,7 @@
 {
   "files.associations": {
     "*.tpl": "go",
+    "*.hcl": "terraform",
     "Dockerfile.*": "dockerfile",
   },
   "editor.autoIndent": "advanced"
