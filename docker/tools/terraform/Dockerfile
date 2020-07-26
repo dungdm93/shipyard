@@ -22,7 +22,7 @@ RUN set -eux; \
 RUN set -eux; cd bundle; \
     curl -L  https://github.com/aminueza/terraform-provider-minio/releases/download/${PROVIDER_MINIO_VERSION}/terraform-provider-minio_${PROVIDER_MINIO_VERSION}_linux_amd64 \
          -o  terraform-provider-minio_${PROVIDER_MINIO_VERSION}; \
-    chmod +x terraform-provider-minio_${PROVIDER_MINIO_VERSION};
+    chmod +x terraform-provider-minio_*;
 
 # Nexus provider
 RUN set -eux; cd bundle; \
@@ -35,11 +35,19 @@ RUN set -eux; cd bundle; \
     unzip terraform-provider-keycloak_*.zip "terraform-*"; \
     rm -rf terraform-provider-keycloak_*.zip;
 
+ENV TERRAGRUNT_VERSION=v0.23.31
+
+RUN set -eux; cd bundle; \
+    curl -L  https://github.com/gruntwork-io/terragrunt/releases/download/${TERRAGRUNT_VERSION}/terragrunt_linux_amd64 \
+         -o  terragrunt; \
+    chmod +x terragrunt;
+
 ####################
 FROM hub.teko.vn/tools/base
 
 COPY --from=bundler /terraform/bundle/terraform-provider-* /root/.terraform.d/plugins/
 COPY --from=bundler /terraform/bundle/terraform            /usr/local/bin/
+COPY --from=bundler /terraform/bundle/terragrunt           /usr/local/bin/
 COPY                ./scripts                              /usr/local/bin/
 
 RUN terraform -install-autocomplete
