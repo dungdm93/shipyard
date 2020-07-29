@@ -1,3 +1,6 @@
+# ref:
+# * https://github.com/hashicorp/terraform/blob/guide-v0.13-beta/draft-upgrade-guide.md
+# * https://github.com/hashicorp/terraform/blob/master/website/docs/commands/cli-config.html.markdown#provider-installation
 FROM hub.teko.vn/tools/base
 
 # Terraform
@@ -49,4 +52,4 @@ RUN set -eux; \
     unzip terraform-provider-keycloak_*.zip "terraform-*"; \
     rm -rf terraform-provider-keycloak_*.zip;
 
-COPY                ./scripts                              /usr/local/bin/
+COPY ./scripts /usr/local/bin/
