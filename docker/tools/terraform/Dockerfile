@@ -3,8 +3,8 @@ FROM golang:1.14-alpine AS bundler
 RUN apk add -U git curl unzip;
 
 ARG GO111MODULE=on
-ARG TERRAFORM_VERSION=v0.12.26
-RUN go get -u github.com/hashicorp/terraform/tools/terraform-bundle@${TERRAFORM_VERSION}
+ARG TERRAFORM_BUNDLE_VERSION=v0.12
+RUN go get -u github.com/hashicorp/terraform/tools/terraform-bundle@${TERRAFORM_BUNDLE_VERSION}
 
 COPY terraform-bundle.hcl /terraform/
 WORKDIR /terraform
@@ -35,8 +35,15 @@ RUN set -eux; cd bundle; \
     unzip terraform-provider-keycloak_*.zip "terraform-*"; \
     rm -rf terraform-provider-keycloak_*.zip;
 
-ENV TERRAGRUNT_VERSION=v0.23.31
+# Terraform
+ENV TERRAFORM_VERSION=v0.13.0-rc1
+RUN set -eux; cd bundle; \
+    curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION#v}/terraform_${TERRAFORM_VERSION#v}_linux_amd64.zip; \
+    unzip -o terraform_*_linux_amd64.zip; \
+    rm -rf terraform_*_linux_amd64.zip;
 
+# Terragrunt
+ENV TERRAGRUNT_VERSION=v0.23.31
 RUN set -eux; cd bundle; \
     curl -L  https://github.com/gruntwork-io/terragrunt/releases/download/${TERRAGRUNT_VERSION}/terragrunt_linux_amd64 \
          -o  terragrunt; \
