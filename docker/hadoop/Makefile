@@ -1,5 +1,5 @@
 HADOOP_VERSION ?= 3.3.0
-IMAGE := hub.teko.vn/data/hadoop:${HADOOP_VERSION}
+IMAGE := hub.teko.vn/dataops/hadoop:${HADOOP_VERSION}
 
 build:
 	docker build --pull \

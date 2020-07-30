@@ -30,7 +30,7 @@ RUN set -eux; \
 
 
 
-FROM hub.teko.vn/data/hadoop:${HADOOP_VERSION}
+FROM hub.teko.vn/dataops/hadoop:${HADOOP_VERSION}
 
 RUN set -eux; \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su; \

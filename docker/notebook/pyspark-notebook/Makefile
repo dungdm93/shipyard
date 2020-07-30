@@ -1,6 +1,6 @@
 IMAGE_TAG    ?= 3.0.0-hadoop-3.3.0
-SOURCE_IMAGE := hub.teko.vn/data/spark:${IMAGE_TAG}
-TARGET_IMAGE := hub.teko.vn/data/pyspark-notebook:${IMAGE_TAG}
+SOURCE_IMAGE := hub.teko.vn/dataops/spark:${IMAGE_TAG}
+TARGET_IMAGE := hub.teko.vn/dataops/pyspark-notebook:${IMAGE_TAG}
 
 build:
 	docker build --pull \

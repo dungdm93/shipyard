@@ -1,4 +1,4 @@
-IMAGE_REPO := hub.teko.vn/data/spark
+IMAGE_REPO := hub.teko.vn/dataops/spark
 SPARK_VERSION  ?= 3.0.0
 
 ifeq (${STANDALONE}, yes)

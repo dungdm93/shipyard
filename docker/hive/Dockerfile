@@ -25,7 +25,7 @@ RUN tar -xf  "apache-hive-${HIVE_VERSION}-bin.tar.gz" --no-same-owner; \
 
 
 
-FROM hub.teko.vn/data/hadoop:${HADOOP_VERSION}
+FROM hub.teko.vn/dataops/hadoop:${HADOOP_VERSION}
 
 # Tools
 RUN set -eux; \
