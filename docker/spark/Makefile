@@ -1,12 +1,12 @@
 IMAGE_REPO := hub.teko.vn/data/spark
-SPARK_VERSION  ?= 2.4.5
+SPARK_VERSION  ?= 3.0.0
 
 ifeq (${STANDALONE}, yes)
-	HADOOP_VERSION ?= 3.2.1
+	HADOOP_VERSION ?= 3.3.0
 	IMAGE_TAG  := ${SPARK_VERSION}-hadoop-${HADOOP_VERSION}
 	DOCKERFILE := ./Dockerfile.standalone
 else
-	HADOOP_VERSION ?= 2.7
+	HADOOP_VERSION ?= 3.2
 	IMAGE_TAG  := ${SPARK_VERSION}
 	DOCKERFILE := ./Dockerfile.bundled
 endif
@@ -14,7 +14,7 @@ BUILD_ARGS := --build-arg HADOOP_VERSION=${HADOOP_VERSION} \
 			 --build-arg SPARK_VERSION=${SPARK_VERSION}
 
 ifeq (${BINDING}, python)
-	PYTHON_VERSION ?= 3.7
+	PYTHON_VERSION ?= 3.8
 	BUILD_ARGS := --build-arg PYTHON_VERSION=${PYTHON_VERSION} \
 				 --build-arg BASE_IMAGE=${IMAGE_REPO}:${IMAGE_TAG}
 	IMAGE_TAG  := ${IMAGE_TAG}-python-${PYTHON_VERSION}

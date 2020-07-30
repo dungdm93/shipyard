@@ -24,8 +24,9 @@ RUN tar -xf  "hadoop-${HADOOP_VERSION}.tar.gz" --no-same-owner \
 
 
 
-FROM ubuntu:bionic
+FROM  ubuntu:focal
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+SHELL [ "/bin/bash", "-c" ]
 
 RUN set -eux; \
     apt-get update; \
