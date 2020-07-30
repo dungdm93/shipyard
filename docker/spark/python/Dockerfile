@@ -24,10 +24,7 @@ RUN set -eux; \
     conda config --system --set show_channel_urls true; \
     \
     echo "conda ${CONDA_VERSION}" >> "${CONDA_HOME}/conda-meta/pinned"; \
-    echo "$PYTHON_VERSION" | grep -oP '^\d+.\d+' | xargs -I% echo "python %.*" >> "${CONDA_HOME}/conda-meta/pinned"; \
-    \
-    "${CONDA_HOME}/bin/conda" clean -fay;
-
+    echo "$PYTHON_VERSION" | grep -oP '^\d+.\d+' | xargs -I% echo "python %.*" >> "${CONDA_HOME}/conda-meta/pinned";
 
 
 FROM ${BASE_IMAGE}
@@ -35,5 +32,10 @@ FROM ${BASE_IMAGE}
 ENV CONDA_HOME=/opt/conda
 COPY --from=builder ${CONDA_HOME} ${CONDA_HOME}
 
-ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip" \
+ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip" \
     PATH="${CONDA_HOME}/bin:${PATH}"
+
+RUN set -eux; \
+    conda install -c conda-forge -y \
+        pyarrow; \
+    conda clean -fay;
