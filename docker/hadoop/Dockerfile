@@ -11,7 +11,7 @@ RUN apk add -U curl gnupg tar
 #   * https://apache.org/mirrors
 ARG APACHE_DIST=https://archive.apache.org/dist
 ARG APACHE_MIRROR=${APACHE_DIST}
-ARG HADOOP_VERSION=3.2.1
+ARG HADOOP_VERSION=3.3.0
 
 RUN set -eux; \
     curl -L  "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \

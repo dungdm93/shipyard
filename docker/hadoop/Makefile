@@ -1,4 +1,4 @@
-HADOOP_VERSION ?= 3.2.1
+HADOOP_VERSION ?= 3.3.0
 IMAGE := hub.teko.vn/data/hadoop:${HADOOP_VERSION}
 
 build:
