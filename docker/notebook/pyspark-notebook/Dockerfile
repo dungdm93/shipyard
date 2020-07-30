@@ -2,10 +2,10 @@ ARG  SOURCE_IMAGE
 FROM ${SOURCE_IMAGE} AS source
 
 FROM jupyter/scipy-notebook
-
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
-USER root
 SHELL [ "/bin/bash", "-c" ]
+USER root
+
 COPY ./scripts/ /usr/local/bin/
 
 RUN set -eux; \
@@ -26,12 +26,11 @@ COPY --chown=$NB_UID:$NB_GID --from=source       /opt/hadoop ${HADOOP_HOME}
 COPY --chown=$NB_UID:$NB_GID --from=source       /opt/spark  ${SPARK_HOME}
 COPY --chown=$NB_UID:$NB_GID ./configs/jupyter/* ${CONDA_DIR}/etc/jupyter
 
-ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip" \
+ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip" \
     PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
 
 RUN set -eux; \
     conda install -c conda-forge -y jupyterlab-git; \
-    jupyter labextension install jupyterlab-drawio; \
     jupyter labextension install @krassowski/jupyterlab-lsp; \
     pip install jupyter-lsp python-language-server[all]; \
     \

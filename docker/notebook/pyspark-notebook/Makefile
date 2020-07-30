@@ -1,4 +1,4 @@
-IMAGE_TAG    ?= 2.4.5-hadoop-3.2.1
+IMAGE_TAG    ?= 3.0.0-hadoop-3.3.0
 SOURCE_IMAGE := hub.teko.vn/data/spark:${IMAGE_TAG}
 TARGET_IMAGE := hub.teko.vn/data/pyspark-notebook:${IMAGE_TAG}
 
