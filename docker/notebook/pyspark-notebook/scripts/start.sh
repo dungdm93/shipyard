@@ -32,37 +32,31 @@ run-hooks () {
                 fi
                 ;;
         esac
-    echo "$0: done running hooks in $1"
     done
+    echo "$0: done running hooks in $1"
 }
 
 run-hooks /usr/local/bin/start-notebook.d
 
 # Handle special flags if we're root
 if [ $(id -u) == 0 ] ; then
-    if [ "$NB_USER" == "{username}" ]; then
-        NB_USER=${JUPYTERHUB_USER:-jovyan}
-    fi
 
     # Only attempt to change the jovyan username if it exists
     if id jovyan &> /dev/null ; then
         echo "Set username to: $NB_USER"
-        if [ -z "$NB_USER_HOME_DONT_MOVE" ]; then
-            usermod_opts="-d /home/$NB_USER"
-        fi
-        usermod $usermod_opts -l $NB_USER jovyan
+        usermod -d /home/$NB_USER -l $NB_USER jovyan
     fi
-    home_dir=$(eval echo "~$NB_USER")
 
     # Handle case where provisioned storage does not have the correct permissions by default
     # Ex: default NFS/EFS (no auto-uid/gid)
     if [[ "$CHOWN_HOME" == "1" || "$CHOWN_HOME" == 'yes' ]]; then
-        echo "Changing ownership of $home_dir to $NB_UID:$NB_GID"
-        chown $CHOWN_HOME_OPTS $NB_UID:$NB_GID "$home_dir"
+        echo "Changing ownership of /home/$NB_USER to $NB_UID:$NB_GID with options '${CHOWN_HOME_OPTS}'"
+        chown $CHOWN_HOME_OPTS $NB_UID:$NB_GID /home/$NB_USER
     fi
     if [ ! -z "$CHOWN_EXTRA" ]; then
         for extra_dir in $(echo $CHOWN_EXTRA | tr ',' ' '); do
-            chown $CHOWN_EXTRA_OPTS $NB_UID:$NB_GID "$extra_dir"
+            echo "Changing ownership of ${extra_dir} to $NB_UID:$NB_GID with options '${CHOWN_EXTRA_OPTS}'"
+            chown $CHOWN_EXTRA_OPTS $NB_UID:$NB_GID $extra_dir
         done
     fi
 
@@ -70,30 +64,26 @@ if [ $(id -u) == 0 ] ; then
     if [[ "$NB_USER" != "jovyan" ]]; then
         # changing username, make sure homedir exists
         # (it could be mounted, and we shouldn't create it if it already exists)
-        if [[ ! -e "$home_dir" ]]; then
-            echo "Relocating home dir to $home_dir"
-            mv "/home/jovyan" "$home_dir"
+        if [[ ! -e "/home/$NB_USER" ]]; then
+            echo "Relocating home dir to /home/$NB_USER"
+            mv /home/jovyan "/home/$NB_USER" || ln -s /home/jovyan "/home/$NB_USER"
         fi
-        # if workdir is in /home/jovyan, cd to $home_dir
+        # if workdir is in /home/jovyan, cd to /home/$NB_USER
         if [[ "$PWD/" == "/home/jovyan/"* ]]; then
-            new_cwd="$home_dir/${PWD:13}"
-            echo "Setting CWD to $new_cwd"
-            cd "$new_cwd"
+            newcwd="/home/$NB_USER/${PWD:13}"
+            echo "Setting CWD to $newcwd"
+            cd "$newcwd"
         fi
     fi
 
-    # Change UID of NB_USER to NB_UID if it does not match
-    if [ "$NB_UID" != $(id -u $NB_USER) ] ; then
-        echo "Set $NB_USER UID to: $NB_UID"
-        usermod -u $NB_UID $NB_USER
-    fi
-
-    # Set NB_USER primary gid to NB_GID (after making the group).  Set
-    # supplementary gids to NB_GID and 100.
-    if [ "$NB_GID" != $(id -g $NB_USER) ] ; then
-        echo "Add $NB_USER to group: $NB_GID"
-        groupadd -g $NB_GID -o ${NB_GROUP:-${NB_USER}}
-        usermod  -g $NB_GID -aG 100 $NB_USER
+    # Change UID:GID of NB_USER to NB_UID:NB_GID if it does not match
+    if [ "$NB_UID" != $(id -u $NB_USER) ] || [ "$NB_GID" != $(id -g $NB_USER) ]; then
+        echo "Set user $NB_USER UID:GID to: $NB_UID:$NB_GID"
+        if [ "$NB_GID" != $(id -g $NB_USER) ]; then
+            groupadd -g $NB_GID -o ${NB_GROUP:-${NB_USER}}
+        fi
+        userdel $NB_USER
+        useradd --home /home/$NB_USER -u $NB_UID -g $NB_GID -G 100 -l $NB_USER
     fi
 
     # Enable sudo if requested
@@ -102,18 +92,21 @@ if [ $(id -u) == 0 ] ; then
         echo "$NB_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/notebook
     fi
 
+    # Add $CONDA_DIR/bin to sudo secure_path
+    sed -r "s#Defaults\s+secure_path\s*=\s*\"?([^\"]+)\"?#Defaults secure_path=\"\1:$CONDA_DIR/bin\"#" /etc/sudoers | grep secure_path > /etc/sudoers.d/path
+
     # Exec the command as NB_USER with the PATH and the rest of
     # the environment preserved
     run-hooks /usr/local/bin/before-notebook.d
-    # echo "Executing the command: ${cmd[@]}"
+    echo "Executing the command: ${cmd[@]}"
     exec gosu $NB_USER "${cmd[@]}"
 else
-    if [[ "$NB_UID" == "$(id -u jovyan)" && "$NB_GID" == "$(id -g jovyan)" ]]; then
+    if [[ "$NB_UID" == "$(id -u jovyan 2>/dev/null)" && "$NB_GID" == "$(id -g jovyan 2>/dev/null)" ]]; then
         # User is not attempting to override user/group via environment
         # variables, but they could still have overridden the uid/gid that
         # container runs as. Check that the user has an entry in the passwd
         # file and if not add an entry.
-        whoami &> /dev/null || STATUS=$? && true
+        STATUS=0 && whoami &> /dev/null || STATUS=$? && true
         if [[ "$STATUS" != "0" ]]; then
             if [[ -w /etc/passwd ]]; then
                 echo "Adding passwd file entry for $(id -u)"
@@ -149,6 +142,6 @@ else
 
     # Execute the command
     run-hooks /usr/local/bin/before-notebook.d
-    # echo "Executing the command: ${cmd[@]}"
+    echo "Executing the command: ${cmd[@]}"
     exec "${cmd[@]}"
 fi
