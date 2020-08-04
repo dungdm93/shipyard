@@ -14,6 +14,8 @@ RUN set -eux; \
         gosu curl vim gettext-base tzdata openssh-client libsasl2-modules \
         iproute2 net-tools telnet dnsutils iputils-* htop iftop \
         openjdk-8-jre-headless; \
+    ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so; \
+    ln -s libssl.so.1.1    /usr/lib/x86_64-linux-gnu/libssl.so; \
     cleanup.sh apt;
 
 USER $NB_UID
