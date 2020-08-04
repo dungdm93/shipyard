@@ -1,1 +1,1 @@
-Dockerfile.standalone
+Dockerfile.separated

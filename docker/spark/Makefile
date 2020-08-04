@@ -1,14 +1,14 @@
 IMAGE_REPO := hub.teko.vn/dataops/spark
 SPARK_VERSION  ?= 3.0.0
 
-ifeq (${STANDALONE}, yes)
-	HADOOP_VERSION ?= 3.3.0
-	IMAGE_TAG  := ${SPARK_VERSION}-hadoop-${HADOOP_VERSION}
-	DOCKERFILE := ./Dockerfile.standalone
-else
+ifeq (${BUNDLED}, yes)
 	HADOOP_VERSION ?= 3.2
 	IMAGE_TAG  := ${SPARK_VERSION}
 	DOCKERFILE := ./Dockerfile.bundled
+else
+	HADOOP_VERSION ?= 3.3.0
+	IMAGE_TAG  := ${SPARK_VERSION}-hadoop-${HADOOP_VERSION}
+	DOCKERFILE := ./Dockerfile.separated
 endif
 BUILD_ARGS := --build-arg HADOOP_VERSION=${HADOOP_VERSION} \
 			 --build-arg SPARK_VERSION=${SPARK_VERSION}
@@ -36,13 +36,13 @@ run:
 	docker run -it --rm ${IMAGE} bash
 
 all:
-	$(MAKE) ${CMD} STANDALONE=no
+	$(MAKE) ${CMD} BUNDLED=no
 	@echo =================================================
-	$(MAKE) ${CMD} STANDALONE=yes
+	$(MAKE) ${CMD} BUNDLED=yes
 	@echo =================================================
-	$(MAKE) ${CMD} STANDALONE=no  BINDING=python
+	$(MAKE) ${CMD} BUNDLED=no  BINDING=python
 	@echo =================================================
-	$(MAKE) ${CMD} STANDALONE=yes BINDING=python
+	$(MAKE) ${CMD} BUNDLED=yes BINDING=python
 
 build-all:
 	$(MAKE) all CMD=build
