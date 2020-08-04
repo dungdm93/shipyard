@@ -28,8 +28,9 @@ COPY --chown=$NB_UID:$NB_GID --from=source       /opt/hadoop ${HADOOP_HOME}
 COPY --chown=$NB_UID:$NB_GID --from=source       /opt/spark  ${SPARK_HOME}
 COPY --chown=$NB_UID:$NB_GID ./configs/jupyter/* ${CONDA_DIR}/etc/jupyter
 
-ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip" \
-    PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
+ENV PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}" \
+    PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip" \
+    LD_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}"
 
 RUN set -eux; \
     conda install -c conda-forge -y jupyterlab-git; \
