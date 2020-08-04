@@ -51,6 +51,6 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 \
     HADOOP_HOME=/opt/hadoop
 
 COPY --from=downloader /build/hadoop ${HADOOP_HOME}
-COPY                  ./configs/*    ${HADOOP_HOME}/etc/hadoop/
 
-ENV PATH="${HADOOP_HOME}/bin:${PATH}"
+ENV PATH="${HADOOP_HOME}/bin:${PATH}" \
+    LD_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}"
