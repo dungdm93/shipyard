@@ -1,5 +1,5 @@
-AIRFLOW_VERSION ?= 1.10.9
-IMAGE := hub.teko.vn/data/airflow:${AIRFLOW_VERSION}
+AIRFLOW_VERSION ?= 1.10.11
+IMAGE := hub.teko.vn/dataops/airflow:${AIRFLOW_VERSION}
 
 build:
 	docker build --pull \
