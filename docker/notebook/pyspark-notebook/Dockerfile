@@ -33,7 +33,9 @@ ENV PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}" \
     LD_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}"
 
 RUN set -eux; \
-    conda install -c conda-forge -y jupyterlab-git; \
+    conda install -c conda-forge -y \
+        jupyter-server-proxy \
+        jupyterlab-git; \
     jupyter labextension install @krassowski/jupyterlab-lsp; \
     pip install jupyter-lsp python-language-server[all]; \
     \
