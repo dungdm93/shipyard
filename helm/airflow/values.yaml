@@ -31,8 +31,8 @@ airflow:
 # airflow components: webserver, scheduler, worker, flower
 commons:
   image:
-    repository: hub.teko.vn/data/airflow
-    tag: 1.10.9
+    repository: hub.teko.vn/dataops/airflow
+    tag: 1.10.11
   replicas: null
   command: []
   args: []
