@@ -13,3 +13,10 @@ Webserver selector labels
 {{ include "airflow.selectorLabels" . }}
 app.kubernetes.io/component: webserver
 {{- end -}}
+
+{{- define "airflow.webserver.volumeMounts" -}}
+- name: airflow-config
+  mountPath: /opt/airflow/webserver_config.py
+  subPath:   webserver_config.py
+{{ include "airflow.volumeMounts" . }}
+{{- end -}}

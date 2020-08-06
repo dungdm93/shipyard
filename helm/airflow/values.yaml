@@ -27,6 +27,8 @@ airflow:
   webserver:
     expose_config: true
 
+webserver_config: ""
+
 # Commons k8s configurations. It can be overridden by
 # airflow components: webserver, scheduler, worker, flower
 commons:

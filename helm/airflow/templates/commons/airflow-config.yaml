@@ -119,3 +119,6 @@ data:
     {{- end }}
   {{- end }}
 {{ end }}
+
+  webserver_config.py: |
+    {{ .Values.webserver_config | nindent 4 | trim }}
