@@ -55,6 +55,9 @@ commons:
   tolerations: []
   nodeSelector: {}
 
+  extraVolumes: []
+  extraVolumeMounts: []
+
 webserver:
   args: [webserver]
 

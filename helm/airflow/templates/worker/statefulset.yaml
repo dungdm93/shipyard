@@ -69,6 +69,9 @@ spec:
               containerPort: 8793
           volumeMounts:
             {{- include "airflow.volumeMounts" . | nindent 12 }}
+          {{- with $worker.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           livenessProbe:
             tcpSocket:
               port: worker
@@ -83,6 +86,9 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
         {{- include "airflow.volumes" . | nindent 8 }}
+      {{- with $worker.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     {{- with $worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

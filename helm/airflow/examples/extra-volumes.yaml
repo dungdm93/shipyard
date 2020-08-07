@@ -1,0 +1,11 @@
+webserver:
+  extraVolumes:
+  - name: tls
+    secret:
+      secretName: foobar.example.com-tls
+  extraVolumeMounts:
+  - name: tls
+    mountPath: /etc/tls/k8s/
+  env:
+  - name: EXTRA_CA
+    value: /etc/tls/k8s/ca.crt
