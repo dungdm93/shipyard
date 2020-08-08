@@ -77,7 +77,7 @@ spec:
             periodSeconds: 30
           resources:
             {{- toYaml $webserver.resources | nindent 12 }}
-      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
+      serviceAccountName: {{ include "airflow.webserver.serviceAccountName" . }}
       priorityClassName:  {{ $webserver.priorityClassName }}
       runtimeClassName:   {{ $webserver.runtimeClassName }}
       schedulerName:      {{ $webserver.schedulerName }}

@@ -67,7 +67,7 @@ spec:
             periodSeconds: 30
           resources:
             {{- toYaml $flower.resources | nindent 12 }}
-      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
+      serviceAccountName: {{ include "airflow.flower.serviceAccountName" . }}
       priorityClassName:  {{ $flower.priorityClassName }}
       runtimeClassName:   {{ $flower.runtimeClassName }}
       schedulerName:      {{ $flower.schedulerName }}

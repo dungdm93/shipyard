@@ -1,7 +1,10 @@
 {{- if .Values.rbac.create }}
+{{- $executor := include "airflow.normalizeExecutor" . }}
+{{- $grantScheduler := or (eq $executor "LocalExecutor") (eq $executor "SequentialExecutor") (eq $executor "KubernetesExecutor") }}
+{{- $grantWorker := or (eq $executor "CeleryExecutor") (eq $executor "KubernetesExecutor") }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: {{ include "airflow.fullname" . }}
   labels:
@@ -21,17 +24,24 @@ rules:
   verbs: ["create", "get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
-  name: {{ template "airflow.fullname" . }}
+  name: {{ include "airflow.fullname" . }}
   labels:
     {{- include "airflow.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ template "airflow.fullname" . }}
+  kind: ClusterRole
+  name: {{ include "airflow.fullname" . }}
 subjects:
+{{- if $grantScheduler }}
 - kind: ServiceAccount
-  name: {{ template "airflow.serviceAccountName" . }}
+  name: {{ include "airflow.scheduler.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- if $grantWorker }}
+- kind: ServiceAccount
+  name: {{ include "airflow.worker.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}
 {{- end }}

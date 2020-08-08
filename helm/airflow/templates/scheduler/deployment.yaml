@@ -64,7 +64,7 @@ spec:
           # Scheduler has no ports & healchecks
           resources:
             {{- toYaml $scheduler.resources | nindent 12 }}
-      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
+      serviceAccountName: {{ include "airflow.scheduler.serviceAccountName" . }}
       priorityClassName:  {{ $scheduler.priorityClassName }}
       runtimeClassName:   {{ $scheduler.runtimeClassName }}
       schedulerName:      {{ $scheduler.schedulerName }}
