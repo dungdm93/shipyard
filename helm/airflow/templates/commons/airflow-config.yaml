@@ -53,6 +53,7 @@
   {{- $_ := set $kubernetes "worker_annotations"          (toJson $worker.podAnnotations) }}
 
   {{- $_ := set $kubernetes "airflow_configmap" (printf "%s-config" (include "airflow.fullname" .)) }}
+  {{- $_ := set $kubernetes "airflow_local_settings_configmap" (printf "%s-config" (include "airflow.fullname" .)) }}
   # env_from_configmap_ref
   # env_from_secret_ref
 
@@ -122,3 +123,6 @@ data:
 
   webserver_config.py: |
     {{ .Values.webserver_config | nindent 4 | trim }}
+
+  airflow_local_settings.py: |
+    {{ .Values.airflow_local_settings | nindent 4 | trim }}

@@ -248,6 +248,9 @@ Airflow volumeMounts
 - name: airflow-config
   mountPath: /opt/airflow/airflow.cfg
   subPath:   airflow.cfg
+- name: airflow-config
+  mountPath: /opt/airflow/config/airflow_local_settings.py
+  subPath:   airflow_local_settings.py
 
 {{- if eq .Values.dags.fetcher "git" }}
 - name: airflow-dags

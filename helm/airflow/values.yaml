@@ -27,7 +27,16 @@ airflow:
   webserver:
     expose_config: true
 
+# Airflow FAB-based webserver configs
+# example: https://github.com/apache/airflow/blob/master/airflow/config_templates/default_webserver_config.py
 webserver_config: ""
+
+# examples:
+# * https://github.com/astronomer/airflow-chart/blob/master/templates/configmap.yaml#L124
+# * https://github.com/apache/airflow/blob/master/airflow/config_templates/airflow_local_settings.py
+airflow_local_settings: ""
+  # def pod_mutation_hook(pod: Pod):
+  #   pod.annotations['airflow.apache.org/launched-by'] = 'Tests'
 
 # Commons k8s configurations. It can be overridden by
 # airflow components: webserver, scheduler, worker, flower
