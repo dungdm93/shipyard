@@ -2,11 +2,6 @@ FROM python:3.7-slim AS base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
-ENV AIRFLOW_HOME="/opt/airflow" \
-    AIRFLOW_INSTALL_DIR="/usr/local/airflow"
-ENV PATH="${AIRFLOW_INSTALL_DIR}/bin:${PATH}" \
-    PYTHONPATH="${PYTHONPATH}:${AIRFLOW_INSTALL_DIR}/lib/python3.7/site-packages/"
-
 RUN set -eux; \
     apt-get update; \
     apt-get install -yqq --no-install-recommends \
@@ -29,6 +24,8 @@ RUN set -eux; \
     locale-gen; \
     update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8;
 
+ENV AIRFLOW_HOME="/opt/airflow" \
+    PATH=/home/airflow/.local/bin:$PATH
 RUN set -eux; \
     useradd -ms "/bin/bash" --uid=1000 airflow; \
     mkdir -p "${AIRFLOW_HOME}"; \
@@ -54,6 +51,8 @@ RUN set -eux; \
         libsnappy-dev \
         libev-dev
 
+USER airflow
+
 RUN set -eux; \
     function join { local IFS="$1"; echo "${*:2}"; }; \
     AIRFLOW_PACKAGES=( \
@@ -72,17 +71,17 @@ RUN set -eux; \
         # Others
         async crypto ssh slack sendgrid \
     ); \
-    mkdir -p ${AIRFLOW_INSTALL_DIR}; \
-    pip install --prefix="${AIRFLOW_INSTALL_DIR}" \
+    pip config set global.user True; \
+    pip install \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}" \
         "lz4" "python-snappy" "airflow-exporter";
 
 FROM base
 
-COPY --from=builder "${AIRFLOW_INSTALL_DIR}" "${AIRFLOW_INSTALL_DIR}"
 COPY ./scripts/* /usr/local/bin/
 COPY --chown=airflow:airflow ./runit /etc/airflow
+COPY --from=builder /home/airflow/.local /home/airflow/.local
 
-ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
-EXPOSE 8080 8793 5555
 USER airflow
+EXPOSE 8080 8793 5555
+ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
