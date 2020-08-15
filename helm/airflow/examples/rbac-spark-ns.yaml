@@ -1,0 +1,4 @@
+rbac:
+  sparkOperator:
+    enable: true
+    namespace: spark

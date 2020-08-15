@@ -1,0 +1,42 @@
+{{- if and .Values.rbac.create .Values.rbac.sparkOperator.enable }}
+{{- $executor := include "airflow.normalizeExecutor" . }}
+{{- $grantScheduler := or (eq $executor "LocalExecutor") (eq $executor "SequentialExecutor") (eq $executor "KubernetesExecutor") }}
+{{- $grantWorker := or (eq $executor "CeleryExecutor") (eq $executor "KubernetesExecutor") }}
+{{- $namespace := .Values.rbac.sparkOperator.namespace | default .Release.Namespace }}
+{{- $kindPrefix := eq "" .Values.rbac.sparkOperator.namespace | ternary "Cluster" "" }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ printf "%sRole" $kindPrefix }}
+metadata:
+  name: {{ include "airflow.fullname" . }}-spark
+  namespace: {{ $namespace  }}
+  labels:
+    {{- include "airflow.labels" . | nindent 4 }}
+rules:
+- apiGroups: ["sparkoperator.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ printf "%sRoleBinding" $kindPrefix }}
+metadata:
+  name: {{ include "airflow.fullname" . }}-spark
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "airflow.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: {{ printf "%sRole" $kindPrefix }}
+  name: {{ include "airflow.fullname" . }}-spark
+subjects:
+{{- if $grantScheduler }}
+- kind: ServiceAccount
+  name: {{ include "airflow.scheduler.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- if $grantWorker }}
+- kind: ServiceAccount
+  name: {{ include "airflow.worker.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}
