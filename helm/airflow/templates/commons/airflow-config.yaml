@@ -32,6 +32,7 @@
     {{- $_ := set $logging "remote_base_log_folder" $logs.path }}
   {{- end }}
 {{- end }}
+{{- $_ := $logging | mergeOverwrite $core }}
 
 {{- if eq $core.executor "CeleryExecutor" }}
   {{- $_ := set $celery "broker_url" (include "airflow.celeryBroker" .) }}
