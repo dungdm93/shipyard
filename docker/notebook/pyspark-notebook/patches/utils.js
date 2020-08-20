@@ -85,23 +85,41 @@ function formatLogsCells(execLogs, type) {
   return result;
 }
 
+// function getStandAloneAppId(cb) {
+//   var words = document.baseURI.split('/');
+//   var ind = words.indexOf("proxy");
+//   if (ind > 0) {
+//     var appId = words[ind + 1];
+//     cb(appId);
+//     return;
+//   }
+//   ind = words.indexOf("history");
+//   if (ind > 0) {
+//     var appId = words[ind + 1];
+//     cb(appId);
+//     return;
+//   }
+//   // Looks like Web UI is running in standalone mode
+//   // Let's get application-id using REST End Point
+//   $.getJSON(location.origin + "/api/v1/applications", function(response, status, jqXHR) {
+//     if (response && response.length > 0) {
+//       var appId = response[0].id;
+//       cb(appId);
+//       return;
+//     }
+//   });
+// }
+
 function getStandAloneAppId(cb) {
   var words = document.baseURI.split('/');
   var ind = words.indexOf("proxy");
+  var baseURI = location.origin;
   if (ind > 0) {
-    var appId = words[ind + 1];
-    cb(appId);
-    return;
-  }
-  ind = words.indexOf("history");
-  if (ind > 0) {
-    var appId = words[ind + 1];
-    cb(appId);
-    return;
+    baseURI = words.slice(0, ind + 2).join('/');
   }
   // Looks like Web UI is running in standalone mode
   // Let's get application-id using REST End Point
-  $.getJSON(location.origin + "/api/v1/applications", function(response, status, jqXHR) {
+  $.getJSON(baseURI + "/api/v1/applications", function(response, status, jqXHR) {
     if (response && response.length > 0) {
       var appId = response[0].id;
       cb(appId);
@@ -136,19 +154,29 @@ function ConvertDurationString(data) {
   return parseFloat(data) * multiplier;
 }
 
+// function createTemplateURI(appId, templateName) {
+//   var words = document.baseURI.split('/');
+//   var ind = words.indexOf("proxy");
+//   if (ind > 0) {
+//     var baseURI = words.slice(0, ind + 1).join('/') + '/' + appId + '/static/' + templateName + '-template.html';
+//     return baseURI;
+//   }
+//   ind = words.indexOf("history");
+//   if(ind > 0) {
+//     var baseURI = words.slice(0, ind).join('/') + '/static/' + templateName + '-template.html';
+//     return baseURI;
+//   }
+//   return location.origin + "/static/" + templateName + "-template.html";
+// }
+
 function createTemplateURI(appId, templateName) {
   var words = document.baseURI.split('/');
   var ind = words.indexOf("proxy");
+  var baseURI = location.origin;
   if (ind > 0) {
-    var baseURI = words.slice(0, ind + 1).join('/') + '/' + appId + '/static/' + templateName + '-template.html';
-    return baseURI;
+    baseURI = words.slice(0, ind + 2).join('/');
   }
-  ind = words.indexOf("history");
-  if(ind > 0) {
-    var baseURI = words.slice(0, ind).join('/') + '/static/' + templateName + '-template.html';
-    return baseURI;
-  }
-  return location.origin + "/static/" + templateName + "-template.html";
+  return baseURI + "/static/" + templateName + "-template.html";
 }
 
 function setDataTableDefaults() {
@@ -164,24 +192,34 @@ function formatDate(date) {
   else return date.split(".")[0].replace("T", " ");
 }
 
+// function createRESTEndPointForExecutorsPage(appId) {
+//     var words = document.baseURI.split('/');
+//     var ind = words.indexOf("proxy");
+//     if (ind > 0) {
+//         var appId = words[ind + 1];
+//         var newBaseURI = words.slice(0, ind + 2).join('/');
+//         return newBaseURI + "/api/v1/applications/" + appId + "/allexecutors";
+//     }
+//     ind = words.indexOf("history");
+//     if (ind > 0) {
+//         var appId = words[ind + 1];
+//         var attemptId = words[ind + 2];
+//         var newBaseURI = words.slice(0, ind).join('/');
+//         if (isNaN(attemptId)) {
+//             return newBaseURI + "/api/v1/applications/" + appId + "/allexecutors";
+//         } else {
+//             return newBaseURI + "/api/v1/applications/" + appId + "/" + attemptId + "/allexecutors";
+//         }
+//     }
+//     return location.origin + "/api/v1/applications/" + appId + "/allexecutors";
+// }
+
 function createRESTEndPointForExecutorsPage(appId) {
     var words = document.baseURI.split('/');
     var ind = words.indexOf("proxy");
+    var baseURI = location.origin;
     if (ind > 0) {
-        var appId = words[ind + 1];
-        var newBaseURI = words.slice(0, ind + 2).join('/');
-        return newBaseURI + "/api/v1/applications/" + appId + "/allexecutors";
+      baseURI = words.slice(0, ind + 2).join('/');
     }
-    ind = words.indexOf("history");
-    if (ind > 0) {
-        var appId = words[ind + 1];
-        var attemptId = words[ind + 2];
-        var newBaseURI = words.slice(0, ind).join('/');
-        if (isNaN(attemptId)) {
-            return newBaseURI + "/api/v1/applications/" + appId + "/allexecutors";
-        } else {
-            return newBaseURI + "/api/v1/applications/" + appId + "/" + attemptId + "/allexecutors";
-        }
-    }
-    return location.origin + "/api/v1/applications/" + appId + "/allexecutors";
+    return baseURI + "/api/v1/applications/" + appId + "/allexecutors";
 }

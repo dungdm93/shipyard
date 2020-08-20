@@ -1,6 +1,15 @@
 ARG  SOURCE_IMAGE
 FROM ${SOURCE_IMAGE} AS source
 
+RUN set -eux; \
+    apt-get update; \
+    apt-get install --no-install-recommends -y openjdk-8-jdk-headless;
+
+COPY ./patches/ /patches/org/apache/spark/ui/static/
+
+RUN set -eux; cd /patches/; \
+    jar -uf ${SPARK_HOME}/jars/spark-core_*.jar org/
+
 FROM jupyter/scipy-notebook
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL [ "/bin/bash", "-c" ]
@@ -9,7 +18,7 @@ USER root
 COPY ./scripts/ /usr/local/bin/
 
 RUN set -eux; \
-    apt-get update -y; \
+    apt-get update; \
     apt-get install --no-install-recommends -y \
         gosu curl vim gettext-base tzdata openssh-client libsasl2-modules \
         iproute2 net-tools telnet dnsutils iputils-* htop iftop \
