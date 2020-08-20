@@ -17,4 +17,5 @@ run:
 		-p 8888:8888 \
 		-e GRANT_SUDO=yes \
 		-e JUPYTER_ENABLE_LAB=yes \
-		${TARGET_IMAGE}
+		${TARGET_IMAGE} \
+		start-notebook.sh --NotebookApp.token=''
