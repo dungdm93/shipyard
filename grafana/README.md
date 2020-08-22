@@ -22,17 +22,25 @@ helm upgrade --install \
 ```
 
 ## 2. Well-known dashboards
-* [`kubernetes-monitoring/kubernetes-mixin`](https://github.com/kubernetes-monitoring/kubernetes-mixin/): Kubernetes Infra dashboards
-* [`povilasv/kubernetes-grafana-mixin`](https://github.com/povilasv/kubernetes-grafana-mixin): Kubernetes Control Plan dashboards. [ref](https://povilasv.me/grafana-dashboards-for-kubernetes-administrators/)
-* [Istio Control Plan dashboards](https://github.com/istio/istio/tree/master/install/kubernetes/helm/istio/charts/grafana/dashboards)
-* [`grafana/grafonnet-lib`](https://github.com/grafana/grafonnet-lib)
+* [`grafana/grafonnet-lib`](https://github.com/grafana/grafonnet-lib): Jsonnet library for generating Grafana dashboard files
 * [`grafana/jsonnet-libs`](https://github.com/grafana/jsonnet-libs)
-  * consul-mixin
-  * jaeger-mixin
-  * memcached-mixin
-* [NGINX Ingress controller](https://grafana.com/grafana/dashboards/9614) | [source](https://github.com/kubernetes/ingress-nginx/tree/master/deploy/grafana/dashboards)
+  * `grafana-builder`: A library for building Grafana dashboards with jsonnet, following the **builder pattern**.
+  * `ksonnet-util` / `helm-util`
+  * `consul`, `consul-mixin`: manifests, dashboards and alerts for Hashicorp's Consul
+  * `envoy-mixin`: dashboards and alerts for envoy
+  * `jaeger-mixin`, `jaeger-agent-mixin`: dashboards and alerts for Jaeger
+  * `memcached`, `memcached-mixin`: manifests, dashboards and alerts for memcached
+
+* [`kubernetes-monitoring/kubernetes-mixin`](https://github.com/kubernetes-monitoring/kubernetes-mixin/): Kubernetes Infra dashboards
+  * Used by [`prometheus-operator/kube-prometheus`](https://github.com/prometheus-operator/kube-prometheus/blob/master/jsonnet/kube-prometheus/jsonnetfile.json)
+* [Kubernetes Control Plan dashboards](https://github.com/povilasv/kubernetes-grafana-mixin)
+  * [ref](https://povilasv.me/grafana-dashboards-for-kubernetes-administrators/)
+* [Istio Control Plan dashboards](https://github.com/istio/istio/tree/master/manifests/addons/dashboards)
+
+* [NGINX Ingress controller](https://github.com/kubernetes/ingress-nginx/tree/master/deploy/grafana/dashboards) ([source](https://grafana.com/grafana/dashboards/9614))
 * [Percona dashboards](https://github.com/percona/grafana-dashboards) for MySQL, MongoDB,...
 * [`thanos-mixin`](https://github.com/thanos-io/kube-thanos/tree/master/jsonnet/thanos-mixin)
 * [`etcd-mixin`](https://github.com/etcd-io/etcd/tree/master/Documentation/etcd-mixin)
+
 ----------
 * ref: [Everything You Need to Know About Monitoring Mixins](https://grafana.com/blog/2018/09/13/everything-you-need-to-know-about-monitoring-mixins/)
