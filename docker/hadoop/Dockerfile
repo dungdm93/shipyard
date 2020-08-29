@@ -47,10 +47,14 @@ RUN set -eux; \
 # * libisal2
 #   ln -s libisal.so.2     /usr/lib/x86_64-linux-gnu/libisal.so
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 \
-    HADOOP_HOME=/opt/hadoop
+ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" \
+    HADOOP_HOME="/opt/hadoop"
 
-COPY --from=downloader /build/hadoop ${HADOOP_HOME}
+COPY --from=downloader "/build/hadoop" "${HADOOP_HOME}"
 
 ENV PATH="${HADOOP_HOME}/bin:${PATH}" \
     LD_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}"
+
+# Other soutions don't work, like:
+# echo "${HADOOP_HOME}/lib/native" > /etc/ld.so.conf.d/hadoop.conf
+# export JAVA_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${JAVA_LIBRARY_PATH}"

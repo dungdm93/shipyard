@@ -33,11 +33,9 @@ RUN set -eux; \
     apt-get install -y netcat; \
     rm -rf /var/cache/apt/*;
 
-ENV HIVE_HOME=/opt/hive
+ENV HIVE_HOME="/opt/hive" \
+    PATH="/opt/hive/bin:${PATH}"
 
-COPY --from=downloader /build/hive  ${HIVE_HOME}
+COPY --from=downloader "/build/hive" "${HIVE_HOME}"
 # COPY ./entrypoint.sh /opt/
-
-ENV PATH="${HIVE_HOME}/bin:${PATH}"
-
 # ENTRYPOINT [ "/opt/entrypoint.sh" ]
