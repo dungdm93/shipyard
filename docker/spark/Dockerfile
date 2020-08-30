@@ -23,12 +23,22 @@ RUN set -eux; \
 RUN tar -xf  "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" --no-same-owner; \
     mv       "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" "spark";
 
+# Update guava
+# ref: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/spark-docker/Dockerfile
+RUN set -eux; cd "./spark/jars"; \
+    rm guava-*.jar; \
+    curl -LO "https://repo1.maven.org/maven2/com/google/guava/guava/23.0/guava-23.0.jar";
+
 RUN set -eux; \
     curl -LO "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini"; \
     chmod +x tini;
 
 FROM hub.teko.vn/dataops/hadoop:3.2.0 as hadoop
 WORKDIR /build/hadoop
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends curl;
 
 ARG HADOOP_TOOLS="hadoop-aliyun,hadoop-aws,hadoop-azure,hadoop-azure-datalake,hadoop-kafka,hadoop-openstack"
 
@@ -56,6 +66,24 @@ RUN set -eux; \
         JARS="$(./bin/hadoop-tools.sh)"; \
         cp ${JARS//:/ } "./lib/tools/"; \
     done;
+
+# Cloud Storage connector for Hadoop + Spark
+# https://cloud.google.com/dataproc/docs/concepts/connectors/cloud-storage
+# https://github.com/GoogleCloudDataproc/hadoop-connectors/tree/master/gcs
+COPY ./etc/hadoop-gcs.sh "./libexec/shellprofile.d/"
+RUN set -eux; cd "./lib/tools/"; \
+    curl -LO "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop3-2.1.4.jar";
+
+# BigQuery connector for Hadoop
+# * https://cloud.google.com/dataproc/docs/concepts/connectors/bigquery
+# * https://github.com/GoogleCloudDataproc/hadoop-connectors/tree/master/bigquery
+# BigQuery connector for Spark
+# * https://github.com/GoogleCloudDataproc/spark-bigquery-connector
+# * https://cloud.google.com/dataproc/docs/tutorials/bigquery-connector-spark-example
+COPY ./etc/hadoop-bigquery.sh "./libexec/shellprofile.d/"
+RUN set -eux; cd "./lib/tools/"; \
+    curl -LO "https://storage.googleapis.com/hadoop-lib/bigquery/bigquery-connector-hadoop3-1.1.4.jar"; \
+    curl -LO "https://storage.googleapis.com/spark-lib/bigquery/spark-bigquery-with-dependencies_2.12-0.17.1.jar";
 
 FROM ubuntu:focal
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
