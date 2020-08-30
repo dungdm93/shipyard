@@ -32,8 +32,11 @@ FROM ${BASE_IMAGE}
 ENV CONDA_HOME=/opt/conda
 COPY --from=builder ${CONDA_HOME} ${CONDA_HOME}
 
-ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip" \
-    PATH="${CONDA_HOME}/bin:${PATH}"
+ENV PATH="${CONDA_HOME}/bin:${PATH}"
+
+# Alternative solutions:
+# export PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip"
+RUN pip install --no-cache-dir -e "${SPARK_HOME}/python"
 
 RUN set -eux; \
     conda install -c conda-forge -y \
