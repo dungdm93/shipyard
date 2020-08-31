@@ -60,7 +60,7 @@ fi
 # Teko's stuff to support 'HADOOP_OPTIONAL_TOOLS' function
 if [ -z "${HADOOP_HOME}" ] && [ -n "${HADOOP_OPTIONAL_TOOLS}" ] \
     && [ -x "${SPARK_HOME}/hadoop/bin/hadoop-tools.sh" ]; then
-  SPARK_DIST_CLASSPATH+=":$(${SPARK_HOME}/hadoop/bin/hadoop-tools.sh)"
+  export SPARK_DIST_CLASSPATH+=":$(${SPARK_HOME}/hadoop/bin/hadoop-tools.sh)"
 fi
 
 case "$1" in
