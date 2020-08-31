@@ -44,3 +44,4 @@ helm upgrade --install \
 
 ----------
 * ref: [Everything You Need to Know About Monitoring Mixins](https://grafana.com/blog/2018/09/13/everything-you-need-to-know-about-monitoring-mixins/)
+* Monitoring Mixins: [home](https://monitoring.mixins.dev/) | [repo](https://github.com/monitoring-mixins/website)
