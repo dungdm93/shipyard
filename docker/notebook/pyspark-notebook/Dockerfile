@@ -35,7 +35,7 @@ ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" \
 COPY --chown=$NB_UID:$NB_GID --from=source       /opt/spark  ${SPARK_HOME}
 COPY --chown=$NB_UID:$NB_GID ./configs/jupyter/* ${CONDA_DIR}/etc/jupyter
 
-ENV PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}" \
+ENV PATH="${SPARK_HOME}/bin:${PATH}" \
     LD_LIBRARY_PATH="${SPARK_HOME}/hadoop/lib/native:${LD_LIBRARY_PATH}"
 
 # Alternative solutions:
