@@ -4,7 +4,7 @@
 FROM hub.teko.vn/tools/base
 
 # Terraform
-ENV TERRAFORM_VERSION=v0.13.0-rc1
+ENV TERRAFORM_VERSION=v0.13.2
 RUN set -eux; cd /usr/local/bin/; \
     curl -LO "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION#v}/terraform_${TERRAFORM_VERSION#v}_linux_amd64.zip"; \
     unzip -o terraform_*_linux_amd64.zip; \
@@ -12,7 +12,7 @@ RUN set -eux; cd /usr/local/bin/; \
     terraform -install-autocomplete;
 
 # Terragrunt
-ENV TERRAGRUNT_VERSION=v0.23.31
+ENV TERRAGRUNT_VERSION=v0.23.40
 RUN set -eux; cd /usr/local/bin/; \
     curl -L  "https://github.com/gruntwork-io/terragrunt/releases/download/${TERRAGRUNT_VERSION}/terragrunt_linux_amd64" \
          -o  terragrunt; \
@@ -26,7 +26,7 @@ COPY providers.tf ./
 RUN terraform providers mirror "${TERRAFORM_LOCAL_MIRROR_DIR}"
 
 ENV PROVIDER_MINIO_VERSION=v1.1.0 \
-    PROVIDER_NEXUS_VERSION=v1.8.1 \
+    PROVIDER_NEXUS_VERSION=v1.10.2 \
     PROVIDER_KEYCLOAK_VERSION=v1.20.0
 
 # MinIO provider
