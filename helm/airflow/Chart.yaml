@@ -3,7 +3,7 @@ name: airflow
 description: Airflow helm chart
 icon: https://airflow.apache.org/docs/stable/_images/pin_large.png
 type: application
-version: 0.4.2
+version: 0.4.3
 appVersion: 1.10.11
 # kubeVersion: ^1.15
 dependencies:
