@@ -14,6 +14,7 @@ stringData:
   GIT_SYNC_ROOT:     /git
   GIT_SYNC_DEST:     repo
   GIT_SYNC_WAIT:     {{ $gitsync.syncInterval | quote}}
+  GIT_SYNC_MAX_SYNC_FAILURES: "-1"
 {{- if $gitsync.auth.username }}
   GIT_SYNC_USERNAME: {{ $gitsync.auth.username | quote }}
   GIT_SYNC_PASSWORD: {{ $gitsync.auth.password | quote }}
