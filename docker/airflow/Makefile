@@ -1,4 +1,4 @@
-AIRFLOW_VERSION ?= 1.10.11
+AIRFLOW_VERSION ?= 1.10.12
 IMAGE := hub.teko.vn/dataops/airflow:${AIRFLOW_VERSION}
 
 build:

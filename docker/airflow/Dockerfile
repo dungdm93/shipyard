@@ -35,7 +35,7 @@ WORKDIR ${AIRFLOW_HOME}
 
 FROM base AS builder
 
-ARG AIRFLOW_VERSION=1.10.11
+ARG AIRFLOW_VERSION=1.10.12
 
 RUN set -eux; \
     apt-get update; \
