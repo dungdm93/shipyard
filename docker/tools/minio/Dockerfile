@@ -6,3 +6,7 @@ RUN set -eux; \
           -o /usr/local/bin/mc; \
     chmod +x /usr/local/bin/mc; \
     mc --autocompletion;
+
+RUN set -eux; \
+    apt-get update; apt-get install -y s3cmd; \
+    apt-get clean; rm -rf /var/lib/apt/lists/*
