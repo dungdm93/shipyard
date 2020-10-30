@@ -1,40 +1,9 @@
 Data stacks
 ===========
+Template for build data warehouse stack based on Kubernetes
 
-:boom: :boom: :boom: **WIP**: New warehouse stack base on Kubernetes :boom: :boom: :boom:
-
-## Structure
-```
-.
-├── docker
-│   └── <images>
-├── kubernetes
-│   └── <components>
-├── terraform
-│   └── data-warehouse
-├── .editorconfig
-├── .gitignore
-└── README.md
-```
-
-## Components
-* [x] cert-manager
-* [x] nginx-ingress
-* [ ] Ceph
-* [ ] PostgreSQL
-* [ ] Cassandra
-* [ ] Keycloak
-* [ ] Vault
-* [ ] Observability stack
-  * [x] Grafana
-  * [x] Prometheus
-  * [ ] FluentBit
-  * [x] Loki
-  * [ ] Jaeger
-* [x] JupyterHub
-* [x] Airflow
-* [ ] Kafka
-* [ ] ClickHouse
-* [x] Elastic stack
-  * [x] ElasticSearch
-  * [x] Kibana
+## 1. Folder structure
+* [`docker`](/docker): Dockerfile and other stuffs for build docker images.
+* [`helm`](/helm): Helm charts for data services
+* [`kubernetes`](/kubernetes): example deployments in k8s
+* [`cluster`](/cluster): example manifest for bootstrap k8s cluster
