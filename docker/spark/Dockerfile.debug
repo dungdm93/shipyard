@@ -1,0 +1,6 @@
+FROM hub.teko.vn/dataops/spark:3.0.0
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends openjdk-8-jdk; \
+    rm -rf /var/cache/apt/*;
