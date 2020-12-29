@@ -10,3 +10,6 @@ RUN set -eux; \
 RUN set -eux; \
     apt-get update; apt-get install -y s3cmd; \
     apt-get clean; rm -rf /var/lib/apt/lists/*
+
+COPY ./entrypoint.sh "/usr/local/bin/"
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
