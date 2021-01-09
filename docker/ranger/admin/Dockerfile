@@ -21,7 +21,8 @@ RUN set -eux; \
         openjdk-8-jre-headless \
         ca-certificates \
         python; \
-    rm -rf /var/cache/apt/*;
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 \
     RANGER_HOME=/opt/ranger

@@ -97,7 +97,8 @@ RUN set -eux; \
         libssl1.1 libisal2 libnss3 libpam-modules krb5-user procps; \
     ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so; \
     ln -s libssl.so.1.1    /usr/lib/x86_64-linux-gnu/libssl.so; \
-    rm -rf /var/cache/apt/*;
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su; \

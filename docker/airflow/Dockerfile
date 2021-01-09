@@ -11,13 +11,7 @@ RUN set -eux; \
         libpq5 libmariadb3; \
     \
     apt-get clean; \
-    rm -rf \
-        /var/lib/apt/lists/* \
-        /tmp/* \
-        /var/tmp/* \
-        /usr/share/man \
-        /usr/share/doc \
-        /usr/share/doc-base
+    rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
     sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen; \

@@ -15,6 +15,7 @@ RUN set -eux; \
     chmod +x  /usr/bin/yq; \
     yq shell-completion > /etc/bash_completion.d/yq; \
     \
-    rm -rf /var/lib/apt/lists/*;
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
 
 COPY ./rootfs /

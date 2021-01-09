@@ -31,7 +31,8 @@ FROM hub.teko.vn/dataops/hadoop:${HADOOP_VERSION}
 RUN set -eux; \
     apt-get update; \
     apt-get install -y netcat; \
-    rm -rf /var/cache/apt/*;
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
 
 ENV HIVE_HOME="/opt/hive" \
     PATH="/opt/hive/bin:${PATH}"

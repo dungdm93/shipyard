@@ -14,6 +14,7 @@ RUN set -eux; \
     # https://docs.npmjs.com/cli-commands/completion.html
     npm completion > /etc/bash_completion.d/npm; \
     \
-    rm -rf /var/lib/apt/lists/*;
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g postcss-cli;

@@ -7,4 +7,5 @@ RUN set -eux; \
     \
     apt-get update; \
     apt-get install -y google-cloud-sdk; \
-    rm -rf /var/lib/apt/lists/*;
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
