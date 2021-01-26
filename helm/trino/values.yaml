@@ -2,17 +2,17 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: prestosql/presto
-  tag: 331
+  repository: trinodb/trino
+  tag: 351
   pullPolicy: IfNotPresent
   pullSecrets: []
 
-presto:
+trino:
   node.properties:
     node.environment: kubernetes
-    node.data-dir: /data/presto
-    plugin.dir: /usr/lib/presto/plugin
-  # Default values from: https://github.com/prestosql/presto/blob/master/docker/default/etc/jvm.config
+    node.data-dir: /data/trino
+    plugin.dir: /usr/lib/trino/plugin
+  # Default values from: https://github.com/trinodb/trino/blob/master/core/docker/default/etc/jvm.config
   jvm.config: |
     -server
     -Xmx1G
@@ -27,8 +27,8 @@ presto:
     -Djdk.attach.allowAttachSelf=true
     -Djdk.nio.maxCachedBufferSize=2000000
   log.properties:
-    io.prestosql: INFO
-  # https://prestosql.io/docs/current/admin/properties.html
+    io.trino: INFO
+  # https://trino.io/docs/current/admin/properties.html
   config.properties: {}
 
 catalog: {}
@@ -71,7 +71,7 @@ authen:
     groupAuthPattern:
     cacheTtl:
 
-    # Presto server can use dedicated LDAP service user for doing user group membership queries.
+    # Trino server can use dedicated LDAP service user for doing user group membership queries.
     bindDN:
     bindPassword:
 
@@ -141,9 +141,9 @@ ingress:
     # kubernetes.io/tls-acme: "true"
     # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
   hosts:
-    - host: presto.local
+    - host: trino.local
       paths: []
   tls: []
-  #  - secretName: presto.local-tls
+  #  - secretName: trino.local-tls
   #    hosts:
-  #      - presto.local
+  #      - trino.local

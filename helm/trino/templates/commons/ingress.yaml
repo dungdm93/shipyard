@@ -1,5 +1,5 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "presto.fullname" . -}}
+{{- $fullName := include "trino.fullname" . -}}
 {{- $svcPort := .Values.httpServer.https.enabled | ternary .Values.service.httpsPort .Values.service.httpPort -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1beta1
@@ -10,7 +10,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    {{- include "presto.labels" . | nindent 4 }}
+    {{- include "trino.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

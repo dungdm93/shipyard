@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "presto.name" -}}
+{{- define "trino.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "presto.fullname" -}}
+{{- define "trino.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "presto.chart" -}}
+{{- define "trino.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "presto.labels" -}}
-helm.sh/chart: {{ include "presto.chart" . }}
-{{ include "presto.selectorLabels" . }}
+{{- define "trino.labels" -}}
+helm.sh/chart: {{ include "trino.chart" . }}
+{{ include "trino.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -46,17 +46,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "presto.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "presto.name" . }}
+{{- define "trino.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "trino.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "presto.serviceAccountName" -}}
+{{- define "trino.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default (include "presto.fullname" .) .Values.serviceAccount.name }}
+    {{ default (include "trino.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
@@ -65,10 +65,10 @@ Create the name of the service account to use
 {{/*
 Checksum pod annotations
 */}}
-{{- define "presto.checksum" -}}
-checksum/presto-properties: {{ include (print $.Template.BasePath "/commons/presto-properties.yaml") . | sha256sum }}
-checksum/presto-config:     {{ include (print $.Template.BasePath "/commons/presto-config.yaml") .     | sha256sum }}
-checksum/presto-catalog:    {{ include (print $.Template.BasePath "/commons/presto-catalog.yaml") .    | sha256sum }}
+{{- define "trino.checksum" -}}
+checksum/trino-properties: {{ include (print $.Template.BasePath "/commons/trino-properties.yaml") . | sha256sum }}
+checksum/trino-config:     {{ include (print $.Template.BasePath "/commons/trino-config.yaml") .     | sha256sum }}
+checksum/trino-catalog:    {{ include (print $.Template.BasePath "/commons/trino-catalog.yaml") .    | sha256sum }}
 {{- end -}}
 
 {{/*
