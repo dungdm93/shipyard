@@ -1,51 +1,49 @@
-{{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
+{{- $coordinator := mergeOverwrite (deepCopy .Values.commons) .Values.coordinator -}}
 {{- $httpServer := .Values.httpServer }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "presto.fullname" . }}-worker
+  name: {{ include "trino.fullname" . }}-coordinator
   labels:
-    {{- include "presto.worker.labels" . | nindent 4 }}
-    {{- with $worker.labels }}
+    {{- include "trino.coordinator.labels" . | nindent 4 }}
+    {{- with $coordinator.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    {{- toYaml $worker.annotations | nindent 4 }}
+    {{- toYaml $coordinator.annotations | nindent 4 }}
 spec:
-  {{- with $worker.replicas }}
-  replicas: {{ . }}
-  {{- end }}
+  replicas: 1
   selector:
     matchLabels:
-      {{- include "presto.worker.selectorLabels" . | nindent 6 }}
+      {{- include "trino.coordinator.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "presto.worker.selectorLabels" . | nindent 8 }}
-        {{- with $worker.podLabels }}
+        {{- include "trino.coordinator.selectorLabels" . | nindent 8 }}
+        {{- with $coordinator.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
-        {{- include "presto.checksum" . | nindent 8 }}
-        {{- with $worker.podAnnotations }}
+        {{- include "trino.checksum" . | nindent 8 }}
+        {{- with $coordinator.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+    {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       enableServiceLinks: false
       containers:
-        - name: presto-worker
+        - name: trino-coordinator
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- with $worker.command }}
+        {{- with $coordinator.command }}
           command:
             {{- toYaml . | nindent 12 }}
         {{- end }}
-        {{- with $worker.args }}
+        {{- with $coordinator.args }}
           args:
             {{- toYaml . | nindent 12 }}
         {{- end }}
@@ -61,31 +59,31 @@ spec:
               containerPort: {{ $httpServer.https.port }}
           {{- end }}
           volumeMounts:
-            {{- include "presto.worker.volumeMounts" . | nindent 12 }}
+            {{- include "trino.coordinator.volumeMounts" . | nindent 12 }}
           livenessProbe:
             tcpSocket:
               port: {{ $httpServer.http.enabled | ternary "http" "https" }}
           resources:
-            {{- toYaml $worker.resources | nindent 12 }}
+            {{- toYaml $coordinator.resources | nindent 12 }}
           securityContext:
-            {{- toYaml $worker.securityContext | nindent 12 }}
-      serviceAccountName: {{ include "presto.serviceAccountName" . }}
-      priorityClassName:  {{ $worker.priorityClassName }}
-      runtimeClassName:   {{ $worker.runtimeClassName }}
-      schedulerName:      {{ $worker.schedulerName }}
+            {{- toYaml $coordinator.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "trino.serviceAccountName" . }}
+      priorityClassName:  {{ $coordinator.priorityClassName }}
+      runtimeClassName:   {{ $coordinator.runtimeClassName }}
+      schedulerName:      {{ $coordinator.schedulerName }}
       securityContext:
-        {{- toYaml $worker.podSecurityContext | nindent 8 }}
+        {{- toYaml $coordinator.podSecurityContext | nindent 8 }}
       volumes:
-        {{- include "presto.worker.volumes" . | nindent 8 }}
-    {{- with $worker.nodeSelector }}
+        {{- include "trino.coordinator.volumes" . | nindent 8 }}
+    {{- with $coordinator.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with $worker.affinity }}
+    {{- with $coordinator.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with $worker.tolerations }}
+    {{- with $coordinator.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

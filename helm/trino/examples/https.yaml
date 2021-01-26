@@ -6,9 +6,9 @@ httpServer:
 ingress:
   enabled: true
   hosts:
-    - host: presto.local
+    - host: trino.local
       paths: [/]
   tls:
-  - secretName: presto.local-tls
+  - secretName: trino.local-tls
     hosts:
-      - presto.local
+      - trino.local

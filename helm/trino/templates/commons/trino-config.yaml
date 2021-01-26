@@ -1,5 +1,5 @@
-{{- $presto := .Values.presto }}
-{{- $config := index $presto "config.properties" | default dict }}
+{{- $trino := .Values.trino }}
+{{- $config := index $trino "config.properties" | default dict }}
 
 {{- $_ := unset $config "coordinator" }}
 {{- $_ := unset $config "node-scheduler.include-coordinator" }}
@@ -21,22 +21,22 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "presto.fullname" . }}-config
+  name: {{ include "trino.fullname" . }}-config
   labels:
-    {{- include "presto.labels" . | nindent 4 }}
+    {{- include "trino.labels" . | nindent 4 }}
 data:
   coordinator-config.properties: |
     coordinator=true
     node-scheduler.include-coordinator=false
     discovery-server.enabled=true
-    discovery.uri={{ printf "http://%s:8080" (include "presto.fullname" .) }}
+    discovery.uri={{ printf "http://%s:8080" (include "trino.fullname" .) }}
     {{- range $key, $value := $config }}
     {{ $key }}={{ $value }}
     {{- end }}
 
   worker-config.properties: |
     coordinator=false
-    discovery.uri={{ printf "http://%s:8080" (include "presto.fullname" .) }}
+    discovery.uri={{ printf "http://%s:8080" (include "trino.fullname" .) }}
     {{- range $key, $value := $config }}
     {{ $key }}={{ $value }}
     {{- end }}

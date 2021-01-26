@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "presto.fullname" . }}-catalog
+  name: {{ include "trino.fullname" . }}-catalog
   labels:
-    {{- include "presto.labels" . | nindent 4 }}
+    {{- include "trino.labels" . | nindent 4 }}
 data:
 {{- range $catalog, $data := .Values.catalog }}
   {{ $catalog }}: |

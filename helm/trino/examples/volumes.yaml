@@ -5,4 +5,4 @@ commons:
   extraVolumes:
   - name: certificate
     secret:
-      secretName: presto-tls
+      secretName: trino-tls

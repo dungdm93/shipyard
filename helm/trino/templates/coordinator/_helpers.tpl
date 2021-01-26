@@ -1,37 +1,37 @@
 {{/*
 Coordinator labels
 */}}
-{{- define "presto.coordinator.labels" -}}
-{{ include "presto.labels" . }}
+{{- define "trino.coordinator.labels" -}}
+{{ include "trino.labels" . }}
 app.kubernetes.io/component: coordinator
 {{- end -}}
 
 {{/*
 Coordinator selector labels
 */}}
-{{- define "presto.coordinator.selectorLabels" -}}
-{{ include "presto.selectorLabels" . }}
+{{- define "trino.coordinator.selectorLabels" -}}
+{{ include "trino.selectorLabels" . }}
 app.kubernetes.io/component: coordinator
 {{- end -}}
 
 {{/*
 Coordinator volumes
 */}}
-{{- define "presto.coordinator.volumes" -}}
+{{- define "trino.coordinator.volumes" -}}
 {{- $coordinator := mergeOverwrite (deepCopy .Values.commons) .Values.coordinator -}}
-- name: presto-config
+- name: trino-config
   projected:
     sources:
     - configMap:
-        name: {{ include "presto.fullname" . }}-properties
+        name: {{ include "trino.fullname" . }}-properties
     - configMap:
-        name: {{ include "presto.fullname" . }}-config
+        name: {{ include "trino.fullname" . }}-config
         items:
         - key:  coordinator-config.properties
           path: config.properties
-- name: presto-catalog
+- name: trino-catalog
   configMap:
-    name: {{ include "presto.fullname" . }}-catalog
+    name: {{ include "trino.fullname" . }}-catalog
 {{- with $coordinator.extraVolumes }}
 {{ toYaml . }}
 {{- end }}
@@ -41,12 +41,12 @@ Coordinator volumes
 {{/*
 Coordinator volumeMounts
 */}}
-{{- define "presto.coordinator.volumeMounts" -}}
+{{- define "trino.coordinator.volumeMounts" -}}
 {{- $coordinator := mergeOverwrite (deepCopy .Values.commons) .Values.coordinator -}}
-- name: presto-config
-  mountPath: /etc/presto
-- name: presto-catalog
-  mountPath: /etc/presto/catalog
+- name: trino-config
+  mountPath: /etc/trino
+- name: trino-catalog
+  mountPath: /etc/trino/catalog
 {{- with $coordinator.extraVolumeMounts }}
 {{ toYaml . }}
 {{- end }}

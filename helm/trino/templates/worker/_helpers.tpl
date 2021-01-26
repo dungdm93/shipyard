@@ -1,37 +1,37 @@
 {{/*
 Worker labels
 */}}
-{{- define "presto.worker.labels" -}}
-{{ include "presto.labels" . }}
+{{- define "trino.worker.labels" -}}
+{{ include "trino.labels" . }}
 app.kubernetes.io/component: worker
 {{- end -}}
 
 {{/*
 Worker selector labels
 */}}
-{{- define "presto.worker.selectorLabels" -}}
-{{ include "presto.selectorLabels" . }}
+{{- define "trino.worker.selectorLabels" -}}
+{{ include "trino.selectorLabels" . }}
 app.kubernetes.io/component: worker
 {{- end -}}
 
 {{/*
 Worker volumes
 */}}
-{{- define "presto.worker.volumes" -}}
+{{- define "trino.worker.volumes" -}}
 {{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
-- name: presto-config
+- name: trino-config
   projected:
     sources:
     - configMap:
-        name: {{ include "presto.fullname" . }}-properties
+        name: {{ include "trino.fullname" . }}-properties
     - configMap:
-        name: {{ include "presto.fullname" . }}-config
+        name: {{ include "trino.fullname" . }}-config
         items:
         - key:  worker-config.properties
           path: config.properties
-- name: presto-catalog
+- name: trino-catalog
   configMap:
-    name: {{ include "presto.fullname" . }}-catalog
+    name: {{ include "trino.fullname" . }}-catalog
 {{- with $worker.extraVolumes }}
 {{ toYaml . }}
 {{- end }}
@@ -40,12 +40,12 @@ Worker volumes
 {{/*
 Coordinator volumeMounts
 */}}
-{{- define "presto.worker.volumeMounts" -}}
+{{- define "trino.worker.volumeMounts" -}}
 {{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
-- name: presto-config
-  mountPath: /etc/presto
-- name: presto-catalog
-  mountPath: /etc/presto/catalog
+- name: trino-config
+  mountPath: /etc/trino
+- name: trino-catalog
+  mountPath: /etc/trino/catalog
 {{- with $worker.extraVolumeMounts }}
 {{ toYaml . }}
 {{- end }}

@@ -1,0 +1,11 @@
+apiVersion: v2
+name: trino
+description: Trino helm chart
+icon: https://trino.io/assets/images/trino-logo/trino-ko_tiny-alt.svg
+type: application
+version: 0.3.0
+appVersion: 351
+# kubeVersion: ^1.15
+maintainers:
+- name: Teko's DataOps team
+  email: dataops@teko.vn
