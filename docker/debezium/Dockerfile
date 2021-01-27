@@ -7,4 +7,5 @@ RUN confluent-hub install debezium/debezium-connector-sqlserver:1.3.1 --no-promp
 FROM quay.io/strimzi/kafka:latest-kafka-2.6.0
 COPY --from=builder /usr/share/confluent-hub-components /opt/kafka/plugins/
 USER root:root
+RUN yum install -y java-11-openjdk-devel
 USER 1001
