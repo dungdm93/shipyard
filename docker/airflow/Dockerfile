@@ -4,7 +4,7 @@ SHELL ["/bin/bash", "-c"]
 
 RUN set -eux; \
     apt-get update; \
-    apt-get install -yqq --no-install-recommends \
+    apt-get install -y --no-install-recommends \
         curl runit rsync netcat locales \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libev4 libssl1.1 libisal2 libnss3 \
