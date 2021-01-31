@@ -18,7 +18,7 @@
     </repositories>
 
     <properties>
-        <confluent.version>5.5.2</confluent.version>
+        <confluent.version>6.1.0</confluent.version>
     </properties>
 
     <dependencyManagement>
