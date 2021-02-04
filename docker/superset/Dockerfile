@@ -77,13 +77,19 @@ RUN set -eux; \
     pip install "apache-superset[$(join ',' ${SUPERSET_PACKAGES[@]})]==${SUPERSET_VERSION}" \
         "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=0.15" "redis~=3.5" "pylibmc~=1.6";
 
+# patch: https://github.com/apache/superset/pull/12760/
+RUN curl -sSL https://github.com/apache/superset/raw/master/superset/tasks/thumbnails.py \
+           -o ~/.local/lib/python3.8/site-packages/superset/tasks/thumbnails.py
+
 RUN pip install sqlalchemy-trino
 COPY --chown=superset:superset \
     ./trino.py /home/superset/.local/lib/python3.8/site-packages/superset/db_engine_specs/
 
 FROM base
 
+COPY ./scripts/* /usr/local/bin/
 COPY --from=builder /home/superset/.local /home/superset/.local
 
 USER superset
-EXPOSE 8080
+EXPOSE 8088 5555
+ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
