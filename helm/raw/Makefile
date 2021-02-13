@@ -1,3 +1,0 @@
-RELEASE   ?= pure
-
-include ../Makefile

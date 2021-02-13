@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  RELEASE: hornet
+
+includes:
+  helm: ../
