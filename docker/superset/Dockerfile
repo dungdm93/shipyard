@@ -5,10 +5,10 @@ SHELL ["/bin/bash", "-c"]
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        curl runit rsync netcat locales \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libev4 libssl1.1 libisal2 libnss3 \
-        libpq5 libmariadb3; \
+        libpq5 libmariadb3 \
+        curl locales; \
     \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
@@ -30,8 +30,7 @@ RUN set -eux; \
     locale-gen; \
     update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8;
 
-ENV SUPERSET_HOME="/opt/superset" \
-    PATH=/home/superset/.local/bin:$PATH
+ENV SUPERSET_HOME="/opt/superset"
 RUN set -eux; \
     useradd -ms "/bin/bash" --uid=1000 superset; \
     mkdir -p "${SUPERSET_HOME}"; \
@@ -56,8 +55,6 @@ RUN set -eux; \
         # pip install sasl
         libsasl2-dev;
 
-USER superset
-
 RUN set -eux; \
     function join { local IFS="$1"; echo "${*:2}"; }; \
     SUPERSET_PACKAGES=( \
@@ -73,18 +70,16 @@ RUN set -eux; \
         # Others
         cors thumbnails \
     ); \
-    pip config set global.user True; \
     pip install "apache-superset[$(join ',' ${SUPERSET_PACKAGES[@]})]==${SUPERSET_VERSION}" \
         "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=0.15" "redis~=3.5" "pylibmc~=1.6";
 
 RUN pip install sqlalchemy-trino
-COPY --chown=superset:superset \
-    ./trino.py /home/superset/.local/lib/python3.8/site-packages/superset/db_engine_specs/
+COPY ./trino.py /usr/local/lib/python3.8/site-packages/superset/db_engine_specs/
 
 FROM base
 
 COPY ./scripts/* /usr/local/bin/
-COPY --from=builder /home/superset/.local /home/superset/.local
+COPY --from=builder /usr/local/lib/python3.8 /usr/local/lib/python3.8
 
 USER superset
 EXPOSE 8088 5555
