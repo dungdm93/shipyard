@@ -1,3 +1,0 @@
-RELEASE   ?= local
-
-include ../Makefile
