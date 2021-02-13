@@ -41,7 +41,7 @@ WORKDIR ${SUPERSET_HOME}
 
 FROM base AS builder
 
-ARG SUPERSET_VERSION=1.0
+ARG SUPERSET_VERSION=1.0.1
 
 RUN set -eux; \
     apt-get update; \
@@ -76,10 +76,6 @@ RUN set -eux; \
     pip config set global.user True; \
     pip install "apache-superset[$(join ',' ${SUPERSET_PACKAGES[@]})]==${SUPERSET_VERSION}" \
         "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=0.15" "redis~=3.5" "pylibmc~=1.6";
-
-# patch: https://github.com/apache/superset/pull/12760/
-RUN curl -sSL https://github.com/apache/superset/raw/master/superset/tasks/thumbnails.py \
-           -o ~/.local/lib/python3.8/site-packages/superset/tasks/thumbnails.py
 
 RUN pip install sqlalchemy-trino
 COPY --chown=superset:superset \

@@ -3,7 +3,6 @@ IMAGE := hub.teko.vn/dataops/superset:${SUPERSET_VERSION}
 
 build:
 	docker build --pull \
-		--build-arg SUPERSET_VERSION=${SUPERSET_VERSION} \
 		--tag ${IMAGE} .
 
 push:
