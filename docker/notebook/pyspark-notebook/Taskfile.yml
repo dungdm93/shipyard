@@ -1,0 +1,8 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/dataops/pyspark-notebook:3.0.0
+  BUILD_ARGS: --build-arg SOURCE_IMAGE=hub.teko.vn/dataops/spark:3.0.0
+
+includes:
+  docker: ../../

@@ -1,12 +1,13 @@
-FROM hub.teko.vn/tools/base
+FROM hub.teko.vn/tools/base:1.0
 
+ARG DOCKER_VERSION=20.10.*
 RUN set -eux; \
     source /etc/os-release; \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -; \
     echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu ${UBUNTU_CODENAME} stable" > /etc/apt/sources.list.d/docker.list; \
     \
     apt-get update; \
-    apt-get install -y docker-ce-cli; \
+    apt-get install -y "docker-ce-cli=5:${DOCKER_VERSION}"; \
     \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*

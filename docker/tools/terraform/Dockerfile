@@ -1,7 +1,7 @@
 # ref:
 # * https://github.com/hashicorp/terraform/blob/guide-v0.13-beta/draft-upgrade-guide.md
 # * https://github.com/hashicorp/terraform/blob/master/website/docs/commands/cli-config.html.markdown#provider-installation
-FROM hub.teko.vn/tools/base
+FROM hub.teko.vn/tools/base:1.0
 
 # Terraform
 ENV TERRAFORM_VERSION=v0.13.2

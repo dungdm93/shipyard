@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/tools/rke:1.1
+
+includes:
+  docker: ../../

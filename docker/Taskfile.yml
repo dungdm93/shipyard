@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+    - pwd
+    - docker build --pull {{.BUILD_ARGS}} --tag {{.IMAGE}} .
+
+  push:
+    cmds:
+    - docker push {{.IMAGE}}
+
+  publish:
+  - task: build
+  - task: push
+
+  run:
+    cmds:
+    - docker run -it --rm {{.IMAGE}} bash -l

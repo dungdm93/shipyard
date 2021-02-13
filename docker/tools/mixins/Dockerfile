@@ -10,7 +10,7 @@ RUN set -eux; \
 WORKDIR /app/grizzly
 RUN make install
 
-FROM hub.teko.vn/tools/base
+FROM hub.teko.vn/tools/base:1.0
 
 RUN set -eux; \
     apt-get update; apt-get install -y jsonnet; \

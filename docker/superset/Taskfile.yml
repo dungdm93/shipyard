@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/dataops/superset:1.0
+
+includes:
+  docker: ../

@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/base
+FROM hub.teko.vn/tools/base:1.0
 
 RUN set -eux; \
     apt-get update; \
@@ -15,8 +15,9 @@ RUN set -eux; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install \
-        ansible \
+ARG ANSIBLE_VERSION=2.9.*
+
+RUN pip install ansible==${ANSIBLE_VERSION} \
         Jinja2  \
         toml    \
         PyYAML  \
