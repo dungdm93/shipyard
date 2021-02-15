@@ -1,3 +1,0 @@
-RELEASE   ?= foobar
-
-include ../Makefile

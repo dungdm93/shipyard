@@ -1,0 +1,50 @@
+version: '3'
+
+vars:
+  NAMESPACE: '{{.NAMESPACE | default "default"}}'
+
+tasks:
+  dep:
+    cmds:
+    - helm dependency update
+
+  gen:
+    cmds:
+    - mkdir -p ./build
+    - rm   -rf ./build/*
+    - helm template {{.RELEASE}} .
+        --namespace={{.NAMESPACE}}
+        --values={{.VALUES}}
+        --output-dir=build
+
+  clean:
+    cmds:
+    - rm -rf ./build
+
+  diff:
+    cmds:
+    - helm diff upgrade {{.RELEASE}} .
+        --namespace={{.NAMESPACE}}
+        --values={{.VALUES}}
+        --allow-unreleased
+
+  apply:
+    cmds:
+    - helm upgrade --install {{.RELEASE}} .
+        --namespace={{.NAMESPACE}}
+        --values={{.VALUES}}
+
+  show:
+    cmds:
+    - kubectl --namespace={{.NAMESPACE}} get pod
+        -l app.kubernetes.io/instance={{.RELEASE}}
+
+  destroy:
+    cmds:
+    - helm uninstall {{.RELEASE}} --namespace={{.NAMESPACE}}
+
+  push:
+    cmds:
+    - task: dep
+    # TODO: BasicAuth https://github.com/chartmuseum/helm-push#basic-auth
+    - helm push . teko

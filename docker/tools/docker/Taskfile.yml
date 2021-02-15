@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/tools/docker:20.10
+
+includes:
+  docker: ../../

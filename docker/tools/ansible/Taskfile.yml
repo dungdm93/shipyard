@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/tools/ansible:2.9
+
+includes:
+  docker: ../../

@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/dataops/airflow:1.10.12
+
+includes:
+  docker: ../

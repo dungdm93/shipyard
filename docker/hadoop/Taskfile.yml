@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/dataops/hadoop:3.3.0
+
+includes:
+  docker: ../

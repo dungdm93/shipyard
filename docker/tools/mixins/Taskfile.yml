@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/tools/mixins:0.1
+
+includes:
+  docker: ../../

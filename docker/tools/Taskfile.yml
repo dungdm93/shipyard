@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/tools/base:1.0
+
+includes:
+  docker: ../

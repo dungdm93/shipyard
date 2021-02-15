@@ -1,4 +1,6 @@
-FROM hub.teko.vn/tools/base
+FROM hub.teko.vn/tools/base:1.0
+
+ARG GCLOUD_SDK_VERSION=327.*
 
 # Install Google Cloud SDK
 RUN set -eux; \
@@ -6,6 +8,7 @@ RUN set -eux; \
     curl "https://packages.cloud.google.com/apt/doc/apt-key.gpg" | apt-key add -; \
     \
     apt-get update; \
-    apt-get install -y google-cloud-sdk; \
+    apt-get install -y "google-cloud-sdk=${GCLOUD_SDK_VERSION}"; \
+    \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*

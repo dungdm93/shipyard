@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/base
+FROM hub.teko.vn/tools/base:1.0
 
 # Install kubectl
 ENV KUBECTL_VERSION=v1.18.2
