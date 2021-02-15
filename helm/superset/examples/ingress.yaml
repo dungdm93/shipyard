@@ -1,0 +1,11 @@
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: superset.dungdm93.me
+      path: /
+  tls:
+   - secretName: superset.dungdm93.me-tls
+     hosts:
+       - superset.dungdm93.me

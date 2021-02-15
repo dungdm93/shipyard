@@ -1,0 +1,40 @@
+superset:
+  extraSupersetConfig: |
+    # ===== Caching =====
+    # https://flask-caching.readthedocs.io/en/latest/#configuring-flask-caching
+
+    # Caching for Superset's own metadata
+    CACHE_CONFIG = {
+        'CACHE_TYPE': 'redis',
+        'CACHE_DEFAULT_TIMEOUT': 60 * 60 * 24,  # 1 day
+        'CACHE_KEY_PREFIX': 'superset.metadata.',
+        'CACHE_REDIS_URL': f'redis://{REDIS_AUTHORITY}{REDIS_HOST}:{REDIS_PORT}/3',
+    }
+
+    # Caching for charting data queried from datasources
+    DATA_CACHE_CONFIG = {
+        'CACHE_TYPE': 'redis',
+        'CACHE_DEFAULT_TIMEOUT': 60 * 60 * 24,  # 1 day
+        'CACHE_KEY_PREFIX': 'superset.query.',
+        'CACHE_REDIS_URL': f'redis://{REDIS_AUTHORITY}{REDIS_HOST}:{REDIS_PORT}/4',
+    }
+
+    THUMBNAIL_CACHE_CONFIG = {
+        'CACHE_TYPE': 'redis',
+        'CACHE_DEFAULT_TIMEOUT': 60 * 60 * 24,  # 1 day
+        'CACHE_KEY_PREFIX': 'superset.thumbnail.',
+        'CACHE_REDIS_URL': f'redis://{REDIS_AUTHORITY}{REDIS_HOST}:{REDIS_PORT}/5',
+    }
+
+    # ===== Optional Feature =====
+    FEATURE_FLAGS = {
+        'THUMBNAILS': True,
+        'THUMBNAILS_SQLA_LISTENERS': True,
+    }
+
+  extraGunicornConfig: |
+    workers = 3
+    worker_class = 'gevent'
+    worker_connections = 1000
+
+  extraCeleryConfig:
