@@ -71,15 +71,17 @@ RUN set -eux; \
         cors thumbnails \
     ); \
     pip install "apache-superset[$(join ',' ${SUPERSET_PACKAGES[@]})]==${SUPERSET_VERSION}" \
-        "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=0.15" "redis~=3.5" "pylibmc~=1.6";
+        "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=0.15" "redis~=3.5" "pylibmc~=1.6"; \
+    \
+    rm -rf /usr/local/cx_Oracle-doc;
 
 RUN pip install sqlalchemy-trino
 COPY ./trino.py /usr/local/lib/python3.8/site-packages/superset/db_engine_specs/
 
 FROM base
 
+COPY --from=builder /usr/local /usr/local
 COPY ./scripts/* /usr/local/bin/
-COPY --from=builder /usr/local/lib/python3.8 /usr/local/lib/python3.8
 
 USER superset
 EXPOSE 8088 5555
