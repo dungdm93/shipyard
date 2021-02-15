@@ -1,0 +1,90 @@
+{{- $flower := mergeOverwrite (deepCopy .Values.commons) .Values.flower -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "superset.fullname" . }}-flower
+  labels:
+    {{- include "superset.flower.labels" . | nindent 4 }}
+    {{- with $flower.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $flower.annotations | nindent 4 }}
+spec:
+  replicas: {{ $flower.replicas }}
+  selector:
+    matchLabels:
+      {{- include "superset.flower.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "superset.flower.selectorLabels" . | nindent 8 }}
+        {{- with $flower.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "superset.checksum" . | nindent 8 }}
+        {{- with $flower.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: superset-flower
+          image: {{ $flower.image.repository }}:{{ $flower.image.tag }}
+          imagePullPolicy: {{ $flower.imagePullPolicy }}
+        {{- with $flower.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with $flower.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          env:
+            {{- toYaml $flower.env | nindent 12 }}
+          # envFrom:
+          #   - configMapRef:
+          #       name: "{{ template "superset.fullname" . }}-env"
+          ports:
+            - name: flower
+              protocol: TCP
+              containerPort: 5555
+          volumeMounts:
+            - name: superset-config
+              mountPath: /opt/superset/superset.cfg
+              subPath:   superset.cfg
+          livenessProbe:
+            httpGet:
+              path: /
+              port: flower
+            periodSeconds: 30
+          resources:
+            {{- toYaml $flower.resources | nindent 12 }}
+      serviceAccountName: {{ include "superset.flower.serviceAccountName" . }}
+      priorityClassName:  {{ $flower.priorityClassName }}
+      runtimeClassName:   {{ $flower.runtimeClassName }}
+      schedulerName:      {{ $flower.schedulerName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: superset-config
+          configMap:
+            name: {{ include "superset.fullname" . }}-config
+    {{- with $flower.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $flower.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $flower.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

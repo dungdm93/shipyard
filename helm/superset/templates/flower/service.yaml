@@ -1,0 +1,22 @@
+{{- $flower := mergeOverwrite (deepCopy .Values.commons) .Values.flower -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "superset.fullname" . }}-flower
+  labels:
+    {{- include "superset.flower.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $flower.service.annotations | nindent 4 }}
+spec:
+  type: {{ $flower.service.type }}
+  ports:
+    - port: {{ $flower.service.port }}
+      name: flower
+      protocol: TCP
+      {{- if eq $flower.service.type "NodePort" }}
+      nodePort: {{ $flower.service.nodePort }}
+      {{- end }}
+      targetPort: flower
+  selector:
+    {{- include "superset.flower.selectorLabels" . | nindent 4 }}

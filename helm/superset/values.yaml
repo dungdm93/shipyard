@@ -1,0 +1,145 @@
+nameOverride: ""
+fullnameOverride: ""
+
+imagePullPolicy: IfNotPresent
+imagePullSecrets: []
+# - name: regcred
+
+superset: {}
+
+# Commons k8s configurations. It can be overridden by
+# superset components: webserver, worker, beat, flower
+commons:
+  image:
+    repository: hub.teko.vn/dataops/superset
+    tag: "1.0"
+  replicas: null
+  command: []
+  args: []
+  env: []
+
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+
+  resources: {}
+
+  schedulerName: null
+  runtimeClassName: null
+  priorityClassName: null
+
+  affinity: {}
+  tolerations: []
+  nodeSelector: {}
+
+  extraVolumes: []
+  extraVolumeMounts: []
+
+webserver:
+  args: [webserver]
+
+worker:
+  args: [worker]
+  terminationPeriod: 120  # 2 minutes to worker complete its tasks
+
+beat:
+  args: [beat]
+
+flower:
+  args: [flower]
+  service:
+    type: ClusterIP
+    port: 5555
+    nodePort:
+    annotations: {}
+  ingress:
+    enabled: false
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: superset.local
+        path: /flower
+    tls: []
+    #  - secretName: superset.local-tls
+    #    hosts:
+    #      - superset.local
+
+postgresql:
+  enabled: true
+
+  postgresqlUsername: postgres
+  postgresqlPassword: superset
+  postgresqlDatabase: superset
+
+  replication:
+    enabled: false
+
+  persistence:
+    enabled: true
+
+# See: https://docs.sqlalchemy.org/en/13/dialects/index.html
+externalDatabase: ""
+
+redis:
+  enabled: true
+
+  password: superset
+
+  cluster:
+    enabled: false
+
+  sentinel:
+    enabled: false
+
+  master:
+    persistence:
+      enabled: true
+
+# See: https://docs.celeryproject.org/en/stable/getting-started/brokers/index.html
+externalCeleryBroker: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+rbac:
+  # If true, create & use RBAC resources
+  create: true
+  # If true, create and use PodSecurityPolicy
+  pspEnable: true
+  # The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podDisruptionBudget:
+  enabled: false
+  # minAvailable: 1
+  # maxUnavailable:
+
+service:
+  type: ClusterIP
+  port: 8088
+  nodePort:
+  annotations: {}
+  sessionAffinity: None
+  sessionAffinityConfig: {}
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: superset.local
+      path: /
+  tls: []
+  #  - secretName: superset.local-tls
+  #    hosts:
+  #      - superset.local
