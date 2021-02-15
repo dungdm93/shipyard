@@ -47,18 +47,19 @@ spec:
             {{- toYaml . | nindent 12 }}
         {{- end }}
           env:
-            {{- toYaml $flower.env | nindent 12 }}
-          # envFrom:
-          #   - configMapRef:
-          #       name: "{{ template "superset.fullname" . }}-env"
+            {{- include "superset.env" . | nindent 12 }}
+          {{- with $flower.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: flower
               protocol: TCP
               containerPort: 5555
           volumeMounts:
-            - name: superset-config
-              mountPath: /opt/superset/superset.cfg
-              subPath:   superset.cfg
+            {{- include "superset.volumeMounts" . | nindent 12 }}
+          {{- with $flower.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /
@@ -73,9 +74,10 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
-        - name: superset-config
-          configMap:
-            name: {{ include "superset.fullname" . }}-config
+        {{- include "superset.volumes" . | nindent 8 }}
+      {{- with $flower.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     {{- with $flower.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

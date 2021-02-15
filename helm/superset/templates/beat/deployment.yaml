@@ -47,10 +47,10 @@ spec:
             {{- toYaml . | nindent 12 }}
         {{- end }}
           env:
-            {{- toYaml $beat.env | nindent 12 }}
-          # envFrom:
-          #   - configMapRef:
-          #       name: "{{ template "superset.fullname" . }}-env"
+            {{- include "superset.env" . | nindent 12 }}
+          {{- with $beat.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             {{- include "superset.volumeMounts" . | nindent 12 }}
           {{- with $beat.extraVolumeMounts }}

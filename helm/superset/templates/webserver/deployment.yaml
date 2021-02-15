@@ -47,10 +47,10 @@ spec:
             {{- toYaml . | nindent 12 }}
         {{- end }}
           env:
-            {{- toYaml $webserver.env | nindent 12 }}
-          # envFrom:
-          #   - configMapRef:
-          #       name: "{{ template "superset.fullname" . }}-env"
+            {{- include "superset.env" . | nindent 12 }}
+          {{- with $webserver.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: web
               protocol: TCP

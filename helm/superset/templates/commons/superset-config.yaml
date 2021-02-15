@@ -7,20 +7,10 @@ metadata:
     {{- include "superset.labels" . | nindent 4 }}
 data:
   superset_config.py: |
-    from cachelib.redis import RedisCache
-    from celery.schedules import crontab
-
-    LOG_LEVEL = 'DEBUG'
-
-    SUPERSET_WEBSERVER_PROTOCOL = 'http'
-    SUPERSET_WEBSERVER_ADDRESS = '0.0.0.0'
-    SUPERSET_WEBSERVER_PORT = 8088
-    ENABLE_PROXY_FIX = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:SuperSecr3t@postgres:5432/superset'
-    WEBDRIVER_BASEURL = 'http://superset-webserver:8088/'
+    {{- tpl (.Files.Get "files/superset_config.py") . | nindent 4 }}
 
   gunicorn.conf.py: |
-    accesslog = '-' # stdout
-    errorlog = '-'  # stderr
+    {{- tpl (.Files.Get "files/gunicorn.conf.py") . | nindent 4 }}
 
   celeryconfig.py: |
+    {{- tpl (.Files.Get "files/celeryconfig.py") . | nindent 4 }}

@@ -94,7 +94,19 @@ Join a list with transformation
 {{- end -}}
 
 {{/*
-superset volumeMounts
+Superset env
+*/}}
+{{- define "superset.env" -}}
+- name: SUPERSET_CONFIG_PATH
+  value: /etc/superset/superset_config.py
+- name: GUNICORN_CONFIG_PATH
+  value: /etc/superset/gunicorn.conf.py
+- name: CELERY_CONFIG_PATH
+  value: /etc/superset/celeryconfig.py
+{{- end -}}
+
+{{/*
+Superset volumeMounts
 */}}
 {{- define "superset.volumeMounts" -}}
 - name: superset-config
@@ -102,7 +114,7 @@ superset volumeMounts
 {{- end -}}
 
 {{/*
-superset volumes
+Superset volumes
 */}}
 {{- define "superset.volumes" -}}
 - name: superset-config

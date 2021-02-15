@@ -53,28 +53,29 @@ spec:
             {{- toYaml . | nindent 12 }}
         {{- end }}
           env:
-            {{- toYaml $worker.env | nindent 12 }}
-          # envFrom:
-          #   - configMapRef:
-          #       name: "{{ template "superset.fullname" . }}-env"
+            {{- include "superset.env" . | nindent 12 }}
+          {{- with $worker.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             {{- include "superset.volumeMounts" . | nindent 12 }}
           {{- with $worker.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          livenessProbe:
-            exec:
-              command:
-              - bash
-              - -c
-              - >
-                celery inspect ping
-                  --app=superset.tasks.celery_app:app
-                  --config=$CELERY_CONFIG_PATH
-                  -d celery@$HOSTNAME
-            initialDelaySeconds: 60
-            timeoutSeconds: 15
-            periodSeconds: 30
+          ## This healthcheck don't work as expected and create zombie processes
+          # livenessProbe:
+          #   exec:
+          #     command:
+          #     - bash
+          #     - -c
+          #     - >
+          #       celery inspect ping
+          #         --app=superset.tasks.celery_app:app
+          #         --config=$CELERY_CONFIG_PATH
+          #         -d celery@$HOSTNAME
+          #   initialDelaySeconds: 60
+          #   timeoutSeconds: 15
+          #   periodSeconds: 30
           resources:
             {{- toYaml $worker.resources | nindent 12 }}
       serviceAccountName: {{ include "superset.worker.serviceAccountName" . }}
