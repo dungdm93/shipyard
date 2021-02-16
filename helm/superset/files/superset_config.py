@@ -11,18 +11,27 @@ ENABLE_PROXY_FIX = True
 WEBDRIVER_BASEURL = 'http://{{ include "superset.fullname" . }}-webserver:8088/'
 
 {{ $pg  := .Values.postgresql -}}
+{{ if $pg.enabled -}}
+SQLA_TYPE     = "postgresql"
+SQLA_HOST     = {{ include "call-nested" (list . "postgresql" "postgresql.fullname") | quote }}
+SQLA_PORT     = {{ include "call-nested" (list . "postgresql" "postgresql.port")     | quote }}
+SQLA_USERNAME = {{ include "call-nested" (list . "postgresql" "postgresql.username") | quote }}
+SQLA_PASSWORD = {{ include "call-nested" (list . "postgresql" "postgresql.password") | quote }}
+SQLA_DATABASE = {{ include "call-nested" (list . "postgresql" "postgresql.database") | quote }}
+{{- else -}}
 {{ $xdb := .Values.externalDatabase -}}
-SQLA_TYPE = '{{ $pg.enabled | ternary "postgresql" $xdb.type }}'
-SQLA_HOST = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.fullname")) $xdb.host }}'
-SQLA_PORT = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.port")) $xdb.port }}'
-SQLA_USERNAME = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.username")) $xdb.username }}'
-SQLA_PASSWORD = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.password")) $xdb.password }}'
-SQLA_DATABASE = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.database")) $xdb.database }}'
+SQLA_TYPE     = {{ $xdb.type | quote }}
+SQLA_HOST     = {{ $xdb.host | quote }}
+SQLA_PORT     = {{ $xdb.port | quote }}
+SQLA_USERNAME = {{ $xdb.username | quote }}
+SQLA_PASSWORD = {{ $xdb.password | quote }}
+SQLA_DATABASE = {{ $xdb.database | quote }}
+{{- end }}
 
 SQLALCHEMY_DATABASE_URI = f'{SQLA_TYPE}://{SQLA_USERNAME}:{quote(SQLA_PASSWORD)}@{SQLA_HOST}:{SQLA_PORT}/{SQLA_DATABASE}'
 
 {{ $redis  := .Values.redis -}}
-{{ if $redis -}}
+{{ if $redis.enabled -}}
 from cachelib.redis import RedisCache
 from celery.schedules import crontab
 

@@ -1,0 +1,10 @@
+postgresql:
+  enabled: false
+
+externalDatabase:
+  type: postgresql
+  host: infradb.dungdm93.me
+  port: 5432
+  username: postgres
+  password: SuperSecr3t
+  database: superset
