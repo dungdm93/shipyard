@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "superset.fullname" . }}-config
+  labels:
+    {{- include "superset.labels" . | nindent 4 }}
+data:
+  superset_config.py: |
+    {{- tpl (.Files.Get "files/superset_config.py") . | nindent 4 }}
+
+  gunicorn.conf.py: |
+    {{- tpl (.Files.Get "files/gunicorn.conf.py") . | nindent 4 }}
+
+  celeryconfig.py: |
+    {{- tpl (.Files.Get "files/celeryconfig.py") . | nindent 4 }}

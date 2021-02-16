@@ -1,0 +1,97 @@
+{{- $webserver := mergeOverwrite (deepCopy .Values.commons) .Values.webserver -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "superset.fullname" . }}-webserver
+  labels:
+    {{- include "superset.webserver.labels" . | nindent 4 }}
+    {{- with $webserver.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $webserver.annotations | nindent 4 }}
+spec:
+  replicas: {{ $webserver.replicas }}
+  selector:
+    matchLabels:
+      {{- include "superset.webserver.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "superset.webserver.selectorLabels" . | nindent 8 }}
+        {{- with $webserver.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "superset.checksum" . | nindent 8 }}
+        {{- with $webserver.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: superset-webserver
+          image: {{ $webserver.image.repository }}:{{ $webserver.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with $webserver.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with $webserver.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          env:
+            {{- include "superset.env" . | nindent 12 }}
+          {{- with $webserver.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: web
+              protocol: TCP
+              containerPort: 8088
+          volumeMounts:
+            {{- include "superset.volumeMounts" . | nindent 12 }}
+          {{- with $webserver.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: web
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: web
+            periodSeconds: 30
+          resources:
+            {{- toYaml $webserver.resources | nindent 12 }}
+      serviceAccountName: {{ include "superset.webserver.serviceAccountName" . }}
+      priorityClassName:  {{ $webserver.priorityClassName }}
+      runtimeClassName:   {{ $webserver.runtimeClassName }}
+      schedulerName:      {{ $webserver.schedulerName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- include "superset.volumes" . | nindent 8 }}
+      {{- with $webserver.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with $webserver.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $webserver.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $webserver.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

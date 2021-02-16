@@ -1,0 +1,84 @@
+{{- $beat := mergeOverwrite (deepCopy .Values.commons) .Values.beat -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "superset.fullname" . }}-beat
+  labels:
+    {{- include "superset.beat.labels" . | nindent 4 }}
+    {{- with $beat.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $beat.annotations | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "superset.beat.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "superset.beat.selectorLabels" . | nindent 8 }}
+        {{- with $beat.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "superset.checksum" . | nindent 8 }}
+        {{- with $beat.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: superset-beat
+          image: {{ $beat.image.repository }}:{{ $beat.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with $beat.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with $beat.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          env:
+            {{- include "superset.env" . | nindent 12 }}
+          {{- with $beat.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- include "superset.volumeMounts" . | nindent 12 }}
+          {{- with $beat.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          # Beat has no ports & healchecks
+          resources:
+            {{- toYaml $beat.resources | nindent 12 }}
+      serviceAccountName: {{ include "superset.beat.serviceAccountName" . }}
+      priorityClassName:  {{ $beat.priorityClassName }}
+      runtimeClassName:   {{ $beat.runtimeClassName }}
+      schedulerName:      {{ $beat.schedulerName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- include "superset.volumes" . | nindent 8 }}
+      {{- with $beat.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with $beat.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $beat.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $beat.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

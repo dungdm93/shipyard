@@ -1,0 +1,89 @@
+import logging
+from urllib.parse import *
+
+# https://docs.python.org/3/library/logging.html#logrecord-attributes
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)-5s] %(name)-15s:%(lineno)d: %(message)s')
+
+SUPERSET_WEBSERVER_PROTOCOL = 'http'
+SUPERSET_WEBSERVER_ADDRESS = '0.0.0.0'
+SUPERSET_WEBSERVER_PORT = 8088
+ENABLE_PROXY_FIX = True
+WEBDRIVER_BASEURL = 'http://{{ include "superset.fullname" . }}-webserver:8088/'
+
+{{ $pg  := .Values.postgresql -}}
+{{ $xdb := .Values.externalDatabase -}}
+SQLA_TYPE = '{{ $pg.enabled | ternary "postgresql" $xdb.type }}'
+SQLA_HOST = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.fullname")) $xdb.host }}'
+SQLA_PORT = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.port")) $xdb.port }}'
+SQLA_USERNAME = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.username")) $xdb.username }}'
+SQLA_PASSWORD = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.password")) $xdb.password }}'
+SQLA_DATABASE = '{{ $pg.enabled | ternary (include "call-nested" (list . "postgresql" "postgresql.database")) $xdb.database }}'
+
+SQLALCHEMY_DATABASE_URI = f'{SQLA_TYPE}://{SQLA_USERNAME}:{quote(SQLA_PASSWORD)}@{SQLA_HOST}:{SQLA_PORT}/{SQLA_DATABASE}'
+
+{{ $redis  := .Values.redis -}}
+{{ if $redis -}}
+from cachelib.redis import RedisCache
+from celery.schedules import crontab
+
+REDIS_HOST = '{{ printf "%s-master" (include "call-nested" (list . "redis" "redis.fullname")) }}'
+REDIS_PORT = '{{ $redis.master.service.port }}'
+{{ if $redis.usePassword -}}
+REDIS_PASSWORD = '{{ include "call-nested" (list . "redis" "redis.password") }}'
+{{- else -}}
+REDIS_PASSWORD = None
+{{- end }}
+REDIS_AUTHORITY = f':{quote(REDIS_PASSWORD)}@' if REDIS_PASSWORD else ''
+
+class CeleryConfig:
+    BROKER_URL = f'redis://{REDIS_AUTHORITY}{REDIS_HOST}:{REDIS_PORT}/0' # _kombu.binding.
+    CELERY_IMPORTS = (
+        'superset.sql_lab',
+        'superset.tasks',
+        'superset.tasks.thumbnails',
+    )
+    CELERY_RESULT_BACKEND = f'redis://{REDIS_AUTHORITY}{REDIS_HOST}:{REDIS_PORT}/1'  # celery-task-meta-
+    CELERYD_LOG_LEVEL = 'INFO'
+    CELERYD_PREFETCH_MULTIPLIER = 10
+    CELERY_ACKS_LATE = True
+    CELERY_ANNOTATIONS = {
+        'sql_lab.get_sql_results': {
+            'rate_limit': '100/s'
+        },
+        'email_reports.send': {
+            'rate_limit': '1/s',
+            'time_limit': 120,
+            'soft_time_limit': 150,
+            'ignore_result': True,
+        },
+    }
+    CELERYBEAT_SCHEDULE = {
+        'email_reports.schedule_hourly': {
+            'task': 'email_reports.schedule_hourly',
+            'schedule': crontab(minute=1, hour='*'),
+        },
+        'cache-warmup-hourly': {
+            'task': 'cache-warmup',
+            'schedule': crontab(minute=0, hour='*'),  # hourly
+            'kwargs': {
+                'strategy_name': 'top_n_dashboards',
+                'top_n': 5,
+                'since': '7 days ago',
+            },
+        },
+    }
+
+
+CELERY_CONFIG = CeleryConfig
+RESULTS_BACKEND = RedisCache(
+    host=REDIS_HOST,
+    port=REDIS_PORT,
+    password=REDIS_PASSWORD,
+    db=2,
+    key_prefix='superset.results.'
+)
+{{- end }}
+
+{{ if .Values.superset.extraSupersetConfig -}}
+{{ tpl .Values.superset.extraSupersetConfig . }}
+{{- end }}

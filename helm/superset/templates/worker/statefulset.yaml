@@ -1,0 +1,103 @@
+{{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "superset.fullname" . }}-worker
+  labels:
+    {{- include "superset.worker.labels" . | nindent 4 }}
+    {{- with $worker.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $worker.annotations | nindent 4 }}
+spec:
+  replicas: {{ $worker.replicas }}
+  serviceName: "{{ template "superset.fullname" . }}-worker"
+  podManagementPolicy: Parallel
+  updateStrategy:
+    ## Kill the workers as soon as possible, the scheduler will restart the failed jobs later
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "superset.worker.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "superset.worker.selectorLabels" . | nindent 8 }}
+        {{- with $worker.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "superset.checksum" . | nindent 8 }}
+        {{- with $worker.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: {{ $worker.terminationPeriod }}
+      containers:
+        - name: superset-worker
+          image: {{ $worker.image.repository }}:{{ $worker.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with $worker.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with $worker.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          env:
+            {{- include "superset.env" . | nindent 12 }}
+          {{- with $worker.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- include "superset.volumeMounts" . | nindent 12 }}
+          {{- with $worker.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ## This healthcheck don't work as expected and create zombie processes
+          # livenessProbe:
+          #   exec:
+          #     command:
+          #     - bash
+          #     - -c
+          #     - >
+          #       celery inspect ping
+          #         --app=superset.tasks.celery_app:app
+          #         --config=$CELERY_CONFIG_PATH
+          #         -d celery@$HOSTNAME
+          #   initialDelaySeconds: 60
+          #   timeoutSeconds: 15
+          #   periodSeconds: 30
+          resources:
+            {{- toYaml $worker.resources | nindent 12 }}
+      serviceAccountName: {{ include "superset.worker.serviceAccountName" . }}
+      priorityClassName:  {{ $worker.priorityClassName }}
+      runtimeClassName:   {{ $worker.runtimeClassName }}
+      schedulerName:      {{ $worker.schedulerName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- include "superset.volumes" . | nindent 8 }}
+      {{- with $worker.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with $worker.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $worker.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $worker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
