@@ -6,6 +6,7 @@ imagePullSecrets: []
 # - name: regcred
 
 superset:
+  secretKey:
   extraSupersetConfig:
   extraGunicornConfig:
   extraCeleryConfig:

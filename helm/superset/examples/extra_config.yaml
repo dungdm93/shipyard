@@ -1,4 +1,5 @@
 superset:
+  secretKey: 1234567890poiuytrewqasdfghjklmnbvcxz
   extraSupersetConfig: |
     # ===== Caching =====
     # https://flask-caching.readthedocs.io/en/latest/#configuring-flask-caching

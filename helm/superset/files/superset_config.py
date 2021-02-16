@@ -4,6 +4,7 @@ from urllib.parse import *
 # https://docs.python.org/3/library/logging.html#logrecord-attributes
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)-5s] %(name)-15s:%(lineno)d: %(message)s')
 
+SECRET_KEY = {{ .Values.superset.secretKey | default (randAlphaNum 32) | quote }}
 SUPERSET_WEBSERVER_PROTOCOL = 'http'
 SUPERSET_WEBSERVER_ADDRESS = '0.0.0.0'
 SUPERSET_WEBSERVER_PORT = 8088
@@ -28,7 +29,7 @@ SQLA_PASSWORD = {{ $xdb.password | quote }}
 SQLA_DATABASE = {{ $xdb.database | quote }}
 {{- end }}
 
-SQLALCHEMY_DATABASE_URI = f'{SQLA_TYPE}://{SQLA_USERNAME}:{quote(SQLA_PASSWORD)}@{SQLA_HOST}:{SQLA_PORT}/{SQLA_DATABASE}'
+SQLALCHEMY_DATABASE_URI = f'{SQLA_TYPE}://{SQLA_USERNAME}:{SQLA_PASSWORD}@{SQLA_HOST}:{SQLA_PORT}/{SQLA_DATABASE}'
 
 {{ $redis  := .Values.redis -}}
 {{ if $redis.enabled -}}
@@ -42,7 +43,7 @@ REDIS_PASSWORD = '{{ include "call-nested" (list . "redis" "redis.password") }}'
 {{- else -}}
 REDIS_PASSWORD = None
 {{- end }}
-REDIS_AUTHORITY = f':{quote(REDIS_PASSWORD)}@' if REDIS_PASSWORD else ''
+REDIS_AUTHORITY = f':{REDIS_PASSWORD}@' if REDIS_PASSWORD else ''
 
 class CeleryConfig:
     BROKER_URL = f'redis://{REDIS_AUTHORITY}{REDIS_HOST}:{REDIS_PORT}/0' # _kombu.binding.
