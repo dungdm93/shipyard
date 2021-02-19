@@ -9,7 +9,7 @@ case "$1" in
         if [ -n "$GUNICORN_CONFIG_PATH" ]; then
             GUNICORN_CMD_ARGS="--config=$GUNICORN_CONFIG_PATH ${GUNICORN_CMD_ARGS}"
         fi
-        gunicorn --bind=0.0.0.0:8088 \
+        exec gunicorn --bind=0.0.0.0:8088 \
             ${GUNICORN_CMD_ARGS} \
             "superset.app:create_app()"
         ;;
@@ -21,7 +21,7 @@ case "$1" in
         if [ -n "$CELERY_CONFIG_PATH" ]; then
             CELERY_CMD_ARGS="--config=$CELERY_CONFIG_PATH ${CELERY_CMD_ARGS}"
         fi
-        celery "$1" ${CELERY_CMD_ARGS} \
+        exec celery "$1" ${CELERY_CMD_ARGS} \
             "--app=superset.tasks.celery_app:app"
         ;;
     version)
