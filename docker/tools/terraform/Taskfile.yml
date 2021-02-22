@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/tools/terraform:0.13
+  IMAGE: hub.teko.vn/tools/terraform:0.14
 
 includes:
   docker: ../../

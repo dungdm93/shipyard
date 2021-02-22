@@ -1,89 +1,93 @@
 terraform {
   required_providers {
-    # Amazon AWS
+    ## Amazon AWS
     # aws = {
     #   source  = "hashicorp/aws"
     #   version = "~> 2.70"
     # }
 
-    # Google Cloud Platform
+    ## Google Cloud Platform
     google = {
       source  = "hashicorp/google"
-      version = "~> 3.30"
+      version = "~> 3.50"
     }
 
-    # Microsoft Azure
+    ## Microsoft Azure
     # azurerm = {
     #   source  = "hashicorp/azurerm"
-    #   version = "~> 2.20"
+    #   version = "~> 2.40"
     # }
 
-    # Oracle Cloud Infrastructure
+    ## Oracle Cloud Infrastructure
     # oci = {
     #   source  = "hashicorp/oci"
-    #   version = "~> 3.80"
+    #   version = "~> 4.10"
     # }
 
-    # OpenStack
+    ## OpenStack
     # openstack = {
-    #   source  = "terraform-providers/openstack"
-    #   version = "~> 1.26"
+    #   source  = "terraform-provider-openstack/openstack"
+    #   version = "~> 1.30"
     # }
 
-    # VMware vSphere
+    ## VMware vSphere
     # vsphere = {
     #   source  = "hashicorp/vsphere"
     #   version = "~> 1.20"
     # }
 
-    # Alibaba Cloud
+    ## Alibaba Cloud
     # alicloud = {
-    #   source  = "hashicorp/alicloud"
-    #   version = "~> 1.90"
+    #   source  = "aliyun/alicloud"
+    #   version = "~> 1.100"
     # }
 
-    # Cloudflare
+    ## Cloudflare
     cloudflare = {
-      source  = "terraform-providers/cloudflare"
-      version = "~> 2.4"
+      source  = "cloudflare/cloudflare"
+      version = "~> 2.15"
     }
 
-    # Database PostgreSQL
+    ## Database PostgreSQL
     postgresql = {
-      source  = "terraform-providers/postgresql"
-      version = "~> 1.5"
+      source  = "cyrilgdn/postgresql"
+      version = "~> 1.10"
     }
 
-    # Database MySQL
+    ## Database MySQL
     mysql = {
-      source  = "terraform-providers/mysql"
-      version = "~> 1.9"
+      source  = "petoju/mysql"
+      version = "~> 2.2"
     }
 
-    # RabbitMQ
+    ## RabbitMQ
     # rabbitmq = {
-    #   source  = "terraform-providers/rabbitmq"
-    #   version = "1.1"
+    #   source  = "cyrilgdn/rabbitmq"
+    #   version = "1.5"
     # }
 
-    # Hashicorp Vault
+    ## Hashicorp Vault
     vault = {
       source  = "hashicorp/vault"
-      version = "~> 2.12"
+      version = "~> 2.18"
     }
 
-    ##### Custom plugins - Manual install #####
-    # minio = {
-    #   source  = "github.com/aminueza/minio"
-    #   version = "1.1.0"
-    # }
-    # nexus = {
-    #   source  = "github.com/datadrivers/nexus"
-    #   version = "1.6.0"
-    # }
-    # keycloak = {
-    #   source  = "github.com/mrparkers/keycloak"
-    #   version = "1.20.0"
-    # }
+    ## MinIO
+    minio = {
+      source  = "aminueza/minio"
+      version = "~> 1.2"
+    }
+
+    ## Sonatype Nexus
+    nexus = {
+      source  = "datadrivers/nexus"
+      version = "~> 1.12"
+    }
+
+    ## Keycloak
+    keycloak = {
+      source  = "mrparkers/keycloak"
+      version = "2.2"
+    }
   }
 }
