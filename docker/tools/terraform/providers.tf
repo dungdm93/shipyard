@@ -1,5 +1,17 @@
 terraform {
   required_providers {
+    ## CNCF Kubernetes
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+
+    ## CNCF Helm
+    helm = {
+      source = "hashicorp/helm"
+      version = "~> 2.0"
+    }
+
     ## Amazon AWS
     # aws = {
     #   source  = "hashicorp/aws"
