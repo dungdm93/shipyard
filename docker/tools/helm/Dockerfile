@@ -59,3 +59,10 @@ RUN set -eux; \
     curl -sSL "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" \
           -o /usr/local/bin/helmfile; \
     chmod +x /usr/local/bin/helmfile;
+
+# Install vault
+ENV VAULT_VERSION=1.6.3
+RUN set -eux; \
+    curl -sSL "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip" -o vault.zip; \
+    unzip vault.zip -d /usr/local/bin && rm vault.zip; \
+    chmod +x /usr/local/bin/vault;
