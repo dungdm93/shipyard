@@ -64,5 +64,7 @@ RUN set -eux; \
 ENV VAULT_VERSION=1.6.3
 RUN set -eux; \
     curl -sSL "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip" -o vault.zip; \
-    unzip vault.zip -d /usr/local/bin && rm vault.zip; \
-    chmod +x /usr/local/bin/vault;
+    unzip vault.zip -d /usr/local/bin; \
+    chmod +x /usr/local/bin/vault; \
+    vault -autocomplete-install; \
+    rm vault.zip;
