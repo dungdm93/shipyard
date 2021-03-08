@@ -1,4 +1,4 @@
-VERSION=0.3.1-dev
+VERSION=0.4-debezium-1.4.0
 
 build:
 	docker build -t hub.teko.vn/dataops/debezium-connect:${VERSION} .
