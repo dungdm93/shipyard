@@ -1,0 +1,7 @@
+image:
+  repository: hub.teko.vn/dataops/kafka/schema-registry
+  tag: 6.1.0
+
+imagePullPolicy: Always
+imagePullSecrets:
+- name: regcred

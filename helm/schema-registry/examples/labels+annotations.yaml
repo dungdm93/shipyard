@@ -1,0 +1,13 @@
+labels:
+  statefulset-label: statefulset-label-value
+podLabels:
+  pod-label: pod-label-value
+annotations:
+  statefulset-annotation: statefulset-annotations-value
+podAnnotations:
+  pod-annotation: pod-annotations-value
+
+
+serviceAccount:
+  annotations:
+    sa-annotation: sa-annotations-value
