@@ -4,12 +4,20 @@ metadata:
   name: {{ include "schema-registry.fullname" . }}
   labels:
     {{- include "schema-registry.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.service.annotations | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - name: http
       protocol: TCP
-      name: http
+      port: {{ .Values.service.port }}
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+      targetPort: http
   selector:
     {{- include "schema-registry.selectorLabels" . | nindent 4 }}
+  sessionAffinity: {{ .Values.service.sessionAffinity }}
+  sessionAffinityConfig:
+    {{- toYaml .Values.service.sessionAffinityConfig | nindent 4 }}
