@@ -65,5 +65,5 @@ Create the name of the service account to use
 Checksum pod annotations
 */}}
 {{- define "schema-registry.checksum" -}}
-checksum/airflow-config: foobar
+checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 {{- end -}}

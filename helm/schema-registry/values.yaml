@@ -9,6 +9,10 @@ imagePullPolicy: IfNotPresent
 imagePullSecrets: []
 # - name: regcred
 
+# https://docs.confluent.io/platform/current/schema-registry/installation/config.html
+schemaRegistry:
+  kafkastore.bootstrap.servers: ""
+
 replicas: 1
 
 labels: {}
@@ -19,7 +23,6 @@ podAnnotations: {}
 command: []
 args: []
 env: []
-envFrom: []
 volumes: []
 volumeMounts: []
 
