@@ -72,6 +72,10 @@ class CeleryConfig:
             'task': 'email_reports.schedule_hourly',
             'schedule': crontab(minute=1, hour='*'),
         },
+        'reports.scheduler': {
+            'task': 'reports.scheduler',
+            'schedule': crontab(minute="*", hour="*"),
+        },
         'cache-warmup-hourly': {
             'task': 'cache-warmup',
             'schedule': crontab(minute=0, hour='*'),  # hourly
@@ -80,6 +84,10 @@ class CeleryConfig:
                 'top_n': 5,
                 'since': '7 days ago',
             },
+        },
+        "reports.prune_log": {
+            "task": "reports.prune_log",
+            "schedule": crontab(minute=0, hour=0),
         },
     }
 
