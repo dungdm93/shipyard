@@ -1,0 +1,9 @@
+volumes:
+- name: config
+  secret:
+    secretName: schema-registry-secret
+
+volumeMounts:
+- name: config
+  mountPath: /etc/schema-registry
+  readOnly: true

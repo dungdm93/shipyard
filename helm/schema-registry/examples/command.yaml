@@ -1,0 +1,14 @@
+command:
+- bash
+- -c
+args:
+- run
+- schema-registry
+env:
+- name: FOOBAR
+  value: foobar
+- name: ENV_FROM_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: schema-registry-secret
+      key: important-config
