@@ -1,11 +1,30 @@
-FROM confluentinc/cp-kafka-connect-base:6.0.1 AS builder
-RUN confluent-hub install debezium/debezium-connector-mongodb:1.4.0 --no-prompt
-RUN confluent-hub install debezium/debezium-connector-postgresql:1.4.0 --no-prompt
-RUN confluent-hub install debezium/debezium-connector-mysql:1.4.0 --no-prompt
-RUN confluent-hub install debezium/debezium-connector-sqlserver:1.4.0 --no-prompt
+FROM maven:3.6-jdk-8 AS downloader
+SHELL ["/bin/bash", "-c"]
+WORKDIR /app/
 
-FROM quay.io/strimzi/kafka:latest-kafka-2.6.0
-COPY --from=builder /usr/share/confluent-hub-components /opt/kafka/plugins/
-USER root:root
-RUN yum install -y java-11-openjdk-devel
-USER 1001
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y curl tar;
+
+COPY ./pom.xml /app/
+RUN mvn dependency:resolve \
+        dependency:copy-dependencies -DoutputDirectory=jars/;
+
+ENV DEBEZIUM_VERSION=1.4.2.Final \
+    MAVEN_REPO_CENTRAL=https://repo1.maven.org/maven2
+RUN set -eux; \
+    mkdir plugins/; \
+    DEBEZIUM_CONNECTOR=( \
+        mysql postgres mongodb \
+        sqlserver oracle db2 \
+        # cassandra vitess \
+    ); \
+    for connector in "${DEBEZIUM_CONNECTOR[@]}"; do \
+        curl -sSL "${MAVEN_REPO_CENTRAL}/io/debezium/debezium-connector-${connector}/${DEBEZIUM_VERSION}/debezium-connector-${connector}-${DEBEZIUM_VERSION}-plugin.tar.gz" \
+            | tar -xzvf - -C plugins --no-same-owner; \
+    done
+
+FROM quay.io/strimzi/kafka:0.22.1-kafka-2.7.0
+
+COPY --from=downloader /app/jars/*  /opt/kafka/libs/
+COPY --from=downloader /app/plugins /opt/kafka/plugins
