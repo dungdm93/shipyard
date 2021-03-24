@@ -29,7 +29,7 @@ WORKDIR ${AIRFLOW_HOME}
 
 FROM base AS builder
 
-ARG AIRFLOW_VERSION=1.10.12
+ARG AIRFLOW_VERSION=1.10.15
 
 RUN set -eux; \
     apt-get update; \
@@ -68,7 +68,7 @@ RUN set -eux; \
     pip config set global.user True; \
     pip install --use-deprecated=legacy-resolver \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}" \
-        "lz4" "python-snappy" "airflow-exporter<=1.4" "sqlalchemy-trino";
+        "lz4" "python-snappy" "airflow-exporter==1.3.0" "SQLAlchemy==1.3.15" "sqlalchemy-trino";
 
 FROM base
 
