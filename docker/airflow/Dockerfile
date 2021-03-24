@@ -68,7 +68,7 @@ RUN set -eux; \
     pip config set global.user True; \
     pip install --use-deprecated=legacy-resolver \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}" \
-        "lz4" "python-snappy" "airflow-exporter" "sqlalchemy-trino";
+        "lz4" "python-snappy" "airflow-exporter<=1.4" "sqlalchemy-trino";
 
 FROM base
 
