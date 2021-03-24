@@ -68,7 +68,7 @@ RUN set -eux; \
     pip config set global.user True; \
     pip install \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}" \
-        "lz4" "python-snappy" "airflow-exporter";
+        "lz4" "python-snappy" "airflow-exporter" "sqlalchemy-trino";
 
 FROM base
 
