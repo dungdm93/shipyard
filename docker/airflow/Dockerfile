@@ -83,7 +83,7 @@ RUN rm -rf \
 FROM base
 
 COPY --from=builder /usr/local /usr/local
-COPY --chown=airflow:airflow ./runit /etc/airflow
+COPY --chown=airflow:airflow ./runit /etc/airflow/runit
 COPY ./scripts/* /usr/local/bin/
 
 USER airflow
