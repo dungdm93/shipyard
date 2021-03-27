@@ -2,7 +2,7 @@
 exec 2>&1
 
 if [ "$(id -u)" = "0" ]; then
-    exec chpst -u airflow airflow flower
+    exec chpst -u airflow airflow celery flower
 else
-    exec airflow flower
+    exec airflow celery flower
 fi

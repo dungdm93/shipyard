@@ -7,7 +7,8 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libev4 libssl1.1 libisal2 libnss3 \
-        libpq5 libmariadb3 \
+        libpq5 libmariadb3 libodbc1 \
+        libldap-2.4-2 libkrb5-3 \
         curl locales runit; \
     \
     apt-get clean; \
@@ -38,8 +39,12 @@ RUN set -eux; \
         libsasl2-dev \
         # pip install pykerberos
         libkrb5-dev \
+        # pip install python-ldap
+        libldap2-dev \
         # pip install python-snappy
         libsnappy-dev \
+        # pip install unixodbc-dev
+        unixodbc-dev \
         libev-dev
 
 ARG AIRFLOW_VERSION=2.0.1
@@ -65,15 +70,21 @@ RUN set -eux; \
         sentry statsd hashicorp \
     ); \
     pip install --constraint "${CONSTRAINT_URL}" \
-        "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}"; \
-    pip install "lz4" "python-snappy" "sqlalchemy-trino";
+        "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
+
+RUN set -eux; \
+    pip install "lz4" "python-snappy" "trino";
         # "airflow-exporter==1.3.0"
+
+RUN rm -rf \
+        /usr/local/bin/__pycache__ \
+        /usr/local/cx_Oracle-doc;
 
 FROM base
 
-COPY ./scripts/* /usr/local/bin/
+COPY --from=builder /usr/local /usr/local
 COPY --chown=airflow:airflow ./runit /etc/airflow
-COPY --from=builder /usr/local/lib/python3.8/ /usr/local/lib/python3.8/
+COPY ./scripts/* /usr/local/bin/
 
 USER airflow
 EXPOSE 8080 8793 5555
