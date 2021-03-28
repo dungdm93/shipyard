@@ -73,7 +73,7 @@ RUN set -eux; \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
 
 RUN set -eux; \
-    pip install "lz4" "python-snappy" "trino";
+    pip install "kubernetes~=12.0" "lz4" "python-snappy" "trino";
         # "airflow-exporter==1.3.0"
 
 RUN rm -rf \
