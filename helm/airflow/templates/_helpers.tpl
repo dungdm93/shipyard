@@ -160,7 +160,7 @@ Airflow database connection url
 {{- define "airflow.database" -}}
 {{- if .Values.postgresql.enabled -}}
   {{- $pg := .Values.postgresql }}
-  {{- $pgHost := include "call-nested" (list . "postgresql" "postgresql.fullname") }}
+  {{- $pgHost := include "call-nested" (list . "postgresql" "common.names.fullname") }}
   {{- printf "postgresql+psycopg2://%s:%s@%s:%s/%s" $pg.postgresqlUsername $pg.postgresqlPassword $pgHost (toString $pg.service.port) $pg.postgresqlDatabase -}}
 {{- else -}}
   {{- .Values.externalDatabase }}

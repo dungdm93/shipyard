@@ -12,7 +12,7 @@ metadata:
   annotations:
     {{- toYaml $scheduler.annotations | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ $scheduler.replicas }}
   selector:
     matchLabels:
       {{- include "airflow.scheduler.selectorLabels" . | nindent 6 }}
