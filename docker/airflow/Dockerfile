@@ -19,7 +19,8 @@ RUN set -eux; \
     locale-gen; \
     update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8;
 
-ENV AIRFLOW_HOME="/opt/airflow"
+ENV AIRFLOW_HOME="/opt/airflow" \
+    PATH="/home/airflow/.local/bin:$PATH"
 RUN set -eux; \
     useradd -ms "/bin/bash" --uid=1000 airflow; \
     mkdir -p "${AIRFLOW_HOME}"; \
@@ -72,8 +73,13 @@ RUN set -eux; \
     pip install --constraint "${CONSTRAINT_URL}" \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
 
-RUN set -eux; \
-    pip install "kubernetes~=12.0" "lz4" "python-snappy" "trino";
+RUN pip install \
+        # force kubernetes>=12.0
+        "kubernetes~=12.0" \
+        # missing packages
+        "azure-storage-blob>=12.7.0" \
+        # extra packages
+        "lz4" "python-snappy" "trino";
         # "airflow-exporter==1.3.0"
 
 RUN rm -rf \
