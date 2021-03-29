@@ -1,55 +1,100 @@
 #!/usr/bin/env python3
+import argparse
+import sys
+import time
+from datetime import datetime
 
-def get_config(args):
+
+def print_config(args):
     import logging
     logging.disable(logging.CRITICAL)
 
     from airflow.configuration import conf
-    return conf.get(args.section, args.key)
+    print(conf.get(args.section, args.key))
 
 
-def parse_url(args):
-    from urllib.parse import urlparse
+def wait_for_database(retries: int, interval: float):
+    from airflow.configuration import conf
+    from sqlalchemy import create_engine, sql
+    from sqlalchemy.engine.base import Engine
+    from sqlalchemy.exc import OperationalError
 
-    url = urlparse(args.url)
-    part = getattr(url, args.part)
-    if not part:
-        part = args.default
-    return part
+    db_conn = conf.get("core", "sql_alchemy_conn")
+    engine: Engine = create_engine(db_conn)
+    uri = repr(engine.url)
+    for i in range(retries):
+        try:
+            engine.execute(sql.text('SELECT 1')).scalar()
+        except OperationalError:
+            print(f'[{datetime.now()}] waiting for database at {uri}... Try {i + 1}/{retries}', file=sys.stderr)
+            time.sleep(interval)
+        else:
+            print(f'[{datetime.now()}] Connect to database at {uri} successfully')
+            return
+
+    sys.exit('SQLAlchemy database still unreachable, giving up')
+
+
+def wait_for_broker(retries: int, interval: float):
+    from airflow.configuration import conf
+    from kombu.connection import Connection
+    from kombu.exceptions import OperationalError
+
+    class errback:
+        def __init__(self, uri: str, max_retries: int):
+            self.uri = uri
+            self.count = 0
+            self.max_retries = max_retries
+
+        def __call__(self, exc, interval):
+            self.count += 1
+            msg = f'[{datetime.now()}] waiting for broker at {self.uri}... Try {self.count}/{self.max_retries}'
+            print(msg, file=sys.stderr)
+
+    try:
+        broker_conn = conf.get("celery", "broker_url")
+        conn = Connection(broker_conn)
+        uri = conn.as_uri()
+        conn.ensure_connection(errback=errback(uri, max_retries=retries),
+                               max_retries=retries, interval_start=interval, interval_max=interval)
+        print(f'[{datetime.now()}] Connect to broker at {uri} successfully')
+    except OperationalError:
+        sys.exit('Celery broker still unreachable, giving up')
 
 
 def build_argparse():
-    import argparse
+    def wait_service(args: argparse.Namespace):
+        if args.service == 'database':
+            wait_for_database(args.retries, args.interval)
+        elif args.service == 'broker':
+            wait_for_broker(args.retries, args.interval)
+        else:
+            raise ValueError(f'Unknown service {args.service}')
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title='sub-commands')
 
-    # get-config sub-command
+    # wait sub-command
+    wait = subparsers.add_parser('wait', help='Waiting for external service start-up')
+    wait.add_argument('service', type=str, choices=['database', 'broker'],
+                      help='Service that waiting for')
+    wait.add_argument('--retries', type=int, default=30, help='Maximum number of times to retry')
+    wait.add_argument('--interval', type=float, default=3, help='The number of seconds sleeping for')
+    wait.set_defaults(func=wait_service)
+
     gcp = subparsers.add_parser('get-config', help='Get airflow config from file or envvar')
     gcp.add_argument('section', type=str, help='Airflow config section')
     gcp.add_argument('key', type=str, help='Airflow config key')
-    gcp.set_defaults(func=get_config)
-
-    # parse_url sub-command
-    pup = subparsers.add_parser('parse-url', help='Parse URLs into components')
-    pup.add_argument('url', type=str, help='URL is going to be parse')
-    pup.add_argument('--default', type=str, help='Default value', default="")
-    ucg = pup.add_mutually_exclusive_group()  # url-component group
-    ucg.add_argument('--scheme', dest='part', action='store_const', const='scheme', help='Extract scheme from given URL')
-    ucg.add_argument('--user', dest='part', action='store_const', const='username', help='Extract username from given URL')
-    ucg.add_argument('--pass', dest='part', action='store_const', const='password', help='Extract password from given URL')
-    ucg.add_argument('--host', dest='part', action='store_const', const='hostname', help='Extract hostname from given URL')
-    ucg.add_argument('--port', dest='part', action='store_const', const='port',     help='Extract port from given URL')
-    ucg.add_argument('--path', dest='part', action='store_const', const='path',     help='Extract path from given URL')
-    # params={} | query={} | fragment=[]
-    pup.set_defaults(func=parse_url)
+    gcp.set_defaults(func=print_config)
 
     return parser
 
 
-if __name__ == "__main__":
+def main():
     parser = build_argparse()
-
     args = parser.parse_args()
-    result = args.func(args)
-    print(result)
+    args.func(args)
+
+
+if __name__ == '__main__':
+    main()
