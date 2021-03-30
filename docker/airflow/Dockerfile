@@ -78,6 +78,7 @@ RUN pip install \
         "kubernetes~=12.0" \
         # missing packages
         "azure-storage-blob>=12.7.0" \
+        "authlib~=0.15" \
         # extra packages
         "lz4" "python-snappy" "trino";
         # "airflow-exporter==1.3.0"
