@@ -19,14 +19,6 @@ run_aio() {
         airflow-tools wait broker
     fi
 
-    local LOGGING_DIR="$(airflow-tools get-config logging base_log_folder)"
-    local LOGGING_REMOTE="$(airflow-tools get-config logging remote_logging)"
-    LOGGING_REMOTE="${LOGGING_REMOTE^^}"
-
-    if [ "${LOGGING_REMOTE}" = "FALSE" ] && [ -d "${LOGGING_DIR}" ]; then
-        chown -R airflow: "${LOGGING_DIR}"
-    fi
-
     exec runsvdir -P /etc/service/
 }
 

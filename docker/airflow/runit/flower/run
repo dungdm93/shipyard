@@ -1,8 +1,4 @@
 #!/bin/sh -e
 exec 2>&1
 
-if [ "$(id -u)" = "0" ]; then
-    exec chpst -u airflow airflow celery flower
-else
-    exec airflow celery flower
-fi
+exec airflow celery flower

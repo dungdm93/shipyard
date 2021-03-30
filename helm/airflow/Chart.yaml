@@ -4,7 +4,7 @@ description: Airflow helm chart
 icon: https://airflow.apache.org/docs/stable/_images/pin_large.png
 type: application
 version: 0.5.0
-appVersion: 2.0
+appVersion: 2.0.0
 # kubeVersion: ^1.15
 dependencies:
 - name: postgresql
