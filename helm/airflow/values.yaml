@@ -64,6 +64,9 @@ commons:
   tolerations: []
   nodeSelector: {}
 
+  securityContext: {}
+  podSecurityContext: {}
+
   extraVolumes: []
   extraVolumeMounts: []
 

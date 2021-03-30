@@ -64,12 +64,14 @@ spec:
           # Scheduler has no ports & healchecks
           resources:
             {{- toYaml $scheduler.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $scheduler.securityContext | nindent 12 }}
       serviceAccountName: {{ include "airflow.scheduler.serviceAccountName" . }}
       priorityClassName:  {{ $scheduler.priorityClassName }}
       runtimeClassName:   {{ $scheduler.runtimeClassName }}
       schedulerName:      {{ $scheduler.schedulerName }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml $scheduler.podSecurityContext | nindent 8 }}
       volumes:
         {{- include "airflow.volumes" . | nindent 8 }}
       {{- with $scheduler.extraVolumes }}
