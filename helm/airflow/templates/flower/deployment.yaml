@@ -67,12 +67,14 @@ spec:
             periodSeconds: 30
           resources:
             {{- toYaml $flower.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $flower.securityContext | nindent 12 }}
       serviceAccountName: {{ include "airflow.flower.serviceAccountName" . }}
       priorityClassName:  {{ $flower.priorityClassName }}
       runtimeClassName:   {{ $flower.runtimeClassName }}
       schedulerName:      {{ $flower.schedulerName }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml $flower.podSecurityContext | nindent 8 }}
       volumes:
         - name: airflow-config
           configMap:

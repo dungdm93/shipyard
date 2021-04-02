@@ -43,7 +43,7 @@ airflow_local_settings: ""
 commons:
   image:
     repository: hub.teko.vn/dataops/airflow
-    tag: 1.10.12
+    tag: "2.0"
   replicas: null
   command: []
   args: []
@@ -64,6 +64,9 @@ commons:
   tolerations: []
   nodeSelector: {}
 
+  securityContext: {}
+  podSecurityContext: {}
+
   extraVolumes: []
   extraVolumeMounts: []
 
@@ -74,11 +77,11 @@ scheduler:
   args: [scheduler]
 
 worker:
-  args: [worker]
+  args: [celery, worker]
   terminationPeriod: 120  # 2 minutes to worker complete its tasks
 
 flower:
-  args: [flower]
+  args: [celery, flower]
   service:
     type: ClusterIP
     port: 5555

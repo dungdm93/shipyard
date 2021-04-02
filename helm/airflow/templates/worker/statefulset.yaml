@@ -78,12 +78,14 @@ spec:
             periodSeconds: 30
           resources:
             {{- toYaml $worker.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $worker.securityContext | nindent 12 }}
       serviceAccountName: {{ include "airflow.worker.serviceAccountName" . }}
       priorityClassName:  {{ $worker.priorityClassName }}
       runtimeClassName:   {{ $worker.runtimeClassName }}
       schedulerName:      {{ $worker.schedulerName }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml $worker.podSecurityContext | nindent 8 }}
       volumes:
         {{- include "airflow.volumes" . | nindent 8 }}
       {{- with $worker.extraVolumes }}

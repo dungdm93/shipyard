@@ -3,16 +3,16 @@ name: airflow
 description: Airflow helm chart
 icon: https://airflow.apache.org/docs/stable/_images/pin_large.png
 type: application
-version: 0.4.6
-appVersion: 1.10.12
+version: 0.5.0
+appVersion: 2.0.0
 # kubeVersion: ^1.15
 dependencies:
 - name: postgresql
-  version: 8.x.x
+  version: 10.x.x
   repository: https://charts.bitnami.com/bitnami
   condition: postgresql.enabled
 - name: redis
-  version: 10.x.x
+  version: 12.x.x
   repository: https://charts.bitnami.com/bitnami
   condition: redis.enabled
 maintainers:
