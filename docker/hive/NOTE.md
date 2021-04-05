@@ -1,6 +1,10 @@
 NOTE
 ====
 
+## 0. Hive Standalone Metastore
+* [Tutorial](https://techjogging.com/standalone-hive-metastore-presto-docker.html)
+* [AdminManual Guide](https://cwiki.apache.org/confluence/display/Hive/AdminManual+Metastore+3.0+Administration)
+
 ## 1. Known Issues
 * Hive 3.1.2 incompatible with Hadoop 3.1.1+
 * Missing JDBC drivers: MySQL, Microsoft SQL Server, Oracle
