@@ -40,7 +40,7 @@ WORKDIR ${SUPERSET_HOME}
 
 FROM base AS builder
 
-ARG SUPERSET_VERSION=1.0.1
+ARG SUPERSET_VERSION=1.1.0
 
 RUN set -eux; \
     apt-get update; \
