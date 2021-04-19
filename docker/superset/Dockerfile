@@ -40,7 +40,7 @@ WORKDIR ${SUPERSET_HOME}
 
 FROM base AS builder
 
-ARG SUPERSET_VERSION=1.1.0
+ARG SUPERSET_VERSION=1.2.0
 
 RUN set -eux; \
     apt-get update; \
@@ -60,13 +60,13 @@ RUN set -eux; \
     SUPERSET_PACKAGES=( \
         # Cloud
         athena bigquery redshift \
-        dremio snowflake teradata vertica exasol \
+        dremio databricks snowflake teradata vertica exasol \
         # Database
-        mysql postgres mmsql oracle db2 hana \
+        mysql postgres mmsql oracle hana solr \
         clickhouse cockroachdb elasticsearch \
         excel gsheets \
         # Big Data
-        drill druid hive impala kylin pinot presto \
+        drill druid hive impala kylin pinot presto trino \
         # Others
         cors thumbnails \
     ); \
@@ -75,7 +75,10 @@ RUN set -eux; \
     \
     rm -rf /usr/local/cx_Oracle-doc;
 
-RUN pip install sqlalchemy-trino
+ARG PROPHET_VERSION=1.0
+RUN set -eux; \
+    pip install -r "https://github.com/facebook/prophet/raw/v${PROPHET_VERSION}/python/requirements.txt"; \
+    pip install "prophet~=${PROPHET_VERSION}"
 
 COPY ./trino.py /usr/local/lib/python3.8/site-packages/superset/db_engine_specs/
 COPY ./base.py /usr/local/lib/python3.8/site-packages/superset/db_engine_specs/
