@@ -1,0 +1,6 @@
+app:
+  kind: StatefulSet
+  replicas: 1
+  command:
+  - spark
+  - history-server
