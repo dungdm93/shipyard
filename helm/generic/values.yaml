@@ -9,6 +9,7 @@ image:
 
 ########## App settings ##########
 app:
+  kind: Deployment
   replicas: null
   command: null
   args: null
