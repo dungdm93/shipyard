@@ -1,4 +1,5 @@
 {{- if .Values.autoscaling.enabled -}}
+{{- $kind := lower .Values.app.kind -}}
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -8,7 +9,13 @@ metadata:
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
+    {{- if eq $kind "deployment"  }}
     kind: Deployment
+    {{- else if eq $kind "statefulset"  }}
+    kind: StatefulSet
+    {{- else }}
+    {{- fail (printf "unknow kind %s" $kind) }}
+    {{- end }}
     name: {{ include "generic.fullname" . }}
   minReplicas: {{ .Values.autoscaling.min }}
   maxReplicas: {{ .Values.autoscaling.max }}
