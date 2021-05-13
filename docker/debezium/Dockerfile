@@ -10,7 +10,7 @@ COPY ./pom.xml /app/
 RUN mvn dependency:resolve \
         dependency:copy-dependencies -DoutputDirectory=jars/;
 
-ENV DEBEZIUM_VERSION=1.4.2.Final \
+ENV DEBEZIUM_VERSION=1.5.0.Final \
     MAVEN_REPO_CENTRAL=https://repo1.maven.org/maven2
 RUN set -eux; \
     mkdir plugins/; \
