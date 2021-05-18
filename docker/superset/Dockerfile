@@ -1,4 +1,4 @@
-FROM python:3.8-slim as base
+FROM python:3.8.9-slim as base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
@@ -76,7 +76,10 @@ RUN set -eux; \
     rm -rf /usr/local/cx_Oracle-doc;
 
 RUN pip install sqlalchemy-trino
+
 COPY ./trino.py /usr/local/lib/python3.8/site-packages/superset/db_engine_specs/
+COPY ./base.py /usr/local/lib/python3.8/site-packages/superset/db_engine_specs/
+COPY ./core.py /usr/local/lib/python3.8/site-packages/superset/models/
 
 FROM base
 
