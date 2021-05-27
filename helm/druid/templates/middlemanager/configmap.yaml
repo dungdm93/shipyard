@@ -1,0 +1,27 @@
+{{- $runtime := index .Values.druid.middleManager "runtime.properties" | default dict }}
+{{- $config := omit .Values.druid.middleManager "runtime.properties" }}
+
+{{- $persistence := .Values.middleManager.persistence }}
+{{- if $persistence.enabled }}
+{{- $taskDir := clean (printf "%s/task/" $persistence.mountPath) }}
+{{- $_ := set $runtime "druid.indexer.task.baseDir" $taskDir }}
+{{- $taskLogDir := clean (printf "%s/indexing-logs/" $persistence.mountPath) }}
+{{- $_ := set $runtime "druid.indexer.logs.directory" $taskLogDir }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "druid.fullname" . }}-middlemanager
+  labels:
+    {{- include "druid.middlemanager.labels" . | nindent 4 }}
+data:
+  runtime.properties: |
+    {{- range $key, $value := $runtime }}
+    {{ $key }}={{ has (kindOf $value) (list "map" "slice") | ternary (mustToJson $value) $value }}
+    {{- end }}
+
+  {{- range $file, $content := $config }}
+  {{ $file }}: |
+    {{ $content | nindent 4 | trim }}
+  {{- end }}

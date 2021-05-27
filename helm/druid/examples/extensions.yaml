@@ -1,0 +1,6 @@
+extensions:
+  load:
+  - postgresql-metadata-storage
+  - druid-lookups-cached-global
+  - druid-histogram
+  - druid-datasketches

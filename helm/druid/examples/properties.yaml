@@ -1,0 +1,77 @@
+druid:
+  common:
+    common.runtime.properties:
+      first: string
+      second: 10
+      third: false
+      empty: null
+      list: [1, 2, foo, bar]
+      map:
+        abc: xyz
+        foo: bar
+
+  coordinator:
+    runtime.properties:
+      first: string
+      second: 10
+      third: false
+      empty: null
+      list: [1, 2, foo, bar]
+      map:
+        abc: xyz
+        foo: bar
+
+  overlord:
+    runtime.properties:
+      first: string
+      second: 10
+      third: false
+      empty: null
+      list: [1, 2, foo, bar]
+      map:
+        abc: xyz
+        foo: bar
+
+  router:
+    runtime.properties:
+      first: string
+      second: 10
+      third: false
+      empty: null
+      list: [1, 2, foo, bar]
+      map:
+        abc: xyz
+        foo: bar
+
+  broker:
+    runtime.properties:
+      first: string
+      second: 10
+      third: false
+      empty: null
+      list: [1, 2, foo, bar]
+      map:
+        abc: xyz
+        foo: bar
+
+  middleManager:
+    runtime.properties:
+      first: string
+      second: 10
+      third: false
+      empty: null
+      list: [1, 2, foo, bar]
+      map:
+        abc: xyz
+        foo: bar
+
+  historical:
+    runtime.properties:
+      first: string
+      second: 10
+      third: false
+      empty: null
+      list: [1, 2, foo, bar]
+      map:
+        abc: xyz
+        foo: bar

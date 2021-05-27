@@ -1,0 +1,22 @@
+
+{{- if .Values.router.enabled }}
+{{- $runtime := index .Values.druid.router "runtime.properties" | default dict }}
+{{- $config := omit .Values.druid.router "runtime.properties" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "druid.fullname" . }}-router
+  labels:
+    {{- include "druid.router.labels" . | nindent 4 }}
+data:
+  runtime.properties: |
+    {{- range $key, $value := $runtime }}
+    {{ $key }}={{ has (kindOf $value) (list "map" "slice") | ternary (mustToJson $value) $value }}
+    {{- end }}
+
+  {{- range $file, $content := $config }}
+  {{ $file }}: |
+    {{ $content | nindent 4 | trim }}
+  {{- end }}
+{{- end }}

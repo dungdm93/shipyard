@@ -1,0 +1,7 @@
+middleManager:
+  persistence:
+    enabled: false
+
+historical:
+  persistence:
+    enabled: false
