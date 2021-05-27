@@ -1,0 +1,227 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: apache/druid
+  tag: 0.21.0
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+commons:
+  replicas: null
+  command: []
+  args: []
+  env: []
+
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+
+  resources: {}
+
+  schedulerName: null
+  runtimeClassName: null
+  priorityClassName: null
+
+  affinity: {}
+  tolerations: []
+  nodeSelector: {}
+
+  securityContext: {}
+  podSecurityContext: {}
+
+  extraVolumes: []
+  extraVolumeMounts: []
+
+## Master servers
+coordinator:
+  args: [ coordinator ]
+overlord:
+  enabled: false
+  args: [ overlord ]
+
+## Query servers
+router:
+  enabled: true
+  args: [ router ]
+broker:
+  args: [ broker ]
+
+## Data servers
+middleManager:
+  args: [ middleManager ]
+  persistence:
+    enabled: true
+    size: 3Gi
+    storageClass: null
+    mountPath: /data/druid/
+    subPath:
+    subPathExpr:
+    accessModes:
+    - ReadWriteOnce
+    annotations: {}
+historical:
+  args: [ historical ]
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: null
+    mountPath: /data/druid/
+    subPath:
+    subPathExpr:
+    accessModes:
+    - ReadWriteOnce
+    annotations: {}
+
+### Configurations
+# https://druid.apache.org/docs/latest/configuration/index.html
+# Metadata Store:
+# * MySQL: https://druid.apache.org/docs/latest/development/extensions-core/mysql.html
+# * PostgreSQL: https://druid.apache.org/docs/latest/development/extensions-core/postgresql.html
+# Deep Storage:
+# * HDFS: https://druid.apache.org/docs/latest/development/extensions-core/hdfs.html
+# * S3: https://druid.apache.org/docs/latest/development/extensions-core/s3.html
+# * GCS: https://druid.apache.org/docs/latest/development/extensions-core/google.html
+# * Azure: https://druid.apache.org/docs/latest/development/extensions-core/azure.html
+druid:
+  common:
+    log4j2.xml: |
+      <?xml version="1.0" encoding="UTF-8" ?>
+      <Configuration status="WARN">
+          <Appenders>
+              <Console name="Console" target="SYSTEM_OUT">
+                  <PatternLayout pattern="%d{ISO8601} %p [%t] %c - %m%n"/>
+              </Console>
+          </Appenders>
+          <Loggers>
+              <Root level="warn">
+                  <AppenderRef ref="Console"/>
+              </Root>
+          </Loggers>
+      </Configuration>
+
+    common.runtime.properties:
+      druid.cache.type: caffeine
+      druid.cache.cacheExecutorFactory: COMMON_FJP
+
+  coordinator:
+    # https://druid.apache.org/docs/latest/configuration/index.html#jvm-configuration-best-practices
+    jvm.config: &jvm |
+      -server
+      -XX:+UseG1GC
+      -XX:+ExitOnOutOfMemoryError
+      -Duser.timezone=UTC
+      -Dfile.encoding=UTF-8
+      -Djava.io.tmpdir=/tmp
+      -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
+    main.config: org.apache.druid.cli.Main server coordinator
+
+  overlord:
+    jvm.config: *jvm
+    main.config: org.apache.druid.cli.Main server overlord
+    runtime.properties:
+      druid.indexer.runner.type: remote
+      druid.indexer.storage.type: metadata
+      druid.indexer.queue.startDelay: PT5S
+
+  router:
+    jvm.config: *jvm
+    main.config: org.apache.druid.cli.Main server router
+    runtime.properties:
+      druid.router.managementProxy.enabled: true
+
+  broker:
+    jvm.config: *jvm
+    main.config: org.apache.druid.cli.Main server broker
+    runtime.properties:
+      druid.sql.enable: true
+      druid.sql.http.enable: true
+      druid.sql.avatica.enable: true
+
+      druid.broker.cache.useCache: true
+      druid.broker.cache.populateCache: true
+      druid.broker.cache.useResultLevelCache: true
+      druid.broker.cache.populateResultLevelCache: true
+
+  middleManager:
+    jvm.config: *jvm
+    main.config: org.apache.druid.cli.Main server middleManager
+    runtime.properties:
+      druid.peon.mode: remote
+      druid.peon.defaultSegmentWriteOutMediumFactory.type: tmpFile
+      druid.indexer.logs.type: file
+      druid.indexer.logs.kill.enabled: true
+      druid.indexer.logs.kill.durationToRetain: "1296000000" # 15d
+      druid.indexer.task.restoreTasksOnRestart: true
+      druid.realtime.cache.useCache: true
+      druid.realtime.cache.populateCache: true
+
+  indexer:
+    jvm.config: *jvm
+    main.config: org.apache.druid.cli.Main server indexer
+    runtime.properties: {}
+
+  historical:
+    jvm.config: *jvm
+    main.config: org.apache.druid.cli.Main server historical
+    runtime.properties:
+      druid.historical.cache.useCache: true
+      druid.historical.cache.populateCache: true
+
+metadataStore:
+  type:
+  connectURI: # jdbc:postgresql://hostname:5432/database
+  username:
+  password:
+
+# TODO:
+# deepStorage: {}
+
+extensions:
+  load:
+  - postgresql-metadata-storage
+  excludeModules: []
+
+## Kubernetes
+serviceAccount:
+  create: true
+  annotations: {}
+  name:
+
+rbac:
+  create: true
+  name:
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: druid.local
+      path: /
+  tls: []
+  #  - secretName: druid.local-tls
+  #    hosts:
+  #      - druid.local
+
+## Dependencies
+postgresql:
+  enabled: true
+
+  postgresqlUsername: postgres
+  postgresqlPassword: druid
+  postgresqlDatabase: druid
+
+  replication:
+    enabled: false
+
+  persistence:
+    enabled: true
+
+zookeeper:
+  enabled: true
+
+  persistence:
+    enabled: true

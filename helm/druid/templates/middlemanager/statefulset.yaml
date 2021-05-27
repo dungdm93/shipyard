@@ -1,0 +1,122 @@
+{{- $middlemanager := mergeOverwrite (deepCopy .Values.commons) .Values.middleManager -}}
+{{- $persistence := $middlemanager.persistence }}
+{{- if $persistence.enabled }}
+{{- $_ := dict "fsGroup" 1000 | mergeOverwrite $middlemanager.podSecurityContext }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "druid.fullname" . }}-middlemanager
+  labels:
+    {{- include "druid.middlemanager.labels" . | nindent 4 }}
+    {{- with $middlemanager.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $middlemanager.annotations | nindent 4 }}
+spec:
+  replicas: {{ $middlemanager.replicas }}
+  serviceName: {{ template "druid.fullname" . }}-middlemanager
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      {{- include "druid.middlemanager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "druid.middlemanager.selectorLabels" . | nindent 8 }}
+        {{- with $middlemanager.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "druid.middlemanager.checksum" . | nindent 8 }}
+        {{- with $middlemanager.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: druid-middlemanager
+          image: {{ include "druid.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with $middlemanager.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with $middlemanager.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          env:
+            {{- toYaml $middlemanager.env | nindent 12 }}
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 8091
+          {{- if semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion }}
+          startupProbe:
+            httpGet:
+              port: http
+              path: /status/health
+            periodSeconds: 10
+            failureThreshold: 30  # total 5m
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              port: http
+              path: /status/health
+          readinessProbe:
+            httpGet:
+              port: http
+              path: /status/selfDiscovered
+          volumeMounts:
+            {{- include "druid.middlemanager.volumeMounts" . | nindent 12 }}
+          resources:
+            {{- toYaml $middlemanager.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $middlemanager.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "druid.middlemanager.serviceAccountName" . }}
+      priorityClassName:  {{ $middlemanager.priorityClassName }}
+      runtimeClassName:   {{ $middlemanager.runtimeClassName }}
+      schedulerName:      {{ $middlemanager.schedulerName }}
+      securityContext:
+        {{- toYaml $middlemanager.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- include "druid.middlemanager.volumes" . | nindent 8 }}
+    {{- with $middlemanager.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $middlemanager.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $middlemanager.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+  {{- if $persistence.enabled }}
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        creationTimestamp: null
+        name: data
+        annotations:
+          {{- toYaml $persistence.annotations | nindent 10 }}
+      spec:
+        {{- with $persistence.accessModes }}
+        accessModes:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMode: Filesystem
+        resources:
+          requests:
+            storage: {{ $persistence.size | quote }}
+        storageClassName: {{ $persistence.storageClass }}
+  {{- end }}

@@ -1,0 +1,19 @@
+{{- if .Values.overlord.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "druid.fullname" . }}-overlord
+  labels:
+    {{- include "druid.overlord.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: http
+    port: 8090
+    protocol: TCP
+    targetPort: http
+  selector:
+    {{- include "druid.overlord.selectorLabels" . | nindent 4 }}
+{{- end }}

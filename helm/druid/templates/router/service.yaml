@@ -1,0 +1,18 @@
+{{- if .Values.router.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "druid.fullname" . }}-router
+  labels:
+    {{- include "druid.router.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8888
+    protocol: TCP
+    targetPort: http
+  selector:
+    {{- include "druid.router.selectorLabels" . | nindent 4 }}
+{{- end }}

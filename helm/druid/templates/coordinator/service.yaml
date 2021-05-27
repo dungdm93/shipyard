@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "druid.fullname" . }}-coordinator
+  labels:
+    {{- include "druid.coordinator.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: http
+    port: 8081
+    protocol: TCP
+    targetPort: http
+  selector:
+    {{- include "druid.coordinator.selectorLabels" . | nindent 4 }}

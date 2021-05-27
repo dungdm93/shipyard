@@ -1,0 +1,97 @@
+{{- $coordinator := mergeOverwrite (deepCopy .Values.commons) .Values.coordinator -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "druid.fullname" . }}-coordinator
+  labels:
+    {{- include "druid.coordinator.labels" . | nindent 4 }}
+    {{- with $coordinator.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $coordinator.annotations | nindent 4 }}
+spec:
+  replicas: {{ $coordinator.replicas }}
+  serviceName: {{ template "druid.fullname" . }}-coordinator
+  selector:
+    matchLabels:
+      {{- include "druid.coordinator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "druid.coordinator.selectorLabels" . | nindent 8 }}
+        {{- with $coordinator.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "druid.coordinator.checksum" . | nindent 8 }}
+        {{- with $coordinator.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: druid-coordinator
+          image: {{ include "druid.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with $coordinator.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with $coordinator.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          env:
+            {{- toYaml $coordinator.env | nindent 12 }}
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 8081
+          {{- if semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion }}
+          startupProbe:
+            httpGet:
+              port: http
+              path: /status/health
+            periodSeconds: 10
+            failureThreshold: 30  # total 5m
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              port: http
+              path: /status/health
+          readinessProbe:
+            httpGet:
+              port: http
+              path: /status/selfDiscovered
+          volumeMounts:
+            {{- include "druid.coordinator.volumeMounts" . | nindent 12 }}
+          resources:
+            {{- toYaml $coordinator.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $coordinator.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "druid.coordinator.serviceAccountName" . }}
+      priorityClassName:  {{ $coordinator.priorityClassName }}
+      runtimeClassName:   {{ $coordinator.runtimeClassName }}
+      schedulerName:      {{ $coordinator.schedulerName }}
+      securityContext:
+        {{- toYaml $coordinator.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- include "druid.coordinator.volumes" . | nindent 8 }}
+    {{- with $coordinator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $coordinator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $coordinator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

@@ -1,0 +1,27 @@
+{{- $runtime := index .Values.druid.historical "runtime.properties" | default dict }}
+{{- $config := omit .Values.druid.historical "runtime.properties" }}
+
+{{- $persistence := .Values.historical.persistence }}
+{{- if $persistence.enabled }}
+{{- $size := hasSuffix "i" $persistence.size | ternary (printf "%sB" $persistence.size) $persistence.size }}
+{{- $path := clean (printf "%s/segment-cache/" $persistence.mountPath) }}
+{{- $location := dict "path" $path "maxSize" $size "freeSpacePercent" 1.0 }}
+{{- $_ := set $runtime "druid.segmentCache.locations" (list $location) }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "druid.fullname" . }}-historical
+  labels:
+    {{- include "druid.historical.labels" . | nindent 4 }}
+data:
+  runtime.properties: |
+    {{- range $key, $value := $runtime }}
+    {{ $key }}={{ has (kindOf $value) (list "map" "slice") | ternary (mustToJson $value) $value }}
+    {{- end }}
+
+  {{- range $file, $content := $config }}
+  {{ $file }}: |
+    {{ $content | nindent 4 | trim }}
+  {{- end }}

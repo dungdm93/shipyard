@@ -1,0 +1,12 @@
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+  hosts:
+  - host: druid.local
+    path: /
+  tls:
+  - secretName: druid.local-tls
+    hosts:
+    - druid.local

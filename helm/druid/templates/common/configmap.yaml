@@ -1,0 +1,51 @@
+{{- $runtime := index .Values.druid.common "common.runtime.properties" | default dict }}
+{{- $config := omit .Values.druid.common "common.runtime.properties" }}
+
+{{- $_ := set $runtime "druid.extensions.loadList" .Values.extensions.load }}
+{{- if .Values.extensions.excludeModules }}
+{{- $_ := set $runtime "druid.modules.excludeList" .Values.extensions.excludeModules }}
+{{- end }}
+
+{{- if .Values.postgresql.enabled }}
+{{- $host := include "call-nested" (list . "postgresql" "common.names.fullname") }}
+{{- $port := include "call-nested" (list . "postgresql" "postgresql.port") }}
+{{- $username := include "call-nested" (list . "postgresql" "postgresql.username") }}
+{{- $password := include "call-nested" (list . "postgresql" "postgresql.password") }}
+{{- $database := include "call-nested" (list . "postgresql" "postgresql.database") }}
+
+{{- $_ := set $runtime "druid.metadata.storage.type" "postgresql" }}
+{{- $_ := set $runtime "druid.metadata.storage.connector.connectURI" (printf "jdbc:postgresql://%s:%s/%s" $host $port $database) }}
+{{- $_ := set $runtime "druid.metadata.storage.connector.user" $username }}
+{{- $_ := set $runtime "druid.metadata.storage.connector.password" $password }}
+{{ else }}
+{{- $_ := set $runtime "druid.metadata.storage.type" .Values.metadataStore.type }}
+{{- $_ := set $runtime "druid.metadata.storage.connector.connectURI" .Values.metadataStore.connectURI }}
+{{- $_ := set $runtime "druid.metadata.storage.connector.user" .Values.metadataStore.username }}
+{{- $_ := set $runtime "druid.metadata.storage.connector.password" .Values.metadataStore.password }}
+{{- end }}
+
+{{- if .Values.zookeeper.enabled }}
+{{- $host := include "call-nested" (list . "zookeeper" "common.names.fullname") }}
+{{- $_ := set $runtime "druid.zk.service.host" (printf "%s.%s.svc" $host .Release.Namespace ) }}
+{{- if .Values.zookeeper.auth.enabled }}
+{{- $_ := set $runtime "druid.zk.service.user" .Values.zookeeper.auth.clientUser }}
+{{- $_ := set $runtime "druid.zk.service.pwd" .Values.zookeeper.auth.clientPassword }}
+{{- end }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "druid.fullname" . }}-common
+  labels:
+    {{- include "druid.labels" . | nindent 4 }}
+data:
+  common.runtime.properties: |
+    {{- range $key, $value := $runtime }}
+    {{ $key }}={{ has (kindOf $value) (list "map" "slice") | ternary (mustToJson $value) $value }}
+    {{- end }}
+
+  {{- range $file, $content := $config }}
+  {{ $file }}: |
+    {{ $content | nindent 4 | trim }}
+  {{- end }}

@@ -1,0 +1,98 @@
+{{- if .Values.router.enabled }}
+{{- $router := mergeOverwrite (deepCopy .Values.commons) .Values.router -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "druid.fullname" . }}-router
+  labels:
+    {{- include "druid.router.labels" . | nindent 4 }}
+    {{- with $router.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $router.annotations | nindent 4 }}
+spec:
+  replicas: {{ $router.replicas }}
+  selector:
+    matchLabels:
+      {{- include "druid.router.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "druid.router.selectorLabels" . | nindent 8 }}
+        {{- with $router.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "druid.router.checksum" . | nindent 8 }}
+        {{- with $router.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: druid-router
+          image: {{ include "druid.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with $router.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with $router.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          env:
+            {{- toYaml $router.env | nindent 12 }}
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 8888
+          {{- if semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion }}
+          startupProbe:
+            httpGet:
+              port: http
+              path: /status/health
+            periodSeconds: 10
+            failureThreshold: 30  # total 5m
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              port: http
+              path: /status/health
+          readinessProbe:
+            httpGet:
+              port: http
+              path: /status/selfDiscovered
+          volumeMounts:
+            {{- include "druid.router.volumeMounts" . | nindent 12 }}
+          resources:
+            {{- toYaml $router.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $router.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "druid.router.serviceAccountName" . }}
+      priorityClassName:  {{ $router.priorityClassName }}
+      runtimeClassName:   {{ $router.runtimeClassName }}
+      schedulerName:      {{ $router.schedulerName }}
+      securityContext:
+        {{- toYaml $router.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- include "druid.router.volumes" . | nindent 8 }}
+    {{- with $router.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $router.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $router.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- end }}
