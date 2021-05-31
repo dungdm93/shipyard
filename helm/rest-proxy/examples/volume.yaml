@@ -1,0 +1,9 @@
+volumes:
+- name: config
+  secret:
+    secretName: rest-proxy-secret
+
+volumeMounts:
+- name: config
+  mountPath: /etc/rest-proxy
+  readOnly: true
