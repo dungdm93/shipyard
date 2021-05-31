@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rest-proxy.fullname" . }}
+  labels:
+    {{- include "rest-proxy.labels" . | nindent 4 }}
+{{- with .Values.restProxy }}
+data:
+  {{- range $key, $value := . }}
+  KAFKA_REST_{{ $key | replace "." "_" | upper }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,13 @@
+labels:
+  deployment-label: deployment-label-value
+podLabels:
+  pod-label: pod-label-value
+annotations:
+  deployment-annotation: deployment-annotations-value
+podAnnotations:
+  pod-annotation: pod-annotations-value
+
+
+serviceAccount:
+  annotations:
+    sa-annotation: sa-annotations-value

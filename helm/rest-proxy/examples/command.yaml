@@ -1,0 +1,14 @@
+command:
+- bash
+- -c
+args:
+- run
+- rest-proxy
+env:
+- name: FOOBAR
+  value: foobar
+- name: ENV_FROM_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: rest-proxy-secret
+      key: important-config

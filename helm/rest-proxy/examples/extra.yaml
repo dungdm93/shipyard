@@ -1,0 +1,10 @@
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+  pspEnable: true

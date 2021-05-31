@@ -1,0 +1,29 @@
+{{- if .Values.rbac.create }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "rest-proxy.fullname" . }}
+  labels:
+    {{- include "rest-proxy.labels" . | nindent 4 }}
+rules:
+- apiGroups: ['policy']
+  resources: ['podsecuritypolicies']
+  verbs:     ['use']
+  resourceNames:
+  - {{ include "rest-proxy.fullname" . }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "rest-proxy.fullname" . }}
+  labels:
+    {{- include "rest-proxy.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "rest-proxy.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "rest-proxy.serviceAccountName" . }}
+{{- end }}
