@@ -56,6 +56,7 @@ RUN set -eux; \
     function join { local IFS="$1"; echo "${*:2}"; }; \
     AIRFLOW_PACKAGES=( \
         # Core
+        http ftp ssh grpc \
         async cgroups redis rabbitmq \
         celery dask docker cncf.kubernetes \
         github_enterprise google_auth kerberos ldap password \
@@ -64,10 +65,10 @@ RUN set -eux; \
         # Cloud Providers
         amazon microsoft.azure google \
         # BigData
-        apache.cassandra apache.druid apache.pinot \
-        presto \
+        apache.beam apache.cassandra apache.druid apache.kylin apache.pinot \
+        presto trino \
         # Others
-        crypto ssh grpc slack sendgrid \
+        crypto slack sendgrid \
         sentry statsd hashicorp \
     ); \
     pip install --constraint "${CONSTRAINT_URL}" \
@@ -76,12 +77,10 @@ RUN set -eux; \
 RUN pip install \
         # force kubernetes>=12.0
         "kubernetes~=12.0" \
-        # missing packages
-        "azure-storage-blob>=12.7.0" \
         "authlib~=0.15" \
         # extra packages
-        "lz4" "python-snappy" "trino" \
-        "airflow-exporter==1.4.1";
+        "lz4" "python-snappy" \
+        "airflow-exporter>=1.4";
 
 RUN rm -rf \
         /usr/local/bin/__pycache__ \
