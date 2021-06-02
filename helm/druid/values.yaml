@@ -62,17 +62,8 @@ middleManager:
     - ReadWriteOnce
     annotations: {}
 historical:
-  args: [ historical ]
-  persistence:
-    enabled: true
-    size: 50Gi
-    storageClass: null
-    mountPath: /data/druid/
-    subPath:
-    subPathExpr:
-    accessModes:
-    - ReadWriteOnce
-    annotations: {}
+- tier: default
+  # other defaults see "druid.historical.k8s.default"
 
 ### Configurations
 # https://druid.apache.org/docs/latest/configuration/index.html
@@ -148,6 +139,7 @@ druid:
     jvm.config: *jvm
     main.config: org.apache.druid.cli.Main server middleManager
     runtime.properties:
+      druid.worker.category: default
       druid.peon.mode: remote
       druid.peon.defaultSegmentWriteOutMediumFactory.type: tmpFile
       druid.indexer.logs.type: file
@@ -163,11 +155,8 @@ druid:
     runtime.properties: {}
 
   historical:
-    jvm.config: *jvm
-    main.config: org.apache.druid.cli.Main server historical
-    runtime.properties:
-      druid.historical.cache.useCache: true
-      druid.historical.cache.populateCache: true
+  - tier: default
+    # other defaults see "druid.historical.config.default"
 
 metadataStore:
   type:

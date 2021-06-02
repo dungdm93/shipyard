@@ -1,10 +1,11 @@
+{{- range $group := .Values.historical }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "druid.fullname" . }}-historical
+  name: {{ include "druid.fullname" $ }}-historical-{{ $group.tier }}
   labels:
-    {{- include "druid.historical.labels" . | nindent 4 }}
+    {{- include "druid.historical.labels" (list $ $group.tier) | nindent 4 }}
 spec:
   type: ClusterIP
   clusterIP: None
@@ -14,4 +15,5 @@ spec:
     protocol: TCP
     targetPort: http
   selector:
-    {{- include "druid.historical.selectorLabels" . | nindent 4 }}
+    {{- include "druid.historical.selectorLabels" (list $ $group.tier) | nindent 4 }}
+{{- end }}

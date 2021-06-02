@@ -1,4 +1,7 @@
-{{- $historical := mergeOverwrite (deepCopy .Values.commons) .Values.historical -}}
+{{- $historicalK8sDefault := fromYaml (include "druid.historical.k8s.default" .) }}
+
+{{- range $group := .Values.historical }}
+{{- $historical := mergeOverwrite (deepCopy $.Values.commons) $historicalK8sDefault $group -}}
 {{- $persistence := $historical.persistence }}
 {{- if $persistence.enabled }}
 {{- $_ := dict "fsGroup" 1000 | mergeOverwrite $historical.podSecurityContext }}
@@ -7,9 +10,9 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "druid.fullname" . }}-historical
+  name: {{ include "druid.fullname" $ }}-historical-{{ $historical.tier }}
   labels:
-    {{- include "druid.historical.labels" . | nindent 4 }}
+    {{- include "druid.historical.labels" (list $ $historical.tier) | nindent 4 }}
     {{- with $historical.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -17,33 +20,33 @@ metadata:
     {{- toYaml $historical.annotations | nindent 4 }}
 spec:
   replicas: {{ $historical.replicas }}
-  serviceName: {{ template "druid.fullname" . }}-historical
+  serviceName: {{ template "druid.fullname" $ }}-historical-{{ $historical.tier }}
   podManagementPolicy: Parallel
   selector:
     matchLabels:
-      {{- include "druid.historical.selectorLabels" . | nindent 6 }}
+      {{- include "druid.historical.selectorLabels" (list $ $historical.tier) | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "druid.historical.selectorLabels" . | nindent 8 }}
+        {{- include "druid.historical.selectorLabels" (list $ $historical.tier) | nindent 8 }}
         {{- with $historical.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
-        {{- include "druid.historical.checksum" . | nindent 8 }}
+        {{- include "druid.historical.checksum" $ | nindent 8 }}
         {{- with $historical.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-    {{- with .Values.image.pullSecrets }}
+    {{- with $.Values.image.pullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml $ | nindent 8 }}
     {{- end }}
       enableServiceLinks: false
       containers:
         - name: druid-historical
-          image: {{ include "druid.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: {{ include "druid.image" $ }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
         {{- with $historical.command }}
           command:
             {{- toYaml . | nindent 12 }}
@@ -58,7 +61,7 @@ spec:
             - name: http
               protocol: TCP
               containerPort: 8083
-          {{- if semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion }}
+          {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
           startupProbe:
             httpGet:
               port: http
@@ -75,19 +78,19 @@ spec:
               port: http
               path: /status/selfDiscovered
           volumeMounts:
-            {{- include "druid.historical.volumeMounts" . | nindent 12 }}
+            {{- include "druid.historical.volumeMounts" (list $ $historical) | nindent 12 }}
           resources:
             {{- toYaml $historical.resources | nindent 12 }}
           securityContext:
             {{- toYaml $historical.securityContext | nindent 12 }}
-      serviceAccountName: {{ include "druid.historical.serviceAccountName" . }}
+      serviceAccountName: {{ include "druid.historical.serviceAccountName" $ }}
       priorityClassName:  {{ $historical.priorityClassName }}
       runtimeClassName:   {{ $historical.runtimeClassName }}
       schedulerName:      {{ $historical.schedulerName }}
       securityContext:
         {{- toYaml $historical.podSecurityContext | nindent 8 }}
       volumes:
-        {{- include "druid.historical.volumes" . | nindent 8 }}
+        {{- include "druid.historical.volumes" (list $ $historical) | nindent 8 }}
     {{- with $historical.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -120,3 +123,4 @@ spec:
             storage: {{ $persistence.size | quote }}
         storageClassName: {{ $persistence.storageClass }}
   {{- end }}
+{{- end }}
