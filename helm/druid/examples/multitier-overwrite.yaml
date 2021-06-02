@@ -1,0 +1,30 @@
+historical:
+- tier: hot
+  args: [ historical, hot ]
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: ssd
+- tier: cold
+  args: [ historical, cold ]
+  persistence:
+    enabled: true
+    size: 512Gi
+    storageClass: hdd
+- tier: default
+
+druid:
+  historical:
+  - tier: hot
+    jvm.config: |
+      -server
+      -XX:+UseG1GC
+      -XX:+ExitOnOutOfMemoryError
+      -Xmx:64G
+    runtime.properties:
+      hot-atttr: hot
+  - tier: cold
+    main.config: foobar
+    runtime.properties:
+      cold-atttr: cold
+  - tier: default

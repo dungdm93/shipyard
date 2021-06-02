@@ -1,20 +1,34 @@
-{{- $runtime := index .Values.druid.historical "runtime.properties" | default dict }}
-{{- $config := omit .Values.druid.historical "runtime.properties" }}
+{{- $historicalConfigDefault := fromYaml (include "druid.historical.config.default" .) }}
+{{- $historicalK8sDefault := fromYaml (include "druid.historical.k8s.default" .) }}
 
-{{- $persistence := .Values.historical.persistence }}
+{{- range $group := .Values.historical }}
+{{- $historicalConfig := dict }}
+{{- range $c := $.Values.druid.historical }}
+  {{- if eq $c.tier $group.tier }}
+    {{- $historicalConfig = $c }}
+  {{- end }}
+{{- end }}
+
+{{- $historicalConfig := mergeOverwrite (deepCopy $historicalConfigDefault) $historicalConfig -}}
+{{- $runtime := index $historicalConfig "runtime.properties" | default dict }}
+{{- $config := omit $historicalConfig "runtime.properties" "tier" }}
+
+{{- $_ := set $runtime "druid.server.tier" $group.tier }}
+{{- $historical := mergeOverwrite (deepCopy $.Values.commons) $historicalK8sDefault $group -}}
+{{- $persistence := $historical.persistence }}
 {{- if $persistence.enabled }}
-{{- $size := hasSuffix "i" $persistence.size | ternary (printf "%sB" $persistence.size) $persistence.size }}
-{{- $path := clean (printf "%s/segment-cache/" $persistence.mountPath) }}
-{{- $location := dict "path" $path "maxSize" $size "freeSpacePercent" 1.0 }}
-{{- $_ := set $runtime "druid.segmentCache.locations" (list $location) }}
+  {{- $size := hasSuffix "i" $persistence.size | ternary (printf "%sB" $persistence.size) $persistence.size }}
+  {{- $path := clean (printf "%s/segment-cache/" $persistence.mountPath) }}
+  {{- $location := dict "path" $path "maxSize" $size "freeSpacePercent" 1.0 }}
+  {{- $_ := set $runtime "druid.segmentCache.locations" (list $location) }}
 {{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "druid.fullname" . }}-historical
+  name: {{ include "druid.fullname" $ }}-historical-{{ $historical.tier }}
   labels:
-    {{- include "druid.historical.labels" . | nindent 4 }}
+    {{- include "druid.historical.labels" (list $ $historical.tier) | nindent 4 }}
 data:
   runtime.properties: |
     {{- range $key, $value := $runtime }}
@@ -25,3 +39,4 @@ data:
   {{ $file }}: |
     {{ $content | nindent 4 | trim }}
   {{- end }}
+{{- end }}
