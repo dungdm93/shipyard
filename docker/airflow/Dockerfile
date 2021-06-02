@@ -48,7 +48,7 @@ RUN set -eux; \
         unixodbc-dev \
         libev-dev
 
-ARG AIRFLOW_VERSION=2.0.1
+ARG AIRFLOW_VERSION=2.1.0
 
 RUN set -eux; \
     PYTHON_VERSION_SHORT="${PYTHON_VERSION%.*}"; \
@@ -80,8 +80,8 @@ RUN pip install \
         "azure-storage-blob>=12.7.0" \
         "authlib~=0.15" \
         # extra packages
-        "lz4" "python-snappy" "trino";
-        # "airflow-exporter==1.3.0"
+        "lz4" "python-snappy" "trino" \
+        "airflow-exporter==1.4.1";
 
 RUN rm -rf \
         /usr/local/bin/__pycache__ \
