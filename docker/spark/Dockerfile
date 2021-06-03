@@ -12,7 +12,7 @@ RUN apk add -U curl gnupg tar
 ARG APACHE_DIST=https://archive.apache.org/dist
 ARG APACHE_MIRROR=${APACHE_DIST}
 ARG HADOOP_VERSION=3.2
-ARG SPARK_VERSION=3.0.0
+ARG SPARK_VERSION=3.1.2
 ARG TINI_VERSION=0.19.0
 
 RUN set -eux; \

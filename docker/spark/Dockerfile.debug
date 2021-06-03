@@ -1,4 +1,4 @@
-FROM hub.teko.vn/dataops/spark:3.0.0
+FROM hub.teko.vn/dataops/spark:3.1.2
 
 RUN set -eux; \
     apt-get update; \
