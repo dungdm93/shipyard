@@ -9,7 +9,7 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
         ca-certificates gnupg curl;
 
-ARG CONDA_VERSION=4.8.3
+ARG CONDA_VERSION=4.9.2
 ARG PYTHON_VERSION=3.8
 ENV CONDA_HOME=/opt/conda
 

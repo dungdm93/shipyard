@@ -10,9 +10,9 @@ COPY ./patches/ /patches/org/apache/spark/ui/static/
 RUN set -eux; cd /patches/; \
     jar -uf ${SPARK_HOME}/jars/spark-core_*.jar org/
 
-FROM jupyter/scipy-notebook
+FROM jupyter/scipy-notebook:python-3.9.2
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
-SHELL [ "/bin/bash", "-c" ]
+SHELL ["/bin/bash", "-c"]
 USER root
 
 COPY ./scripts/ /usr/local/bin/
@@ -43,18 +43,19 @@ ENV PATH="${SPARK_HOME}/bin:${PATH}" \
 RUN pip install --no-cache-dir -e "${SPARK_HOME}/python"
 
 RUN set -eux; \
-    conda install -c conda-forge -y \
+    mamba install -c conda-forge -y \
+        xeus-python \
         jupyter-server-proxy \
-        jupyterlab-git; \
-    jupyter labextension install @krassowski/jupyterlab-lsp; \
-    pip install jupyter-lsp python-language-server[all]; \
+        jupyterlab-git \
+        jupyterlab-lsp \
+        python-lsp-server; \
     \
     cleanup.sh conda npm home; \
     fix-permissions $CONDA_DIR /home/$NB_USER;
 
 # Database drivers
 RUN set -eux; \
-    conda install -y \
+    mamba install -y \
         python-dotenv \
         papermill     \
         boost         \
@@ -63,7 +64,6 @@ RUN set -eux; \
         mysqlclient   \
         pyodbc        \
         cx_oracle;    \
-    pip install presto-client; \
     \
     cleanup.sh conda npm home; \
     fix-permissions $CONDA_DIR /home/$NB_USER;
@@ -71,18 +71,18 @@ RUN set -eux; \
 # Widgets & visualization
 # RUN set -eux; \
 #     # ipywidgets ipyleaflet pythreejs bqplot
-#     conda install -y -c conda-forge \
+#     mamba install -y -c conda-forge \
 #         ipyleaflet pythreejs bqplot; \
 #     jupyter labextension install \
 #         jupyter-leaflet jupyter-threejs bqplot; \
 #     \
 #     # plotly
-#     conda install -y -c plotly \
+#     mamba install -y -c plotly \
 #         plotly plotly-orca plotly-geo psutil requests; \
 #     jupyter labextension install jupyterlab-plotly plotlywidget; \
 #     \
 #     # altair
-#     conda install -y -c conda-forge altair; \
+#     mamba install -y -c conda-forge altair; \
 #     \
 #     # jupyterlab-sidecar
 #     pip install sidecar; \
