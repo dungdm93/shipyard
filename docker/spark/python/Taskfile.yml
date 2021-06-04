@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/spark:3.1.2-python-3.8
+  IMAGE: hub.teko.vn/dataops/spark:3.1.2-python-3.9
   BUILD_ARGS: --build-arg BASE_IMAGE=hub.teko.vn/dataops/spark:3.1.2
 
 includes:
