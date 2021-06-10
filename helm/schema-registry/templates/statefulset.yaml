@@ -30,12 +30,29 @@ spec:
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if and .Values.metrics.enabled (not .Values.metrics.podMonitor.enabled) }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9404"
+        prometheus.io/path: "/"
+        {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       enableServiceLinks: false
+      {{- if .Values.metrics.enabled }}
+      initContainers:
+        - name: jmx
+          image: bitnami/jmx-exporter:0.15.0
+          command:
+            - cp
+            - /opt/bitnami/jmx-exporter/jmx_prometheus_javaagent.jar
+            - /tmp/jmx-exporter/
+          volumeMounts:
+            - name: jmx-exporter
+              mountPath: /tmp/jmx-exporter/
+      {{- end }}
       containers:
         - name: schema-registry
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -53,6 +70,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+          {{- if .Values.metrics.enabled }}
+            - name: SCHEMA_REGISTRY_JMX_OPTS
+              value: -javaagent:/tmp/jmx-exporter/jmx_prometheus_javaagent.jar=9404:/tmp/jmx-config/schema-registry-metrics.yaml
+          {{- end }}
           {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -63,9 +84,20 @@ spec:
             - name: http
               containerPort: 8081
               protocol: TCP
-          {{- with .Values.volumeMounts }}
+          {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: 9404
+              protocol: TCP
+          {{- end }}
           volumeMounts:
+          {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.metrics.enabled }}
+            - name: jmx-exporter
+              mountPath: /tmp/jmx-exporter/
+            - name: jmx-config
+              mountPath: /tmp/jmx-config/
           {{- end }}
           livenessProbe:
             httpGet:
@@ -87,9 +119,16 @@ spec:
       schedulerName:      {{ .Values.schedulerName }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- with .Values.volumes }}
       volumes:
+      {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.metrics.enabled }}
+        - name: jmx-exporter
+          emptyDir: {}
+        - name: jmx-config
+          configMap:
+            name: {{ include "schema-registry.fullname" . }}-metrics
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
