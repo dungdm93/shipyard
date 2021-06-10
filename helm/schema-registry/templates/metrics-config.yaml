@@ -1,0 +1,133 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "schema-registry.fullname" . }}-metrics
+  labels:
+    {{- include "schema-registry.labels" . | nindent 4 }}
+data:
+  schema-registry-metrics.yaml: |
+    lowercaseOutputName: true
+    lowercaseOutputLabelNames: true
+    rules:
+    - pattern: kafka.schema.registry<type=master-slave-role><>master-slave-role
+      name: kafka_schema_registry_role
+      help: The current role of this Schema Registry instance, 1=primary, 0=secondary.
+      type: GAUGE
+    - pattern: kafka.schema.registry<type=api-(?<status>success|failure)-count><>api-(\1)-count
+      name: kafka_schema_registry_api_count
+      help: Number of success or failure API calls
+      type: COUNTER
+      labels:
+        status: ${status}
+    - pattern: kafka.schema.registry<type=(?<format>avro|json|protobuf)-schemas-(?<action>created|deleted)><>(\1)-schemas-(\2)
+      name: kafka_schema_registry_schemas_count
+      help: Number of registered schemas
+      type: COUNTER
+      labels:
+        format: ${format}
+        action: ${action}
+    - pattern: kafka.schema.registry<type=jetty-metrics><>connections-active
+      name: kafka_schema_registry_connections_active
+      help: Total number of active Jetty TCP connections
+      type: GAUGE
+    - pattern: kafka.schema.registry<type=jetty-metrics><>connections-(?<kind>opened|closed)-rate
+      name: kafka_schema_registry_connections_rate
+      help: The average rate per second of opened/closed TCP connections
+      type: GAUGE
+      labels:
+        kind: ${kind}
+    # (request|response)-(rate|byte-rate|size-*)
+    - pattern: kafka.schema.registry<type=jersey-metrics><>(?<endpoint>.+).(?<kind>request|response)-rate
+      name: kafka_schema_registry_${kind}_rate
+      help: The average number of HTTP ${kind} per second
+      type: GAUGE
+      labels:
+        endpoint: ${endpoint}
+    - pattern: kafka.schema.registry<type=jersey-metrics><>(?<kind>request|response)-rate
+      name: kafka_schema_registry_${kind}_rate
+      help: The average number of HTTP ${kind} per second
+      type: GAUGE
+      labels:
+        endpoint: "*"
+    - pattern: kafka.schema.registry<type=jersey-metrics><>(?<endpoint>.+).(?<kind>request|response)-byte-rate
+      name: kafka_schema_registry_${kind}_byte_rate
+      help: Bytes/second of incoming requests/outgoing responses
+      type: GAUGE
+      labels:
+        endpoint: ${endpoint}
+    - pattern: kafka.schema.registry<type=jersey-metrics><>(?<kind>request|response)-byte-rate
+      name: kafka_schema_registry_${kind}_byte_rate
+      help: Bytes/second of incoming requests/outgoing responses
+      type: GAUGE
+      labels:
+        endpoint: "*"
+    - pattern: kafka.schema.registry<type=jersey-metrics><>(?<endpoint>.+).(?<kind>request|response)-size-(?<agg>avg|max)
+      name: kafka_schema_registry_${kind}_size_${agg}
+      help: The ${agg} ${kind} size in bytes
+      type: GAUGE
+      labels:
+        endpoint: ${endpoint}
+    - pattern: kafka.schema.registry<type=jersey-metrics><>(?<kind>request|response)-size-(?<agg>avg|max)
+      name: kafka_schema_registry_${kind}_size_${agg}
+      help: The ${agg} ${kind} size in bytes
+      type: GAUGE
+      labels:
+        endpoint: "*"
+    # request_duration
+    - pattern: kafka.schema.registry<type=jersey-metrics><>(?<endpoint>.+).request-latency-(?<percentile>\d+)
+      name: kafka_schema_registry_request_duration
+      help: The summary metrics of request duration in ms
+      type: GAUGE
+      labels:
+        endpoint: ${endpoint}
+        quantile: 0.${percentile}
+    - pattern: kafka.schema.registry<type=jersey-metrics><>(?<endpoint>.+).request-latency-(?<agg>avg|max)
+      name: kafka_schema_registry_request_duration_${agg}
+      help: The ${agg} request latency in ms
+      type: GAUGE
+      labels:
+        endpoint: ${endpoint}
+    - pattern: kafka.schema.registry<type=jersey-metrics><>request-latency-(?<percentile>\d+)
+      name: kafka_schema_registry_request_duration
+      help: The summary metrics of request duration in ms
+      type: GAUGE
+      labels:
+        endpoint: "*"
+        quantile: 0.${percentile}
+    - pattern: kafka.schema.registry<type=jersey-metrics><>request-latency-(?<agg>avg|max)
+      name: kafka_schema_registry_request_duration_${agg}
+      help: The ${agg} request latency in ms
+      type: GAUGE
+      labels:
+        endpoint: "*"
+    # request_status_rate
+    - pattern: kafka.schema.registry<type=jersey-metrics><>request-error-rate
+      name: kafka_schema_registry_request_status_rate
+      help: The average number of requests per second that resulted in HTTP responses
+      type: GAUGE
+      labels:
+        endpoint: "*"
+        http_code: "*"
+    - pattern: kafka.schema.registry<type=jersey-metrics><>(?<endpoint>.+).request-error-rate
+      name: kafka_schema_registry_request_status_rate
+      help: The average number of requests per second that resulted in HTTP responses
+      type: GAUGE
+      labels:
+        endpoint: ${endpoint}
+        http_code: "*"
+    - pattern: kafka.schema.registry<type=jersey-metrics, http_status_code=(?<code>.+)><>request-error-rate
+      name: kafka_schema_registry_request_status_rate
+      help: The average number of requests per second that resulted in HTTP responses
+      type: GAUGE
+      labels:
+        endpoint: "*"
+        http_code: ${code}
+    - pattern: kafka.schema.registry<type=jersey-metrics, http_status_code=(?<code>.+)><>(?<endpoint>.+).request-error-rate
+      name: kafka_schema_registry_request_status_rate
+      help: The average number of requests per second that resulted in HTTP responses
+      type: GAUGE
+      labels:
+        endpoint: ${endpoint}
+        http_code: ${code}
+{{- end }}

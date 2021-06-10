@@ -1,0 +1,19 @@
+{{- if and .Values.metrics.enabled .Values.metrics.podMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "schema-registry.fullname" . }}-metrics
+  labels:
+    {{- include "schema-registry.labels" . | nindent 4 }}
+spec:
+  podMetricsEndpoints:
+  - port: metrics
+    path: /
+    scheme: http
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "schema-registry.selectorLabels" . | nindent 6 }}
+{{- end }}

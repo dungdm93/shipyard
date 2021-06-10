@@ -96,3 +96,8 @@ ingress:
   #  - secretName: rest-proxy-tls
   #    hosts:
   #      - rest-proxy.local
+
+metrics:
+  enabled: false
+  podMonitor:
+    enabled: false

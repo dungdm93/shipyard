@@ -95,3 +95,8 @@ ingress:
   #  - secretName: schema-registry-tls
   #    hosts:
   #      - schema-registry.local
+
+metrics:
+  enabled: false
+  podMonitor:
+    enabled: false
