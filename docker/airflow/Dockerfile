@@ -80,7 +80,7 @@ RUN pip install \
         "authlib~=0.15" \
         # extra packages
         "lz4" "python-snappy" \
-        "airflow-exporter>=1.4";
+        "airflow-exporter>=1.5";
 
 RUN rm -rf \
         /usr/local/bin/__pycache__ \
