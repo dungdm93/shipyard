@@ -3,5 +3,6 @@ middleManager:
     enabled: false
 
 historical:
+- tier: default
   persistence:
     enabled: false

@@ -66,6 +66,7 @@ druid:
         foo: bar
 
   historical:
+  - tier: default
     runtime.properties:
       first: string
       second: 10
