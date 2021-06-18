@@ -69,7 +69,7 @@ spec:
             - name: SCHEMA_REGISTRY_HOST_NAME
               valueFrom:
                 fieldRef:
-                  fieldPath: metadata.name
+                  fieldPath: status.podIP
           {{- if .Values.metrics.enabled }}
             - name: SCHEMA_REGISTRY_JMX_OPTS
               value: -javaagent:/tmp/jmx-exporter/jmx_prometheus_javaagent.jar=9404:/tmp/jmx-config/schema-registry-metrics.yaml
