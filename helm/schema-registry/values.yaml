@@ -96,6 +96,12 @@ ingress:
   #    hosts:
   #      - schema-registry.local
 
+logging:
+  root: INFO
+  loggers: {}
+    # kafka.controller: WARN
+    # kafka.foo.bar: DEBUG
+
 metrics:
   enabled: false
   podMonitor:

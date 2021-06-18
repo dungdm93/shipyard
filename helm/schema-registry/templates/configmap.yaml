@@ -4,9 +4,16 @@ metadata:
   name: {{ include "schema-registry.fullname" . }}
   labels:
     {{- include "schema-registry.labels" . | nindent 4 }}
-{{- with .Values.schemaRegistry }}
 data:
-  {{- range $key, $value := . }}
+  {{- range $key, $value := .Values.schemaRegistry }}
   SCHEMA_REGISTRY_{{ $key | replace "." "_" | upper }}: {{ $value | quote }}
   {{- end }}
-{{- end }}
+
+  SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: {{ .Values.logging.root }}
+  {{- with .Values.logging.loggers }}
+  {{- $loggers := list -}}
+  {{- range $key, $value := . }}
+    {{- $loggers = append $loggers (printf "%s=%s" $key $value) -}}
+  {{- end }}
+  SCHEMA_REGISTRY_LOG4J_LOGGERS: {{ $loggers | join "," | quote }}
+  {{- end }}
