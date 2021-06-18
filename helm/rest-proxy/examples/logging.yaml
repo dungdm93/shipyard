@@ -1,0 +1,5 @@
+logging:
+  root: WARN
+  loggers:
+    kafka.controller: WARN
+    kafka.foo.bar: DEBUG

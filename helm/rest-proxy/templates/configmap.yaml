@@ -4,9 +4,19 @@ metadata:
   name: {{ include "rest-proxy.fullname" . }}
   labels:
     {{- include "rest-proxy.labels" . | nindent 4 }}
-{{- with .Values.restProxy }}
 data:
-  {{- range $key, $value := . }}
-  KAFKA_REST_{{ $key | replace "." "_" | upper }}: {{ $value | quote }}
+  {{- range $key, $value := .Values.restProxy }}
+  {{- $key = $key | replace "_" "___" }}
+  {{- $key = $key | replace "-" "__" }}
+  {{- $key = $key | replace "." "_" }}
+  KAFKA_REST_{{ $key | upper }}: {{ $value | quote }}
   {{- end }}
-{{- end }}
+
+  KAFKA_REST_LOG4J_ROOT_LOGLEVEL: {{ .Values.logging.root }}
+  {{- with .Values.logging.loggers }}
+  {{- $loggers := list -}}
+  {{- range $key, $value := . }}
+    {{- $loggers = append $loggers (printf "%s=%s" $key $value) -}}
+  {{- end }}
+  KAFKA_REST_LOG4J_LOGGERS: {{ $loggers | join "," | quote }}
+  {{- end }}
