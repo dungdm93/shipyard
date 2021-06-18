@@ -1,0 +1,4 @@
+schemaRegistry:
+  foo: bar
+  foo.bar-baz_quix: abcxyz
+  schema.compatibility.level: none

@@ -3,5 +3,5 @@ name: schema-registry
 description: Confluent Schema Registry helm chart
 icon: https://assets.confluent.io/m/61d0fe7faad2f991/original/icon-schema-registry.svg
 type: application
-version: 0.2.0
+version: 0.2.1
 appVersion: 6.1.0
