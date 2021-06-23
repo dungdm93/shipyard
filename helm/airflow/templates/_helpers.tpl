@@ -129,7 +129,7 @@ git-sync init container
 */}}
 {{- define "airflow.gitsync.init" -}}
 {{- $gitsync := .Values.dags.git -}}
-- name: git-sync
+- name: git-sync-init
   image: "{{ $gitsync.image.repository }}:{{ $gitsync.image.tag }}"
   imagePullPolicy: IfNotPresent
   env:
