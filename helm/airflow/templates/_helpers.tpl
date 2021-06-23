@@ -125,6 +125,30 @@ git-sync sidecar container
 {{- end -}}
 
 {{/*
+git-sync init container
+*/}}
+{{- define "airflow.gitsync.init" -}}
+{{- $gitsync := .Values.dags.git -}}
+- name: git-sync
+  image: "{{ $gitsync.image.repository }}:{{ $gitsync.image.tag }}"
+  imagePullPolicy: IfNotPresent
+  env:
+    - name: GIT_SYNC_ONE_TIME
+      value: "true"
+  envFrom:
+    - secretRef:
+        name: {{ include "airflow.fullname" . }}-gitsync
+  volumeMounts:
+    - name: airflow-dags
+      mountPath: /git
+    {{- if or $gitsync.auth.sshKey $gitsync.auth.externalSshKeySecret.name }}
+    - name: airflow-gitsync-sshkey
+      mountPath: /etc/git-secret/ssh
+      subPath:   gitSshKey
+    {{- end }}
+{{- end -}}
+
+{{/*
 chownData init container
 */}}
 {{- define "airflow.chownData" -}}
