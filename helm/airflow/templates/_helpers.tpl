@@ -149,28 +149,6 @@ git-sync init container
 {{- end -}}
 
 {{/*
-chownData init container
-*/}}
-{{- define "airflow.chownData" -}}
-{{- $logs := .Values.logs -}}
-{{- if include "airflow.logs.local.persistence" $logs -}}
-- name: chown-data
-  image: busybox:1-glibc
-  imagePullPolicy: IfNotPresent
-  command:
-    - chown
-    - -R
-    - 1000:1000
-    - {{ $logs.path }}
-  volumeMounts:
-    - name: airflow-logs
-      mountPath: {{ $logs.path }}
-  securityContext:
-    runAsUser: 0  # root
-{{- end }}
-{{- end -}}
-
-{{/*
 Airflow normalize executor
 */}}
 {{- define "airflow.normalizeExecutor" -}}
