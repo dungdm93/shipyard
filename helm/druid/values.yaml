@@ -3,7 +3,7 @@ fullnameOverride: ""
 
 image:
   repository: apache/druid
-  tag: 0.21.0
+  tag: 0.21.1
   pullPolicy: IfNotPresent
   pullSecrets: []
 
