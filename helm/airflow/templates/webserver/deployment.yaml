@@ -35,7 +35,9 @@ spec:
     {{- end }}
       enableServiceLinks: false
       initContainers:
-        {{- include "airflow.chownData" . | nindent 8 }}
+      {{- if eq .Values.dags.fetcher "git" }}
+        {{- include "airflow.gitsync.init" . | nindent 8 }}
+      {{- end }}
       containers:
       {{- if eq .Values.dags.fetcher "git" }}
         {{- include "airflow.gitsync.sidecar" . | nindent 8 }}

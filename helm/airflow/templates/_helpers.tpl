@@ -125,25 +125,27 @@ git-sync sidecar container
 {{- end -}}
 
 {{/*
-chownData init container
+git-sync init container
 */}}
-{{- define "airflow.chownData" -}}
-{{- $logs := .Values.logs -}}
-{{- if include "airflow.logs.local.persistence" $logs -}}
-- name: chown-data
-  image: busybox:1-glibc
+{{- define "airflow.gitsync.init" -}}
+{{- $gitsync := .Values.dags.git -}}
+- name: git-sync-init
+  image: "{{ $gitsync.image.repository }}:{{ $gitsync.image.tag }}"
   imagePullPolicy: IfNotPresent
-  command:
-    - chown
-    - -R
-    - 1000:1000
-    - {{ $logs.path }}
+  env:
+    - name: GIT_SYNC_ONE_TIME
+      value: "true"
+  envFrom:
+    - secretRef:
+        name: {{ include "airflow.fullname" . }}-gitsync
   volumeMounts:
-    - name: airflow-logs
-      mountPath: {{ $logs.path }}
-  securityContext:
-    runAsUser: 0  # root
-{{- end }}
+    - name: airflow-dags
+      mountPath: /git
+    {{- if or $gitsync.auth.sshKey $gitsync.auth.externalSshKeySecret.name }}
+    - name: airflow-gitsync-sshkey
+      mountPath: /etc/git-secret/ssh
+      subPath:   gitSshKey
+    {{- end }}
 {{- end -}}
 
 {{/*
