@@ -1,5 +1,7 @@
 {{- $runtime := index .Values.druid.coordinator "runtime.properties" | default dict }}
-{{- $config := omit .Values.druid.coordinator "runtime.properties" }}
+{{- $jvm := index .Values.druid.coordinator "jvm.config" | default "" }}
+{{- $extraJvm := index .Values.druid.coordinator "extra.jvm.config" | default "" }}
+{{- $config := omit .Values.druid.coordinator "runtime.properties" "jvm.config" "extra.jvm.config" }}
 
 {{- if not .Values.overlord.enabled }}
 {{- $_ := set $runtime "druid.coordinator.asOverlord.enabled" true }}
@@ -19,6 +21,12 @@ data:
   runtime.properties: |
     {{- range $key, $value := $runtime }}
     {{ $key }}={{ has (kindOf $value) (list "map" "slice") | ternary (mustToJson $value) $value }}
+    {{- end }}
+
+  jvm.config: |
+    {{ $jvm | nindent 4 | trim }}
+    {{- if $extraJvm }}
+    {{ $extraJvm | nindent 4 | trim }}
     {{- end }}
 
   {{- range $file, $content := $config }}

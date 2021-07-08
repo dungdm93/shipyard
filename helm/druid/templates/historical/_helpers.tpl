@@ -110,6 +110,7 @@ jvm.config: |
   -Dfile.encoding=UTF-8
   -Djava.io.tmpdir=/tmp
   -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
+extra.jvm.config:
 main.config: org.apache.druid.cli.Main server historical
 runtime.properties:
   druid.historical.cache.useCache: true

@@ -11,6 +11,10 @@ druid:
         foo: bar
 
   coordinator:
+    extra.jvm.config: |
+      -Xmx512M
+      -Xms512M
+
     runtime.properties:
       first: string
       second: 10
@@ -22,6 +26,10 @@ druid:
         foo: bar
 
   overlord:
+    extra.jvm.config: |
+      -Foobar
+      -overlord
+
     runtime.properties:
       first: string
       second: 10
@@ -33,6 +41,10 @@ druid:
         foo: bar
 
   router:
+    extra.jvm.config: |
+      -Foobar
+      -router
+
     runtime.properties:
       first: string
       second: 10
@@ -44,6 +56,10 @@ druid:
         foo: bar
 
   broker:
+    extra.jvm.config: |
+      -Foobar
+      -Abcxyz
+
     runtime.properties:
       first: string
       second: 10
@@ -55,6 +71,10 @@ druid:
         foo: bar
 
   middleManager:
+    extra.jvm.config: |
+      -Foobar
+      -middleManager
+
     runtime.properties:
       first: string
       second: 10
@@ -67,6 +87,10 @@ druid:
 
   historical:
   - tier: default
+    extra.jvm.config: |
+      -Foobar
+      -historical.default
+
     runtime.properties:
       first: string
       second: 10

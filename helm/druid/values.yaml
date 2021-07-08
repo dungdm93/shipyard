@@ -95,6 +95,9 @@ druid:
     common.runtime.properties:
       druid.cache.type: caffeine
       druid.cache.cacheExecutorFactory: COMMON_FJP
+      druid.indexer.logs.type: file
+      druid.indexer.logs.kill.enabled: true
+      druid.indexer.logs.kill.durationToRetain: "1296000000" # 15d
 
   coordinator:
     # https://druid.apache.org/docs/latest/configuration/index.html#jvm-configuration-best-practices
@@ -106,10 +109,12 @@ druid:
       -Dfile.encoding=UTF-8
       -Djava.io.tmpdir=/tmp
       -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
+    extra.jvm.config:
     main.config: org.apache.druid.cli.Main server coordinator
 
   overlord:
     jvm.config: *jvm
+    extra.jvm.config:
     main.config: org.apache.druid.cli.Main server overlord
     runtime.properties:
       druid.indexer.runner.type: remote
@@ -118,12 +123,14 @@ druid:
 
   router:
     jvm.config: *jvm
+    extra.jvm.config:
     main.config: org.apache.druid.cli.Main server router
     runtime.properties:
       druid.router.managementProxy.enabled: true
 
   broker:
     jvm.config: *jvm
+    extra.jvm.config:
     main.config: org.apache.druid.cli.Main server broker
     runtime.properties:
       druid.sql.enable: true
@@ -137,20 +144,19 @@ druid:
 
   middleManager:
     jvm.config: *jvm
+    extra.jvm.config:
     main.config: org.apache.druid.cli.Main server middleManager
     runtime.properties:
       druid.worker.category: default
       druid.peon.mode: remote
       druid.peon.defaultSegmentWriteOutMediumFactory.type: tmpFile
-      druid.indexer.logs.type: file
-      druid.indexer.logs.kill.enabled: true
-      druid.indexer.logs.kill.durationToRetain: "1296000000" # 15d
       druid.indexer.task.restoreTasksOnRestart: true
       druid.realtime.cache.useCache: true
       druid.realtime.cache.populateCache: true
 
   indexer:
     jvm.config: *jvm
+    extra.jvm.config:
     main.config: org.apache.druid.cli.Main server indexer
     runtime.properties: {}
 

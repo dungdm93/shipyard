@@ -1,6 +1,8 @@
 {{- if .Values.overlord.enabled }}
 {{- $runtime := index .Values.druid.overlord "runtime.properties" | default dict }}
-{{- $config := omit .Values.druid.overlord "runtime.properties" }}
+{{- $jvm := index .Values.druid.overlord "jvm.config" | default "" }}
+{{- $extraJvm := index .Values.druid.overlord "extra.jvm.config" | default "" }}
+{{- $config := omit .Values.druid.overlord "runtime.properties" "jvm.config" "extra.jvm.config" }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -12,6 +14,12 @@ data:
   runtime.properties: |
     {{- range $key, $value := $runtime }}
     {{ $key }}={{ has (kindOf $value) (list "map" "slice") | ternary (mustToJson $value) $value }}
+    {{- end }}
+
+  jvm.config: |
+    {{ $jvm | nindent 4 | trim }}
+    {{- if $extraJvm }}
+    {{ $extraJvm | nindent 4 | trim }}
     {{- end }}
 
   {{- range $file, $content := $config }}
