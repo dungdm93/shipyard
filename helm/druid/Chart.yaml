@@ -3,7 +3,7 @@ name: druid
 description: Druid helm chart
 icon: https://raw.githubusercontent.com/apache/druid/druid-0.21.0/web-console/assets/druid.png
 type: application
-version: 0.2.1
+version: 0.3.1
 appVersion: 0.21.1
 dependencies:
 - name: zookeeper

@@ -1,5 +1,7 @@
 {{- $runtime := index .Values.druid.middleManager "runtime.properties" | default dict }}
-{{- $config := omit .Values.druid.middleManager "runtime.properties" }}
+{{- $jvm := index .Values.druid.middleManager "jvm.config" | default "" }}
+{{- $extraJvm := index .Values.druid.middleManager "extra.jvm.config" | default "" }}
+{{- $config := omit .Values.druid.middleManager "runtime.properties" "jvm.config" "extra.jvm.config" }}
 
 {{- $persistence := .Values.middleManager.persistence }}
 {{- if $persistence.enabled }}
@@ -19,6 +21,12 @@ data:
   runtime.properties: |
     {{- range $key, $value := $runtime }}
     {{ $key }}={{ has (kindOf $value) (list "map" "slice") | ternary (mustToJson $value) $value }}
+    {{- end }}
+
+  jvm.config: |
+    {{ $jvm | nindent 4 | trim }}
+    {{- if $extraJvm }}
+    {{ $extraJvm | nindent 4 | trim }}
     {{- end }}
 
   {{- range $file, $content := $config }}

@@ -11,7 +11,9 @@
 
 {{- $historicalConfig := mergeOverwrite (deepCopy $historicalConfigDefault) $historicalConfig -}}
 {{- $runtime := index $historicalConfig "runtime.properties" | default dict }}
-{{- $config := omit $historicalConfig "runtime.properties" "tier" }}
+{{- $jvm := index $historicalConfig "jvm.config" | default "" }}
+{{- $extraJvm := index $historicalConfig "extra.jvm.config" | default "" }}
+{{- $config := omit $historicalConfig "runtime.properties" "tier" "jvm.config" "extra.jvm.config" }}
 
 {{- $_ := set $runtime "druid.server.tier" $group.tier }}
 {{- $historical := mergeOverwrite (deepCopy $.Values.commons) $historicalK8sDefault $group -}}
@@ -33,6 +35,12 @@ data:
   runtime.properties: |
     {{- range $key, $value := $runtime }}
     {{ $key }}={{ has (kindOf $value) (list "map" "slice") | ternary (mustToJson $value) $value }}
+    {{- end }}
+
+  jvm.config: |
+    {{ $jvm | nindent 4 | trim }}
+    {{- if $extraJvm }}
+    {{ $extraJvm | nindent 4 | trim }}
     {{- end }}
 
   {{- range $file, $content := $config }}
