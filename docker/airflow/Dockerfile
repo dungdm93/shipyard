@@ -68,7 +68,7 @@ RUN set -eux; \
         apache.beam apache.cassandra apache.druid apache.kylin apache.pinot \
         presto trino \
         # Others
-        crypto slack sendgrid \
+        crypto slack sendgrid sqlparse \
         sentry statsd hashicorp \
     ); \
     pip install --constraint "${CONSTRAINT_URL}" \
