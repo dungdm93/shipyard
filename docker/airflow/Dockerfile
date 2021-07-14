@@ -79,8 +79,7 @@ RUN pip install \
         "kubernetes~=12.0" \
         "authlib~=0.15" \
         # extra packages
-        "lz4" "python-snappy" \
-        "airflow-exporter>=1.5";
+        "lz4" "python-snappy";
 
 RUN rm -rf \
         /usr/local/bin/__pycache__ \
