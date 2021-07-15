@@ -28,6 +28,7 @@ class OAuth2Authentication(Authentication):
             client_id=client_id,
             client_secret=client_secret,
             token_endpoint=token_endpoint,
+            verify=False
         )
         self.client.update_token = OAuth2Authentication.update_token(self.client)
 
@@ -54,6 +55,7 @@ class OAuth2Authentication(Authentication):
     def update_token(client):
         def func(token, refresh_token=None, access_token=None):
             client.token = token
+            client.verify = False
 
         return func
 
@@ -61,7 +63,7 @@ class OAuth2Authentication(Authentication):
     def initialize_token(client):
         token = cache_manager.cache.get(token_cache_key)
         if token is None:
-            token = client.fetch_token(grant_type='client_credentials')
+            token = client.fetch_token(grant_type='client_credentials', verify=False)
             cache_manager.cache.set(key=token_cache_key, value=token, timeout=600)
         client.update_token(token)
 
@@ -135,6 +137,7 @@ class TrinoEngineSpec(BaseEngineSpec):
 
         connect_args = extra.setdefault("connect_args", {})
         connect_args["http_scheme"] = "https"
+        connect_args["verify"] = False
         if auth_method == "kerberos":
             from trino.auth import KerberosAuthentication
             connect_args["auth"] = KerberosAuthentication(**auth_params)
