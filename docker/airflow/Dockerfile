@@ -68,7 +68,7 @@ RUN set -eux; \
         apache.beam apache.cassandra apache.druid apache.kylin apache.pinot \
         presto trino \
         # Others
-        crypto slack sendgrid sqlparse \
+        crypto slack sendgrid \
         sentry statsd hashicorp \
     ); \
     pip install --constraint "${CONSTRAINT_URL}" \
@@ -79,6 +79,7 @@ RUN pip install \
         "kubernetes~=12.0" \
         "authlib~=0.15" \
         # extra packages
+        "sqlparse~=0.4" \
         "lz4" "python-snappy";
 
 RUN rm -rf \
