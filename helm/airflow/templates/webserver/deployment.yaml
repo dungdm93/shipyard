@@ -29,30 +29,27 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
       enableServiceLinks: false
       initContainers:
-      {{- if eq .Values.dags.fetcher "git" }}
+        {{- if eq .Values.dags.fetcher "git" }}
         {{- include "airflow.gitsync.init" . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       containers:
-      {{- if eq .Values.dags.fetcher "git" }}
-        {{- include "airflow.gitsync.sidecar" . | nindent 8 }}
-      {{- end }}
         - name: airflow-webserver
           image: "{{ $webserver.image.repository }}:{{ $webserver.image.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- with $webserver.command }}
+          {{- with $webserver.command }}
           command:
             {{- toYaml . | nindent 12 }}
-        {{- end }}
-        {{- with $webserver.args }}
+          {{- end }}
+          {{- with $webserver.args }}
           args:
             {{- toYaml . | nindent 12 }}
-        {{- end }}
+          {{- end }}
           env:
             {{- toYaml $webserver.env | nindent 12 }}
           # envFrom:
@@ -64,9 +61,9 @@ spec:
               containerPort: 8080
           volumeMounts:
             {{- include "airflow.webserver.volumeMounts" . | nindent 12 }}
-          {{- with $webserver.extraVolumeMounts }}
+            {{- with $webserver.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health
@@ -81,6 +78,9 @@ spec:
             {{- toYaml $webserver.resources | nindent 12 }}
           securityContext:
             {{- toYaml $webserver.securityContext | nindent 12 }}
+        {{- if eq .Values.dags.fetcher "git" }}
+        {{- include "airflow.gitsync.sidecar" . | nindent 8 }}
+        {{- end }}
       serviceAccountName: {{ include "airflow.webserver.serviceAccountName" . }}
       priorityClassName:  {{ $webserver.priorityClassName }}
       runtimeClassName:   {{ $webserver.runtimeClassName }}
@@ -92,15 +92,15 @@ spec:
       {{- with $webserver.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with $webserver.nodeSelector }}
+      {{- with $webserver.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with $webserver.affinity }}
+      {{- end }}
+      {{- with $webserver.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with $webserver.tolerations }}
+      {{- end }}
+      {{- with $webserver.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}

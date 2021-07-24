@@ -15,7 +15,7 @@ metadata:
   annotations:
     {{- toYaml $flower.ingress.annotations | nindent 4 }}
 spec:
-{{- if $flower.ingress.tls }}
+  {{- if $flower.ingress.tls }}
   tls:
   {{- range $flower.ingress.tls }}
   - hosts:
@@ -24,7 +24,7 @@ spec:
     {{- end }}
     secretName: {{ .secretName }}
   {{- end }}
-{{- end }}
+  {{- end }}
   rules:
   {{- range $flower.ingress.hosts }}
   - host: {{ .host }}

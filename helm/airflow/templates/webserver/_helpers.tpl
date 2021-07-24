@@ -26,8 +26,8 @@ Create the name of the service account to use
 */}}
 {{- define "airflow.webserver.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ .Values.serviceAccount.name | default (include "airflow.fullname" .) }}-webserver
+  {{ .Values.serviceAccount.name | default (include "airflow.fullname" .) }}-webserver
 {{- else -}}
-    {{ .Values.serviceAccount.name | default "default" }}
+  {{ .Values.serviceAccount.name | default "default" }}
 {{- end -}}
 {{- end -}}

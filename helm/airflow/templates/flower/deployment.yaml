@@ -30,23 +30,23 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
       enableServiceLinks: false
       containers:
         - name: airflow-flower
           image: "{{ $flower.image.repository }}:{{ $flower.image.tag }}"
           imagePullPolicy: {{ $flower.imagePullPolicy }}
-        {{- with $flower.command }}
+          {{- with $flower.command }}
           command:
             {{- toYaml . | nindent 12 }}
-        {{- end }}
-        {{- with $flower.args }}
+          {{- end }}
+          {{- with $flower.args }}
           args:
             {{- toYaml . | nindent 12 }}
-        {{- end }}
+          {{- end }}
           env:
             {{- toYaml $flower.env | nindent 12 }}
           # envFrom:
@@ -79,16 +79,16 @@ spec:
         - name: airflow-config
           configMap:
             name: {{ include "airflow.fullname" . }}-config
-    {{- with $flower.nodeSelector }}
+      {{- with $flower.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with $flower.affinity }}
+      {{- end }}
+      {{- with $flower.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with $flower.tolerations }}
+      {{- end }}
+      {{- with $flower.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
 {{- end }}

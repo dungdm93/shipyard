@@ -19,8 +19,8 @@ Create the name of the service account to use
 */}}
 {{- define "airflow.flower.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ .Values.serviceAccount.name | default (include "airflow.fullname" .) }}-flower
+  {{ .Values.serviceAccount.name | default (include "airflow.fullname" .) }}-flower
 {{- else -}}
-    {{ .Values.serviceAccount.name | default "default" }}
+  {{ .Values.serviceAccount.name | default "default" }}
 {{- end -}}
 {{- end -}}
