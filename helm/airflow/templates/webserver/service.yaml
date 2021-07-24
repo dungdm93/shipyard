@@ -1,10 +1,4 @@
 {{- $webserver := mergeOverwrite (deepCopy .Values.commons) .Values.webserver -}}
-{{- if and .Values.metrics.enabled (not .Values.metrics.serviceMonitor.enabled) }}
-{{- $annotations := .Values.service.annotations }}
-{{- $_ := set $annotations "prometheus.io/scrape" "true" }}
-{{- $_ := set $annotations "prometheus.io/path"   "/admin/metrics" }}
-{{- $_ := set $annotations "prometheus.io/port"   (toString .Values.service.port) }}
-{{- end }}
 ---
 apiVersion: v1
 kind: Service
