@@ -64,9 +64,7 @@ commons:
   tolerations: []
   nodeSelector: {}
 
-  securityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
+  securityContext: {}
   podSecurityContext:
     fsGroup: 1000
 
@@ -102,6 +100,18 @@ flower:
     #  - secretName: airflow.local-tls
     #    hosts:
     #      - airflow.local
+
+logGroomer:
+  command:
+  args: ["log-groomer"]
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+  securityContext: {}
 
 dags:
   path: /opt/airflow/dags

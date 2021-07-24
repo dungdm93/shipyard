@@ -121,6 +121,33 @@ git-sync init container
 {{- end -}}
 
 {{/*
+log-groomer sidecar container
+*/}}
+{{- define "airflow.logGroomer.sidecar" -}}
+{{- $logGroomer := .Values.logGroomer -}}
+{{- if not $logGroomer.image }}
+  {{- $_ := set $logGroomer "image" .Values.commons.image }}
+{{- end }}
+- name: log-groomer
+  image: "{{ $logGroomer.image.repository }}:{{ $logGroomer.image.tag }}"
+  imagePullPolicy: {{ .Values.imagePullPolicy }}
+  {{- with $logGroomer.command }}
+  command:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $logGroomer.args }}
+  args:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  volumeMounts:
+    {{- include "airflow.volumeMounts" . | nindent 4 }}
+  resources:
+    {{- toYaml $logGroomer.resources | nindent 4 }}
+  securityContext:
+    {{- toYaml $logGroomer.securityContext | nindent 4 }}
+{{- end -}}
+
+{{/*
 Airflow normalize executor
 */}}
 {{- define "airflow.normalizeExecutor" -}}
@@ -226,14 +253,12 @@ Airflow volumeMounts
   {{- end }}
 {{- end }}
 
-{{- $logs := .Values.logs -}}
-{{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled }}
+{{- $logs := .Values.logs }}
 - name: airflow-logs
   mountPath: {{ $logs.baseLogFolder }}
-  {{- with $logs.persistence.subPath }}
-  subPath: {{ . }}
+  {{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled $logs.persistence.subPath }}
+  subPath: {{ $logs.persistence.subPath }}
   {{- end }}
-{{- end }}
 {{- end -}}
 
 {{/*
@@ -267,10 +292,13 @@ Airflow volumes
     claimName: {{ $dags.volume.existingClaim | default (printf "%s-dags" (include "airflow.fullname" .)) }}
 {{- end }}
 
-{{- $logs := .Values.logs -}}
+{{- $logs := .Values.logs }}
 {{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled }}
 - name: airflow-logs
   persistentVolumeClaim:
     claimName: {{ $logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .)) }}
+{{- else }}
+- name: airflow-logs
+  emptyDir: {}
 {{- end }}
 {{- end -}}
