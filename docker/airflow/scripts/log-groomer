@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+import logging
+import os
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+
+from airflow.configuration import conf
+
+logger = logging.getLogger("log_groomer")
+
+cleanup_interval = 15 * 60  # 15m
+
+
+def cleanup_log(log_folder: str, retention: timedelta):
+    now = datetime.now()
+
+    for f in Path(log_folder).glob("**/*.log"):
+        if not f.is_file():
+            return
+        mtime = datetime.fromtimestamp(f.stat().st_mtime)
+        if now - mtime > retention:
+            os.remove(f)
+            logger.info("mtime=%s removed %s", mtime, f)
+
+
+def main():
+    log_folder = conf.get("logging", "base_log_folder")
+    retention_days = conf.getint("logging", "retention_days") if conf.has_option("logging", "retention_days") else 3
+    retention = timedelta(days=retention_days)
+
+    logger.info("=====> Local log folder: %s", log_folder)
+    logger.info("=====> Log retention: %sd", retention_days)
+    while True:
+        logger.info("Start cleanup old logs")
+        cleanup_log(log_folder, retention)
+        logger.info("Finish cleanup old logs")
+        time.sleep(cleanup_interval)
+
+
+if __name__ == '__main__':
+    main()
