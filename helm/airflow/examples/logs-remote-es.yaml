@@ -1,4 +1,0 @@
-logs:
-  path: es://10.10.10.10:9200
-  remoteConnId: es-conn
-  # level: INFO

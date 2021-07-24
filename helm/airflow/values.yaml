@@ -43,7 +43,7 @@ airflow_local_settings: ""
 commons:
   image:
     repository: hub.teko.vn/dataops/airflow
-    tag: "2.0"
+    tag: "2.1-b3"
   replicas: null
   command: []
   args: []
@@ -146,24 +146,19 @@ dags:
     existingClaim: null
 
 logs:
-  # Logging location configuration.
-  # For remote logging:
-  #   * Amazon S3:          s3://bucket/path/to/logs
-  #   * Amazon CloudWatch:  cloudwatch://...
-  #   * Google GCS:         gs://bucket/path/to/logs
-  #   * Google StackDriver: stackdriver://...
-  #   * Azure WASB:         wasbs://...
-  #   * ElasticSearch:      es://host:port
-  # For local logging:
-  #   * /path/to/logs
-  #   * files://path/to/logs
-  path: /opt/airflow/logs
+  level: INFO
+  baseLogFolder: /opt/airflow/logs/
 
   # Airflow Connection ID for remote logging
-  remoteConnId:
+  remoteLogConnId:
 
-  # Airflow job log level
-  level: INFO
+  # Remote logging location configuration:
+  # * Amazon S3:          s3://bucket/path/to/logs
+  # * Amazon CloudWatch:  cloudwatch://...
+  # * Google GCS:         gs://bucket/path/to/logs
+  # * Google StackDriver: stackdriver://...
+  # * Azure WASB:         wasbs://...
+  remoteBaseLogFolder:
 
   # Storage configuration for local logs
   persistence:

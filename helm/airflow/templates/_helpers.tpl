@@ -65,34 +65,6 @@ checksum/gitsync-sshkey:  {{ include (print $.Template.BasePath "/commons/gitsyn
 {{- end -}}
 
 {{/*
-Check logs is localy
-*/}}
-{{- define "airflow.logs.local" -}}
-{{- $logsUrl := urlParse .path -}}
-{{- if or (empty $logsUrl.scheme) (eq $logsUrl.scheme "file") -}}
-{{- $logsUrl.path }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Check logs is persistence
-*/}}
-{{- define "airflow.logs.local.persistence" -}}
-{{- if and (include "airflow.logs.local" .) .persistence.enabled -}}
-true
-{{- end -}}
-{{- end -}}
-
-{{/*
-Check logs is persistence and PVC is managed by Helm
-*/}}
-{{- define "airflow.logs.local.persistence.managedPvc" -}}
-{{- if and (include "airflow.logs.local.persistence" .) (not .persistence.existingClaim) -}}
-true
-{{- end -}}
-{{- end -}}
-
-{{/*
 Get airflow dags folder
 */}}
 {{- define "airflow.dags.folder" -}}
@@ -255,9 +227,9 @@ Airflow volumeMounts
 {{- end }}
 
 {{- $logs := .Values.logs -}}
-{{- if include "airflow.logs.local.persistence" $logs }}
+{{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled }}
 - name: airflow-logs
-  mountPath: {{ include "airflow.logs.local" $logs }}
+  mountPath: {{ $logs.baseLogFolder }}
   {{- with $logs.persistence.subPath }}
   subPath: {{ . }}
   {{- end }}
@@ -296,7 +268,7 @@ Airflow volumes
 {{- end }}
 
 {{- $logs := .Values.logs -}}
-{{- if include "airflow.logs.local.persistence" $logs }}
+{{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled }}
 - name: airflow-logs
   persistentVolumeClaim:
     claimName: {{ $logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .)) }}

@@ -1,5 +1,5 @@
 {{- $logs  := .Values.logs -}}
-{{- if include "airflow.logs.local.persistence.managedPvc" $logs }}
+{{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled (not $logs.persistence.existingClaim) }}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

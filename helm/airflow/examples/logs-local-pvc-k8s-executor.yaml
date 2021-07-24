@@ -1,3 +1,5 @@
+executor: KubernetesExecutor
+
 logs:
   baseLogFolder: /opt/airflow/logging
 
