@@ -86,6 +86,10 @@ RUN rm -rf \
         /usr/local/bin/__pycache__ \
         /usr/local/cx_Oracle-doc;
 
+RUN set -eux; \
+    curl -L "https://github.com/apache/airflow/raw/12c9053c06009f154db3343ab0938ea6bda48d62/airflow/providers/docker/operators/docker.py" \
+         -o "/usr/local/lib/python3.8/site-packages/airflow/providers/docker/operators/docker.py"
+
 FROM base
 
 COPY --from=builder /usr/local /usr/local
