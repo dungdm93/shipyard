@@ -1,4 +1,4 @@
 logs:
-  path: gs://bucket/airflow/logs
-  remoteConnId: gcs-conn
+  remoteLogConnId: gcs-conn
+  remoteBaseLogFolder: gs://bucket/logs/
   # level: INFO

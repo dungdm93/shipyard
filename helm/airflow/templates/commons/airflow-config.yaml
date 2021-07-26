@@ -15,22 +15,12 @@
 {{- $_ := set $core "donot_pickle" $dags.doNotPickle }}
 {{- $_ := set $core "sql_alchemy_conn" (include "airflow.database" .) }}
 
-{{- $logsUrl := urlParse $logs.path }}
 {{- $_ := set $logging "logging_level" $logs.level }}
-{{- if include "airflow.logs.local" $logs }}
-  {{- $_ := set $logging "base_log_folder" $logsUrl.path }}
-  {{- $_ := set $logging "remote_logging" false }}
-{{- else }}
+{{- $_ := set $logging "base_log_folder" $logs.baseLogFolder }}
+{{- if $logs.remoteLogConnId }}
   {{- $_ := set $logging "remote_logging" true }}
-  {{- $_ := set $logging "remote_log_conn_id" $logs.remoteConnId }}
-  {{- if eq $logsUrl.scheme "es" }}
-    {{- $_ := unset $logging "remote_base_log_folder" }}
-    {{- $_ := set $elasticsearch "host" $logsUrl.host }}
-  {{- else if eq $logsUrl.scheme "wasbs" }}
-    {{- $_ := set $logging "remote_base_log_folder" "//TODO" }}
-  {{- else }}
-    {{- $_ := set $logging "remote_base_log_folder" $logs.path }}
-  {{- end }}
+  {{- $_ := set $logging "remote_log_conn_id" $logs.remoteLogConnId }}
+  {{- $_ := set $logging "remote_base_log_folder" $logs.remoteBaseLogFolder }}
 {{- end }}
 
 {{- if eq $core.executor "CeleryExecutor" }}
@@ -49,7 +39,7 @@
   {{- $_ := set $kubernetes "worker_container_tag"               $worker.image.tag        }}
   {{- $_ := set $kubernetes "worker_container_image_pull_policy" .Values.imagePullPolicy  }}
   {{- $_ := set $kubernetes "image_pull_secrets" (include "join-transform" (list "," .Values.imagePullSecrets ".name")) }}
-  {{- $_ := set $kubernetes "worker_service_account_name" (include "airflow.serviceAccountName" .) }}
+  {{- $_ := set $kubernetes "worker_service_account_name" (include "airflow.worker.serviceAccountName" .) }}
   {{- $_ := set $kubernetes "worker_annotations"          (toJson $worker.podAnnotations) }}
 
   {{- $_ := set $kubernetes "airflow_configmap" (printf "%s-config" (include "airflow.fullname" .)) }}
@@ -87,7 +77,7 @@
   {{- end }}
 
   # Logs
-  {{- if include "airflow.logs.local.persistence" $logs }}
+  {{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled }}
     {{- $_ := set $kubernetes "logs_volume_claim" ($logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .))) }}
     {{- $_ := set $kubernetes "logs_volume_subpath" $logs.persistence.subPath }}
   {{- end }}

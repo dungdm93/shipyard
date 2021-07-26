@@ -65,34 +65,6 @@ checksum/gitsync-sshkey:  {{ include (print $.Template.BasePath "/commons/gitsyn
 {{- end -}}
 
 {{/*
-Check logs is localy
-*/}}
-{{- define "airflow.logs.local" -}}
-{{- $logsUrl := urlParse .path -}}
-{{- if or (empty $logsUrl.scheme) (eq $logsUrl.scheme "file") -}}
-{{- $logsUrl.path }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Check logs is persistence
-*/}}
-{{- define "airflow.logs.local.persistence" -}}
-{{- if and (include "airflow.logs.local" .) .persistence.enabled -}}
-true
-{{- end -}}
-{{- end -}}
-
-{{/*
-Check logs is persistence and PVC is managed by Helm
-*/}}
-{{- define "airflow.logs.local.persistence.managedPvc" -}}
-{{- if and (include "airflow.logs.local.persistence" .) (not .persistence.existingClaim) -}}
-true
-{{- end -}}
-{{- end -}}
-
-{{/*
 Get airflow dags folder
 */}}
 {{- define "airflow.dags.folder" -}}
@@ -146,6 +118,33 @@ git-sync init container
       mountPath: /etc/git-secret/ssh
       subPath:   gitSshKey
     {{- end }}
+{{- end -}}
+
+{{/*
+log-groomer sidecar container
+*/}}
+{{- define "airflow.logGroomer.sidecar" -}}
+{{- $logGroomer := .Values.logGroomer -}}
+{{- if not $logGroomer.image }}
+  {{- $_ := set $logGroomer "image" .Values.commons.image }}
+{{- end }}
+- name: log-groomer
+  image: "{{ $logGroomer.image.repository }}:{{ $logGroomer.image.tag }}"
+  imagePullPolicy: {{ .Values.imagePullPolicy }}
+  {{- with $logGroomer.command }}
+  command:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $logGroomer.args }}
+  args:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  volumeMounts:
+    {{- include "airflow.volumeMounts" . | nindent 4 }}
+  resources:
+    {{- toYaml $logGroomer.resources | nindent 4 }}
+  securityContext:
+    {{- toYaml $logGroomer.securityContext | nindent 4 }}
 {{- end -}}
 
 {{/*
@@ -254,14 +253,12 @@ Airflow volumeMounts
   {{- end }}
 {{- end }}
 
-{{- $logs := .Values.logs -}}
-{{- if include "airflow.logs.local.persistence" $logs }}
+{{- $logs := .Values.logs }}
 - name: airflow-logs
-  mountPath: {{ include "airflow.logs.local" $logs }}
-  {{- with $logs.persistence.subPath }}
-  subPath: {{ . }}
+  mountPath: {{ $logs.baseLogFolder }}
+  {{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled $logs.persistence.subPath }}
+  subPath: {{ $logs.persistence.subPath }}
   {{- end }}
-{{- end }}
 {{- end -}}
 
 {{/*
@@ -295,10 +292,13 @@ Airflow volumes
     claimName: {{ $dags.volume.existingClaim | default (printf "%s-dags" (include "airflow.fullname" .)) }}
 {{- end }}
 
-{{- $logs := .Values.logs -}}
-{{- if include "airflow.logs.local.persistence" $logs }}
+{{- $logs := .Values.logs }}
+{{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled }}
 - name: airflow-logs
   persistentVolumeClaim:
     claimName: {{ $logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .)) }}
+{{- else }}
+- name: airflow-logs
+  emptyDir: {}
 {{- end }}
 {{- end -}}

@@ -43,7 +43,7 @@ airflow_local_settings: ""
 commons:
   image:
     repository: hub.teko.vn/dataops/airflow
-    tag: "2.0"
+    tag: "2.1-b3"
   replicas: null
   command: []
   args: []
@@ -64,9 +64,7 @@ commons:
   tolerations: []
   nodeSelector: {}
 
-  securityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
+  securityContext: {}
   podSecurityContext:
     fsGroup: 1000
 
@@ -102,6 +100,18 @@ flower:
     #  - secretName: airflow.local-tls
     #    hosts:
     #      - airflow.local
+
+logGroomer:
+  command:
+  args: ["log-groomer"]
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+  securityContext: {}
 
 dags:
   path: /opt/airflow/dags
@@ -146,24 +156,19 @@ dags:
     existingClaim: null
 
 logs:
-  # Logging location configuration.
-  # For remote logging:
-  #   * Amazon S3:          s3://bucket/path/to/logs
-  #   * Amazon CloudWatch:  cloudwatch://...
-  #   * Google GCS:         gs://bucket/path/to/logs
-  #   * Google StackDriver: stackdriver://...
-  #   * Azure WASB:         wasbs://...
-  #   * ElasticSearch:      es://host:port
-  # For local logging:
-  #   * /path/to/logs
-  #   * files://path/to/logs
-  path: /opt/airflow/logs
+  level: INFO
+  baseLogFolder: /opt/airflow/logs/
 
   # Airflow Connection ID for remote logging
-  remoteConnId:
+  remoteLogConnId:
 
-  # Airflow job log level
-  level: INFO
+  # Remote logging location configuration:
+  # * Amazon S3:          s3://bucket/path/to/logs
+  # * Amazon CloudWatch:  cloudwatch://...
+  # * Google GCS:         gs://bucket/path/to/logs
+  # * Google StackDriver: stackdriver://...
+  # * Azure WASB:         wasbs://...
+  remoteBaseLogFolder:
 
   # Storage configuration for local logs
   persistence:
@@ -260,22 +265,3 @@ ingress:
   #  - secretName: airflow.local-tls
   #    hosts:
   #      - airflow.local
-
-## Prometheus Exporter / Metrics
-## ref: https://epoch8.github.io/2018/08/03/monitoring-airflow-with-prometheus.html
-metrics:
-  enabled: false
-
-  ## Prometheus Service Monitor
-  ## ref: https://github.com/coreos/prometheus-operator
-  ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
-  serviceMonitor:
-    enabled: false
-    namespace:
-    labels: {}
-
-    ## Additional serviceMonitor configs:
-    # interval: 30s
-    # scrapeTimeout: 10s
-    # honorLabels: false
-    # metricRelabelings: []

@@ -1,5 +1,5 @@
 logs:
-  path: /opt/airflow/logs
+  baseLogFolder: /opt/airflow/logging
 
   persistence:
     enabled: true

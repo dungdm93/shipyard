@@ -48,7 +48,7 @@ RUN set -eux; \
         unixodbc-dev \
         libev-dev
 
-ARG AIRFLOW_VERSION=2.1.0
+ARG AIRFLOW_VERSION=2.1.2
 
 RUN set -eux; \
     PYTHON_VERSION_SHORT="${PYTHON_VERSION%.*}"; \

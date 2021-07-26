@@ -29,30 +29,27 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
       enableServiceLinks: false
       initContainers:
-      {{- if eq .Values.dags.fetcher "git" }}
+        {{- if eq .Values.dags.fetcher "git" }}
         {{- include "airflow.gitsync.init" . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       containers:
-      {{- if eq .Values.dags.fetcher "git" }}
-        {{- include "airflow.gitsync.sidecar" . | nindent 8 }}
-      {{- end }}
         - name: airflow-scheduler
           image: "{{ $scheduler.image.repository }}:{{ $scheduler.image.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- with $scheduler.command }}
+          {{- with $scheduler.command }}
           command:
             {{- toYaml . | nindent 12 }}
-        {{- end }}
-        {{- with $scheduler.args }}
+          {{- end }}
+          {{- with $scheduler.args }}
           args:
             {{- toYaml . | nindent 12 }}
-        {{- end }}
+          {{- end }}
           env:
             {{- toYaml $scheduler.env | nindent 12 }}
           # envFrom:
@@ -60,14 +57,18 @@ spec:
           #       name: "{{ template "airflow.fullname" . }}-env"
           volumeMounts:
             {{- include "airflow.volumeMounts" . | nindent 12 }}
-          {{- with $scheduler.extraVolumeMounts }}
+            {{- with $scheduler.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- end }}
           # Scheduler has no ports & healchecks
           resources:
             {{- toYaml $scheduler.resources | nindent 12 }}
           securityContext:
             {{- toYaml $scheduler.securityContext | nindent 12 }}
+        {{- if eq .Values.dags.fetcher "git" }}
+        {{- include "airflow.gitsync.sidecar" . | nindent 8 }}
+        {{- end }}
+        {{- include "airflow.logGroomer.sidecar" . | nindent 8 }}
       serviceAccountName: {{ include "airflow.scheduler.serviceAccountName" . }}
       priorityClassName:  {{ $scheduler.priorityClassName }}
       runtimeClassName:   {{ $scheduler.runtimeClassName }}
@@ -76,18 +77,18 @@ spec:
         {{- toYaml $scheduler.podSecurityContext | nindent 8 }}
       volumes:
         {{- include "airflow.volumes" . | nindent 8 }}
-      {{- with $scheduler.extraVolumes }}
+        {{- with $scheduler.extraVolumes }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-    {{- with $scheduler.nodeSelector }}
+        {{- end }}
+      {{- with $scheduler.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with $scheduler.affinity }}
+      {{- end }}
+      {{- with $scheduler.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with $scheduler.tolerations }}
+      {{- end }}
+      {{- with $scheduler.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
