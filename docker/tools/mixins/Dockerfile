@@ -1,26 +1,15 @@
-FROM golang:1.15-buster AS builder
+FROM hub.teko.vn/tools/terraform:1.0
 
-ARG GRIZZLY_REVISION=242b5b3
-RUN set -eux; \
-    mkdir /app; \
-    git clone https://github.com/grafana/grizzly.git /app/grizzly; \
-    cd /app/grizzly; \
-    git checkout ${GRIZZLY_REVISION}
+# Jsonnet
+ENV JSONNET_VERSION=v0.17.0
+RUN set -eux; cd /usr/local/bin/; \
+    curl -sSL "https://github.com/google/go-jsonnet/releases/download/${JSONNET_VERSION}/go-jsonnet_${JSONNET_VERSION#v}_Linux_x86_64.tar.gz" \
+        | tar -xzvf -; \
+    rm -rf LICENSE README.md;
 
-WORKDIR /app/grizzly
-RUN make install
-
-FROM hub.teko.vn/tools/base:1.0
-
-RUN set -eux; \
-    apt-get update; apt-get install -y jsonnet; \
-    apt-get clean;  rm -rf /var/lib/apt/lists/*;
-
-ARG JSONNET_BUNDLER_VERSION=v0.4.0
-RUN set -eux; \
+# jsonnet-bundler
+ENV JSONNET_BUNDLER_VERSION=v0.4.0
+RUN set -eux; cd /usr/local/bin/; \
     curl -sSL "https://github.com/jsonnet-bundler/jsonnet-bundler/releases/download/${JSONNET_BUNDLER_VERSION}/jb-linux-amd64" \
-         -o /usr/local/bin/jb; \
-    chmod +x /usr/local/bin/jb
-
-COPY --from=builder /go/bin/grr /usr/local/bin/
-RUN grr complete
+        -o jb; \
+    chmod +x jb;
