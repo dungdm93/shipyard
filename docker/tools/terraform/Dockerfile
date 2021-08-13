@@ -1,7 +1,7 @@
 FROM hub.teko.vn/tools/base:1.0
 
 # Terraform
-ENV TERRAFORM_VERSION=0.14.*
+ENV TERRAFORM_VERSION=1.0.*
 RUN set -eux; \
     source /etc/os-release; \
     curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -; \
@@ -14,7 +14,7 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # Terragrunt
-ENV TERRAGRUNT_VERSION=v0.28.7
+ENV TERRAGRUNT_VERSION=v0.31.3
 RUN set -eux; cd /usr/local/bin/; \
     curl -L  "https://github.com/gruntwork-io/terragrunt/releases/download/${TERRAGRUNT_VERSION}/terragrunt_linux_amd64" \
          -o  terragrunt; \
