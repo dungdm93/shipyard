@@ -1,9 +1,9 @@
-FROM hub.teko.vn/tools/kubectl:1.18
+FROM hub.teko.vn/tools/kubectl:1.20
 
 # Install helm
-ENV HELM_VERSION=v3.2.4
+ENV HELM_VERSION=v3.6.3
 RUN set -eux; \
-    curl -sSL "https://github.com/helm/helm/raw/master/scripts/get-helm-3" | bash -s -- --version "${HELM_VERSION}"; \
+    curl -sSL "https://github.com/helm/helm/raw/main/scripts/get-helm-3" | bash -s -- --version "${HELM_VERSION}"; \
     helm completion bash > /etc/bash_completion.d/helm;
 
 # Install helm plugins
@@ -54,7 +54,7 @@ RUN set -eux; \
     rm -rf helm-git/{tests,*.json};
 
 # Install helmfile
-ENV HELMFILE_VERSION=v0.125.3
+ENV HELMFILE_VERSION=v0.140.0
 RUN set -eux; \
     curl -sSL "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" \
           -o /usr/local/bin/helmfile; \
