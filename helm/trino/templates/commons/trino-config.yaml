@@ -16,20 +16,22 @@
 {{- $_ := set $config "http-server.https.truststore.path" $httpServer.truststore.path }}
 {{- $_ := set $config "http-server.https.truststore.key"  $httpServer.truststore.key  }}
 
-{{- $_ := include "dict-cleanup" $config }}
+{{- $coordinatorConfig := deepCopy $config }}
+{{- $workerConfig := deepCopy $config }}
 
-{{- $coordinatorConfig := dict }}
 {{- $authen := .Values.authen }}
 {{- if eq $authen.type "oauth2" }}
-{{- $_ := set $coordinatorConfig "http-server.authentication.type"  $authen.type  }}
-{{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.auth-url"  $authen.oauth2.authUrl  }}
-{{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.token-url"  $authen.oauth2.tokenUrl  }}
-{{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.jwks-url"  $authen.oauth2.jwksUrl  }}
-{{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.client-id"  $authen.oauth2.clientId  }}
-{{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.client-secret"  $authen.oauth2.clientSecret  }}
-{{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.principal-field"  $authen.oauth2.principalField  }}
+  {{- $_ := set $coordinatorConfig "web-ui.authentication.type" "oauth2" }}
+  {{- $_ := set $coordinatorConfig "http-server.authentication.type" "oauth2" }}
+  {{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.auth-url" $authen.oauth2.authUrl }}
+  {{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.jwks-url" $authen.oauth2.jwksUrl }}
+  {{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.token-url" $authen.oauth2.tokenUrl }}
+  {{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.client-id" $authen.oauth2.clientId }}
+  {{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.client-secret" $authen.oauth2.clientSecret }}
+  {{- $_ := set $coordinatorConfig "http-server.authentication.oauth2.principal-field" $authen.oauth2.principalField }}
 {{- end }}
 {{- $_ := include "dict-cleanup" $coordinatorConfig }}
+{{- $_ := include "dict-cleanup" $workerConfig }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -43,9 +45,6 @@ data:
     node-scheduler.include-coordinator=false
     discovery-server.enabled=true
     discovery.uri={{ printf "http://%s:8080" (include "trino.fullname" .) }}
-    {{- range $key, $value := $config }}
-    {{ $key }}={{ $value }}
-    {{- end }}
     {{- range $key, $value := $coordinatorConfig }}
     {{ $key }}={{ $value }}
     {{- end }}
@@ -53,6 +52,6 @@ data:
   worker-config.properties: |
     coordinator=false
     discovery.uri={{ printf "http://%s:8080" (include "trino.fullname" .) }}
-    {{- range $key, $value := $config }}
+    {{- range $key, $value := $workerConfig }}
     {{ $key }}={{ $value }}
     {{- end }}

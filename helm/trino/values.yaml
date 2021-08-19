@@ -82,11 +82,11 @@ authen:
 
   oauth2:
     authUrl:
+    jwksUrl:
+    tokenUrl:
     clientId:
     clientSecret:
-    jwksUrl:
     principalField:
-    tokenUrl:
 
 systemAccessControl:
   # Option: custom | allow-all | read-only | file
