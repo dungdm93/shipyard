@@ -53,7 +53,7 @@ httpServer:
     key:
 
 authen:
-  # Option: custom | kerberos | ldap | passwordFile
+  # Option: custom | kerberos | ldap | passwordFile | oauth2
   type: custom
 
   kerberos:
@@ -79,6 +79,14 @@ authen:
     path:
     refreshPeriod:
     cacheSize:
+
+  oauth2:
+    authUrl:
+    clientId:
+    clientSecret:
+    jwksUrl:
+    principalField:
+    tokenUrl:
 
 systemAccessControl:
   # Option: custom | allow-all | read-only | file
