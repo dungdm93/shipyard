@@ -3,7 +3,7 @@ fullnameOverride: ""
 
 image:
   repository: trinodb/trino
-  tag: 351
+  tag: "360"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
@@ -141,6 +141,7 @@ service:
   type: ClusterIP
   httpPort: 8080
   httpsPort: 8443
+  annotations: {}
 
 ingress:
   enabled: false
