@@ -48,7 +48,8 @@ RUN set -eux; \
         unixodbc-dev \
         libev-dev
 
-ARG AIRFLOW_VERSION=2.1.2
+ARG AIRFLOW_VERSION=2.1.4 \
+    DATAHUB_VERSION=0.8.14
 
 RUN set -eux; \
     PYTHON_VERSION_SHORT="${PYTHON_VERSION%.*}"; \
@@ -74,6 +75,8 @@ RUN set -eux; \
     pip install --constraint "${CONSTRAINT_URL}" \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
 
+RUN pip install "acryl-datahub[all]~=${DATAHUB_VERSION}";
+
 RUN pip install \
         # force kubernetes>=12.0
         "kubernetes~=12.0" \
@@ -85,10 +88,6 @@ RUN pip install \
 RUN rm -rf \
         /usr/local/bin/__pycache__ \
         /usr/local/cx_Oracle-doc;
-
-RUN set -eux; \
-    curl -L "https://github.com/apache/airflow/raw/12c9053c06009f154db3343ab0938ea6bda48d62/airflow/providers/docker/operators/docker.py" \
-         -o "/usr/local/lib/python3.8/site-packages/airflow/providers/docker/operators/docker.py"
 
 FROM base
 

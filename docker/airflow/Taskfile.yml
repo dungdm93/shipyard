@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/airflow:2.1-b5
+  IMAGE: hub.teko.vn/dataops/airflow:2.1-b6
 
 includes:
   docker: ../
