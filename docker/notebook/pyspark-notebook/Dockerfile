@@ -10,7 +10,7 @@ COPY ./patches/ /patches/org/apache/spark/ui/static/
 RUN set -eux; cd /patches/; \
     jar -uf ${SPARK_HOME}/jars/spark-core_*.jar org/
 
-FROM jupyter/scipy-notebook:python-3.9.2
+FROM jupyter/scipy-notebook:python-3.9.6
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 USER root
