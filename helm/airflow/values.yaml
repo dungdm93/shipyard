@@ -130,8 +130,8 @@ dags:
     subPath: ""
 
     image:
-      repository: k8s.gcr.io/git-sync
-      tag:   v3.1.5
+      repository: k8s.gcr.io/git-sync/git-sync
+      tag:   v3.3.4
 
     auth:
       username:
