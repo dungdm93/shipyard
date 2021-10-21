@@ -1,5 +1,0 @@
-airflow:
-  executor: Local
-
-# PROBLEMS
-# * LocalExecutor can't get task logs (https://github.com/puckel/docker-airflow/issues/44)

@@ -1,5 +1,0 @@
-NAME            GROUP        VERSION        KIND              SCOPE        CREATED_AT
-.metadata.name  .spec.group  .spec.version  .spec.names.kind  .spec.scope  .metadata.creationTimestamp
-
-##### TUTORIAL #####
-# kubectl get crd -o custom-columns-file=crd.columns --sort-by=.spec.group
