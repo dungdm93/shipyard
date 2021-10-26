@@ -9,10 +9,10 @@ RUN apk add -U curl gnupg tar
 #   * https://dist.apache.org/repos/dist/release
 # List all Apache mirrors:
 #   * https://apache.org/mirrors
-ARG APACHE_DIST=https://archive.apache.org/dist
+ARG APACHE_DIST=https://downloads.apache.org
 ARG APACHE_MIRROR=${APACHE_DIST}
 ARG HADOOP_VERSION=3.2
-ARG SPARK_VERSION=3.1.2
+ARG SPARK_VERSION=3.2.0
 ARG TINI_VERSION=0.19.0
 
 RUN set -eux; \
@@ -33,7 +33,7 @@ RUN set -eux; \
     curl -LO "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini"; \
     chmod +x tini;
 
-FROM hub.teko.vn/dataops/hadoop:3.2.0 as hadoop
+FROM hub.teko.vn/dataops/hadoop:3.3.1 as hadoop
 WORKDIR /build/hadoop
 
 RUN set -eux; \
@@ -92,11 +92,13 @@ SHELL [ "/bin/bash", "-c" ]
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
+        # Hadoop native packages
         openjdk-8-jre-headless ca-certificates libc6 \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
-        libssl1.1 libisal2 libnss3 libpam-modules krb5-user procps; \
+        libssl1.1 libisal2 libnss3 libpam-modules krb5-user procps \
+        # Spark native packages
+        libopenblas-base libatlas3-base libarpack2; \
     ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so; \
-    ln -s libssl.so.1.1    /usr/lib/x86_64-linux-gnu/libssl.so; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
@@ -106,7 +108,10 @@ RUN set -eux; \
     chmod ug+rw /etc/passwd;
 
 ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" \
-    SPARK_HOME="/opt/spark"
+    SPARK_HOME="/opt/spark" \
+    # https://spark.apache.org/docs/latest/ml-linalg-guide.html#spark-configuration
+    OPENBLAS_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1
 
 COPY --from=downloader /build/tini   /usr/bin/tini
 COPY --from=downloader /build/spark  ${SPARK_HOME}
