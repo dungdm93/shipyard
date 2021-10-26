@@ -11,7 +11,7 @@ RUN apk add -U curl gnupg tar
 #   * https://apache.org/mirrors
 ARG APACHE_DIST=https://archive.apache.org/dist
 ARG APACHE_MIRROR=${APACHE_DIST}
-ARG HADOOP_VERSION=3.3.0
+ARG HADOOP_VERSION=3.3.1
 
 RUN set -eux; \
     curl -L  "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \
@@ -35,27 +35,22 @@ RUN set -eux; \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libssl1.1 libisal2 libnss3 libpam-modules krb5-user procps; \
     ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so; \
-    ln -s libssl.so.1.1    /usr/lib/x86_64-linux-gnu/libssl.so;    \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
-
-# TODO: Native Hadoop Library
-# > hadoop checknative -a
-# * libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1
-# * libssl1.1
-#   ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so
-#   ln -s libssl.so.1.1    /usr/lib/x86_64-linux-gnu/libssl.so
-# * libisal2
-#   ln -s libisal.so.2     /usr/lib/x86_64-linux-gnu/libisal.so
 
 ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" \
     HADOOP_HOME="/opt/hadoop"
 
 COPY --from=downloader "/build/hadoop" "${HADOOP_HOME}"
 
-ENV PATH="${HADOOP_HOME}/bin:${PATH}" \
-    LD_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}"
+ENV PATH="${HADOOP_HOME}/bin:${PATH}"
 
-# Other soutions don't work, like:
-# echo "${HADOOP_HOME}/lib/native" > /etc/ld.so.conf.d/hadoop.conf
-# export JAVA_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${JAVA_LIBRARY_PATH}"
+# > hadoop checknative -a
+# Native library checking:
+# hadoop:  true /opt/hadoop/lib/native/libhadoop.so.1.0.0
+# zlib:    true /lib/x86_64-linux-gnu/libz.so.1
+# zstd  :  true /lib/x86_64-linux-gnu/libzstd.so.1
+# bzip2:   true /lib/x86_64-linux-gnu/libbz2.so.1
+# openssl: true /lib/x86_64-linux-gnu/libcrypto.so
+# ISA-L:   true /lib/x86_64-linux-gnu/libisal.so.2
+# PMDK:    false The native code was built without PMDK support.
