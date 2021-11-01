@@ -137,6 +137,12 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
+metrics:
+  enabled: false
+  port: 9090
+  podMonitor:
+    enabled: false
+
 service:
   type: ClusterIP
   httpPort: 8080

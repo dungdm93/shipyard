@@ -1,0 +1,21 @@
+{{- if (and .Values.metrics.enabled .Values.metrics.podMonitor.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "trino.fullname" . }}
+  labels:
+    {{- include "trino.labels" . | nindent 4 }}
+spec:
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/component
+  selector:
+    matchLabels:
+      {{- include "trino.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  podMetricsEndpoints:
+  - port: metrics
+    path: /metrics
+{{- end -}}
