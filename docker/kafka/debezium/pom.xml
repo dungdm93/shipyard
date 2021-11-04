@@ -3,8 +3,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>vn.teko.data</groupId>
-    <artifactId>debezium</artifactId>
+    <groupId>vn.teko.data.kafka</groupId>
+    <artifactId>schema-registry</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>Debezium</name>
@@ -18,7 +18,7 @@
     </repositories>
 
     <properties>
-        <confluent.version>6.1.0</confluent.version>
+        <confluent.version>6.2.1</confluent.version>
     </properties>
 
     <dependencyManagement>
