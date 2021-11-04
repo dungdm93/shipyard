@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/dataops/kafka/cloud-storage:kafka-2.8.1
+
+includes:
+  docker: ../../
