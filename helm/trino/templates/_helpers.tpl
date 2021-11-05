@@ -69,6 +69,7 @@ Checksum pod annotations
 checksum/trino-properties: {{ include (print $.Template.BasePath "/commons/trino-properties.yaml") . | sha256sum }}
 checksum/trino-config:     {{ include (print $.Template.BasePath "/commons/trino-config.yaml") .     | sha256sum }}
 checksum/trino-catalog:    {{ include (print $.Template.BasePath "/commons/trino-catalog.yaml") .    | sha256sum }}
+checksum/trino-monitor:    {{ include (print $.Template.BasePath "/commons/trino-monitor.yaml") .    | sha256sum }}
 {{- end -}}
 
 {{/*
@@ -81,4 +82,27 @@ Remove empty-value entry from dict
     {{- $_ := unset $dict $k }}
   {{- end -}}
 {{- end -}}
+{{- end -}}
+
+
+{{- define "trino.initContainers.jmxAgents" -}}
+- name: jmx-agent
+  image: "bitnami/jmx-exporter:0.16.1"
+  imagePullPolicy: IfNotPresent
+  command:
+    - cp
+    - /opt/bitnami/jmx-exporter/jmx_prometheus_javaagent.jar
+    - /jmx-exporter/jmx_prometheus_javaagent.jar
+  volumeMounts:
+    - name: jmx-exporter
+      mountPath: /jmx-exporter
+{{- end -}}
+
+
+{{- define "trino.jmxMounts" -}}
+- name: jmx-exporter
+  mountPath: /jmx-exporter
+- name: trino-metrics
+  mountPath: /jmx-exporter/trino-metrics.yaml
+  subPath:   trino-metrics.yaml
 {{- end -}}

@@ -9,12 +9,14 @@
 {{- $httpServer := .Values.httpServer }}
 {{- $_ := set $config "http-server.http.enabled"  $httpServer.http.enabled  }}
 {{- $_ := set $config "http-server.http.port"     $httpServer.http.port  }}
-{{- $_ := set $config "http-server.https.enabled" $httpServer.https.enabled }}
-{{- $_ := set $config "http-server.https.port"    $httpServer.https.port }}
-{{- $_ := set $config "http-server.https.keystore.path"   $httpServer.keystore.path }}
-{{- $_ := set $config "http-server.https.keystore.key"    $httpServer.keystore.key  }}
-{{- $_ := set $config "http-server.https.truststore.path" $httpServer.truststore.path }}
-{{- $_ := set $config "http-server.https.truststore.key"  $httpServer.truststore.key  }}
+{{- if $httpServer.https.enabled }}
+  {{- $_ := set $config "http-server.https.enabled" $httpServer.https.enabled }}
+  {{- $_ := set $config "http-server.https.port"    $httpServer.https.port }}
+  {{- $_ := set $config "http-server.https.keystore.path"   $httpServer.keystore.path }}
+  {{- $_ := set $config "http-server.https.keystore.key"    $httpServer.keystore.key  }}
+  {{- $_ := set $config "http-server.https.truststore.path" $httpServer.truststore.path }}
+  {{- $_ := set $config "http-server.https.truststore.key"  $httpServer.truststore.key  }}
+{{- end }}
 
 {{- $coordinatorConfig := deepCopy $config }}
 {{- $workerConfig := deepCopy $config }}

@@ -1,7 +1,10 @@
-{{- $trino := .Values.trino }}
-{{- $node := index $trino "node.properties" }}
-{{- $jvm  := index $trino "jvm.config" }}
-{{- $log  := index $trino "log.properties" }}
+{{- $trino := .Values.trino | deepCopy }}
+{{- $jvm   := index $trino "jvm.config" }}
+
+{{- if .Values.metrics.enabled }}
+  {{- $jvm = print ($jvm | trim) "\n-javaagent:/jmx-exporter/jmx_prometheus_javaagent.jar=" .Values.metrics.port ":/jmx-exporter/trino-metrics.yaml" }}
+{{- end }}
+{{- $trino := omit $trino "config.properties" "jvm.config" }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -10,22 +13,20 @@ metadata:
   labels:
     {{- include "trino.labels" . | nindent 4 }}
 data:
-{{- range $file, $content := .Values.trino }}
-{{- if eq $file "config.properties" -}}
-  {{/* See trino-config file */}}
-{{- else if kindIs "map" $content }}
-  {{- $_ := include "dict-cleanup" $content }}
+  jvm.config: |
+    {{- $jvm | nindent 4 }}
+{{- range $file, $content := $trino }}
   {{ $file }}: |
+{{- if kindIs "map" $content }}
+  {{- $_ := include "dict-cleanup" $content }}
     {{- range $key, $value := $content }}
     {{ $key }}={{ $value }}
     {{- end }}
 {{- else if kindIs "slice" $content }}
-  {{ $file }}: |
     {{- range $option := $content }}
     {{ $option }}
     {{- end }}
 {{- else if $content }}
-  {{ $file }}: |
     {{- $content | nindent 4 }}
 {{- end }}
 {{- end }}

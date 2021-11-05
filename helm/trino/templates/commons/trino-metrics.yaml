@@ -1,0 +1,531 @@
+{{- if (and .Values.metrics.enabled .Values.metrics.podMonitor.enabled) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "trino.fullname" . }}-metrics
+  labels:
+    {{- include "trino.labels" . | nindent 4 }}
+data:
+  trino-metrics.yaml: |
+    lowercaseOutputName: true
+    lowercaseOutputLabelNames: true
+
+    whitelistObjectNames:
+      - 'io.airlift.http.client:*'
+      - 'io.airlift.http.server:*'
+      - 'io.airlift.node:*'
+      - 'io.airlift.stats:*'
+      - 'java.lang:*'
+      - 'java.nio:*'
+      - 'trino.execution:*'
+      - 'trino.execution.executor:*'
+      - 'trino.execution.resourcegroups:*'
+      - 'trino.failuredetector:*'
+      - 'trino.memory:*'
+      - 'trino.metadata:*'
+      - 'trino.plugin.hive:*'
+      - 'trino.plugin.hive.metastore.cache:*'
+      - 'trino.plugin.hive.metastore.glue:*'
+      # Enable and add rules for thrift metastore stats if required
+      # - 'trino.plugin.hive.metastore.thrift:*'
+      - 'trino.plugin.hive.s3:*'
+      - 'trino.security:*'
+      - 'trino.sql.gen:*'
+      - 'trino.sql.planner.iterative:*'
+      - 'trino.sql.planner.optimizations:*'
+
+    rules:
+      - pattern: 'io.airlift.http.client<type=HttpClient, name=For(.+)><>(\dxx)Response.TotalCount'
+        name: 'trino_http_requests_total'
+        help: 'Number of HTTP requests made'
+        type: COUNTER
+        labels:
+          client: '$1'
+          code: '$2'
+      - pattern: 'io.airlift.http.client<type=HttpClient, name=For(.+)><>ConnectionStats.(Received|Sent)Bytes'
+        name: 'trino_http_bytes_total'
+        help: 'Bytes transferred for HTTP requests'
+        type: COUNTER
+        labels:
+          client: '$1'
+          direction: '$2'
+      - pattern: 'io.airlift.http.client<type=HttpClient, name=For(.+)><>ConnectionStats.OpenConnectionCount'
+        name: 'trino_http_open_connections'
+        help: 'Number of open HTTP connections'
+        type: GAUGE
+        labels:
+          client: '$1'
+      - pattern: 'io.airlift.http.client<type=HttpClient, name=For(.+)><>ConnectionStats.MaxOpenConnections'
+        name: 'trino_http_open_connections_max'
+        help: 'Maximum observed number of open HTTP connections'
+        type: GAUGE
+        labels:
+          client: '$1'
+      - pattern: 'io.airlift.http.client<type=HttpClient, name=For(.+)><>QueuedRequestsPerDestination.Count'
+        name: 'trino_http_queued_requests_per_destination'
+        help: 'Number of HTTP requests queued per destination'
+        type: GAUGE
+        labels:
+          client: '$1'
+      - pattern: 'io.airlift.http.client<type=HttpClient, name=For(.+)><>QueuedRequestsPerDestination.Max'
+        name: 'trino_http_queued_requests_per_destination_max'
+        help: 'Maximum observed number of HTTP requests queued per destination'
+        type: GAUGE
+        labels:
+          client: '$1'
+      - pattern: 'io.airlift.http.client<type=HttpClient, name=For(.+)><>ThreadPool.(Max|Min|Busy|Idle|)Threads'
+        name: 'trino_http_thread_pool_$2_threads'
+        help: '$2 threads in HTTP client thread pool'
+        type: GAUGE
+        labels:
+          client: '$1'
+
+      - pattern: 'io.airlift.http.server<name=HttpServer><>DaysUntilCertificateExpiration'
+        name: 'trino_http_server_certificate_expiry_days'
+        help: 'Number of days until server certificate expiry'
+        type: GAUGE
+      - pattern: 'io.airlift.http.server<type=HttpServer><>HttpConnectionStats.(Received|Sent)Bytes'
+        name: 'trino_http_server_bytes_total'
+        help: 'Bytes transferred for serving HTTP requests'
+        type: COUNTER
+        labels:
+          direction: '$1'
+      - pattern: 'io.airlift.http.server<name=HttpServer><>HttpConnectionStats.OpenConnectionCount'
+        name: 'trino_http_server_open_connections'
+        help: 'Number of open connections on the HTTP server'
+        type: GAUGE
+      - pattern: 'io.airlift.http.server<name=HttpServer><>HttpConnectionStats.MaxOpenConnections'
+        name: 'trino_http_server_open_connections_max'
+        help: 'Maximum observed number of open connections on the HTTP server'
+        type: GAUGE
+
+      - pattern: 'io.airlift.node<name=NodeInfo><>(Environment|ExternalAddress|InstanceId|InternalAddress|NodeId|StartTime): (.+)'
+        name: 'trino_node_info'
+        value: 1
+        help: 'A metric with constant 1 value labelled with node information'
+        type: GAUGE
+        labels:
+          '$1': '$2'
+
+      - pattern: 'io.airlift.stats<name=PauseMeter><>(.+)Pauses'
+        name: 'trino_pauses_total'
+        help: 'Total number of JVM pauses'
+        type: COUNTER
+        labels:
+          bucket: '$1'
+      - pattern: 'io.airlift.stats<name=PauseMeter><>TotalPauseSeconds'
+        name: 'trino_pause_seconds_total'
+        help: 'Total time in seconds for which JVM was paused'
+        type: COUNTER
+
+      - pattern: 'java.lang<name=(.+), type=GarbageCollector><>CollectionCount'
+        name: 'jvm_gc_total'
+        help: 'Total number of garbage collections'
+        type: COUNTER
+        labels:
+          name: '$1'
+      - pattern: 'java.lang<name=(.+), type=GarbageCollector><>CollectionTime'
+        valueFactor: 0.001
+        name: 'jvm_gc_time_seconds_total'
+        help: 'Total time in seconds spent on garbage collections'
+        type: COUNTER
+        labels:
+          name: '$1'
+      - pattern: 'java.lang<name=(.+), type=GarbageCollector><LastGcInfo>duration'
+        valueFactor: 0.000001
+        name: 'jvm_gc_duration_seconds'
+        help: 'Garbage collection duration in seconds'
+        type: GAUGE
+        labels:
+          name: '$1'
+      - pattern: 'java.lang<name=(.+), type=GarbageCollector><LastGcInfo>GcThreadCount'
+        name: 'jvm_gc_threads'
+        help: 'Garbage collection threads used'
+        type: GAUGE
+        labels:
+          name: '$1'
+      - pattern: 'java.lang<type=Memory><(Heap|NonHeap)MemoryUsage>(max|init|committed|used)'
+        name: 'jvm_memory_$2_bytes'
+        help: '$2 bytes in $1 memory'
+        type: GAUGE
+        labels:
+          area: '$1'
+
+      - pattern: 'java.lang<type=OperatingSystem><>AvailableProcessors'
+        name: 'jvm_os_processors'
+        help: 'Number of CPU cores available'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(CommittedVirtualMemory|FreePhysicalMemory|TotalPhysicalMemory|FreeSwapSpace|TotalSwapSpace)Size'
+        name: 'jvm_os_$1_bytes'
+        help: '$1 in bytes'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(Max|Open)FileDescriptorCount'
+        name: 'jvm_os_$1_file_descriptors'
+        help: '$1 file descriptors'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(Process|System)CpuLoad'
+        name: 'jvm_os_$1_cpu_load'
+        help: '$1 cpu load'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(Process|System)CpuTime'
+        name: 'jvm_os_$1_cpu_time_seconds'
+        help: '$1 cpu time in seconds'
+        type: COUNTER
+      - pattern: 'java.lang<type=OperatingSystem><>SystemLoadAverage'
+        name: 'jvm_os_system_load_avg'
+        help: 'System load average'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(Arch|Name|Version): (.+)'
+        name: 'jvm_os_info'
+        value: 1
+        help: 'A metric with constant 1 value labelled with OS information'
+        type: GAUGE
+        labels:
+          '$1': '$2'
+      - pattern: 'java.lang<type=Runtime><>Uptime'
+        valueFactor: 0.001
+        name: 'jvm_runtime_uptime_seconds'
+        help: 'JVM uptime in seconds'
+        type: COUNTER
+
+      - pattern: 'java.lang<type=Threading><>(Daemon|Peak|TotalStarted|)ThreadCount'
+        name: 'jvm_threading_$1_threads'
+        help: 'JVM $1 thread count'
+        type: GAUGE
+
+      - pattern: 'java.nio<name=(.+), type=BufferPool><>Count'
+        name: 'jvm_nio_buffer_pool_buffers'
+        help: 'Number of buffers in NIO buffer pool'
+        type: GAUGE
+        labels:
+          pool: '$1'
+      - pattern: 'java.nio<name=(.+), type=BufferPool><>(MemoryUsed|TotalCapacity)'
+        name: 'jvm_nio_buffer_pool_$2_bytes'
+        help: 'NIO buffer pool $2 in bytes'
+        type: GAUGE
+        labels:
+          pool: '$1'
+
+      - pattern: 'trino.execution<name=ClusterSizeMonitor><>RequiredWorkers'
+        name: 'trino_cluster_size_monitor_required_workers'
+        help: 'Number of workers required in cluster'
+        type: GAUGE
+
+      - pattern: 'trino.execution<name=QueryManager><>(Abandoned|Canceled|Completed|Failed|Started|Submitted)Queries.TotalCount'
+        name: 'trino_query_manager_queries_total'
+        help: 'Total number of queries'
+        type: COUNTER
+        labels:
+          state: '$1'
+      - pattern: 'trino.execution<name=QueryManager><>(Queued|Running)Queries'
+        name: 'trino_query_manager_queries'
+        help: 'Number of queries currently in the labelled state'
+        type: GAUGE
+        labels:
+          state: '$1'
+
+      - pattern: 'trino.execution<name=QueryManager><>ConsumedCpuTimeSecs.TotalCount'
+        name: 'trino_query_manager_consumed_cpu_time_seconds_total'
+        help: 'Total CPU time consumed across all queries in seconds'
+        type: COUNTER
+      - pattern: 'trino.execution<name=QueryManager><>ConsumedInputBytes.TotalCount'
+        name: 'trino_query_manager_consumed_input_bytes_total'
+        help: 'Total input bytes consumed across all queries in bytes'
+        type: COUNTER
+      - pattern: 'trino.execution<name=QueryManager><>ConsumedInputRows.TotalCount'
+        name: 'trino_query_manager_consumed_input_rows_total'
+        help: 'Total number of input rows consumed across all queries'
+        type: COUNTER
+
+      - pattern: 'trino.execution<name=QueryManager><>(CpuInputByte|WallInputBytes)Rate.AllTime.(Avg|Min|Max)'
+        name: 'trino_query_manager_$1_rate_$2'
+        help: '$2 rate $1'
+        type: GAUGE
+      - pattern: 'trino.execution<name=QueryManager><>(CpuInputByte|WallInputBytes)Rate.AllTime.P(\d+)'
+        name: 'trino_query_manager_$1_rate'
+        help: '$1 rate for the labelled quantile'
+        type: GAUGE
+        labels:
+          quantile: '0.$2'
+      - pattern: 'trino.execution<name=QueryManager><>(CpuInputByte|WallInputBytes)Rate.AllTime.Count'
+        name: 'trino_query_manager_$1_rate_count'
+        help: '$1 rate count'
+        type: COUNTER
+
+      - pattern: 'trino.execution<name=QueryManager><>(Execution|Queued)Time.AllTime.(Avg|Min|Max)'
+        valueFactor: 0.001
+        name: 'trino_query_manager_$1_seconds_$2'
+        help: '$2 $1 time in seconds'
+        type: GAUGE
+      - pattern: 'trino.execution<name=QueryManager><>(Execution|Queued)Time.AllTime.P(\d+)'
+        valueFactor: 0.001
+        name: 'trino_query_manager_$1_seconds'
+        help: '$1 time in seconds for the labelled quantile'
+        type: GAUGE
+        labels:
+          quantile: '0.$2'
+      - pattern: 'trino.execution<name=QueryManager><>(Execution|Queued)Time.AllTime.Count'
+        valueFactor: 0.001
+        name: 'trino_query_manager_$1_seconds_count'
+        help: '$1 time count'
+        type: COUNTER
+
+      - pattern: 'trino.execution<name=QueryManager><>(External|InsufficientResources|Internal|UserError)Failures.TotalCount'
+        name: 'trino_query_manager_failures_total'
+        help: 'Total number of failures with the labelled type'
+        type: COUNTER
+        labels:
+          type: '$1'
+
+      - pattern: 'trino.execution.executor<name=MultilevelSplitQueue><>Level(\d)Time'
+        valueFactor: 0.000000001
+        name: 'trino_multilevel_split_queue_level_time_seconds_total'
+        help: 'Total time spent in the labelled level of the MLFQ in seconds'
+        type: COUNTER
+        labels:
+          level: '$1'
+      - pattern: 'trino.execution.executor<name=MultilevelSplitQueue><>SelectedCountLevel(\d).TotalCount'
+        name: 'trino_multilevel_split_queue_level_selected_total'
+        help: 'Total number of times the labelled level was selected'
+        type: COUNTER
+        labels:
+          level: '$1'
+
+      - pattern: 'trino.execution.executor<name=TaskExecutor><>(BlockedQuantaWallTime|SplitQueuedTime|SplitWallTime|UnblockedQuantaWallTime).AllTime.(Avg|Min|Max)'
+        valueFactor: 0.000001
+        name: 'trino_task_executor_$1_seconds_$2'
+        help: '$2 $1 in seconds'
+        type: GAUGE
+      - pattern: 'trino.execution.executor<name=TaskExecutor><>(BlockedQuantaWallTime|SplitQueuedTime|SplitWallTime|UnblockedQuantaWallTime).AllTime.P(\d+)'
+        valueFactor: 0.000001
+        name: 'trino_task_executor_$1_seconds'
+        help: '$1 in seconds for the labelled quantile'
+        type: GAUGE
+        labels:
+          quantile: '0.$2'
+      - pattern: 'trino.execution.executor<name=TaskExecutor><>(BlockedQuantaWallTime|SplitQueuedTime|SplitWallTime|UnblockedQuantaWallTime).AllTime.Count'
+        valueFactor: 0.000001
+        name: 'trino_task_executor_$1_seconds_count'
+        help: '$1 in seconds count'
+        type: COUNTER
+
+      - pattern: 'trino.execution.executor<name=TaskExecutor><>(Blocked|Intermediate|Running|Waiting)Splits'
+        name: 'trino_task_executor_splits'
+        help: 'Number of splits in the labelled state'
+        type: GAUGE
+        labels:
+          state: '$1'
+      - pattern: 'trino.execution.executor<name=TaskExecutor><>TotalSplits'
+        name: 'trino_task_executor_splits_total'
+        help: 'Total number of splits'
+        type: COUNTER
+
+      - pattern: 'trino.execution.executor<name=TaskExecutor><>(IntermediateSplitCpu|IntermediateSplitScheduled|IntermediateSplitWait|IntermediateSplitWall|LeafSplitCpu|LeafSplitScheduled|LeafSplitWait|LeafSplitWall)Time.(Avg|Min|Max)'
+        valueFactor: 0.000001
+        name: 'trino_task_executor_$1_seconds_$2'
+        help: '$2 $1 in seconds'
+        type: GAUGE
+      - pattern: 'trino.execution.executor<name=TaskExecutor><>(IntermediateSplitCpu|IntermediateSplitScheduled|IntermediateSplitWait|IntermediateSplitWall|LeafSplitCpu|LeafSplitScheduled|LeafSplitWait|LeafSplitWall)Time.P(\d+)'
+        valueFactor: 0.000001
+        name: 'trino_task_executor_$1_seconds'
+        help: '$1 in seconds for the labelled quantile'
+        type: GAUGE
+        labels:
+          quantile: '0.$2'
+      - pattern: 'trino.execution.executor<name=TaskExecutor><>(IntermediateSplitCpu|IntermediateSplitScheduled|IntermediateSplitWait|IntermediateSplitWall|LeafSplitCpu|LeafSplitScheduled|LeafSplitWait|LeafSplitWall)Time.Count'
+        valueFactor: 0.000001
+        name: 'trino_task_executor_$1_seconds_count'
+        help: '$1 in seconds count'
+        type: COUNTER
+
+      - pattern: 'trino.execution.resourcegroups<type=InternalResourceGroup, name=(.+)><>(HardConcurrencyLimit|MaxQueuedQueries|QueuedQueries|RunningQueries|WaitingQueuedQueries)'
+        name: 'trino_resourcegroups_$2'
+        help: '$2 for the labelled resource group name'
+        type: GAUGE
+        labels:
+          group: '$1'
+
+      - pattern: 'trino.failuredetector<name=HeartbeatFailureDetector><>(Active|Failed|Total)Count'
+        name: 'trino_failuredetector_$1_nodes'
+        help: 'Number of $1 nodes observed by the failure detector'
+        type: GAUGE
+
+      - pattern: 'trino.memory<name=ClusterMemoryManager><>Cluster(MemoryBytes|TotalMemoryReservation|UserMemoryReservation)'
+        name: 'trino_cluster_memory_manager_$1_bytes'
+        help: 'Cluster $1 in bytes'
+        type: GAUGE
+      - pattern: 'trino.memory<name=ClusterMemoryManager><>TotalAvailableProcessors'
+        name: 'trino_cluster_memory_manager_available_processors'
+        help: 'Cluster total available CPU cores'
+        type: GAUGE
+      - pattern: 'trino.memory<name=ClusterMemoryManager><>(NumberOfLeakedQueries|QueriesKilledDueToOutOfMemory)'
+        name: 'trino_cluster_memory_manager_$1_total'
+        help: 'Total $1'
+        type: COUNTER
+
+      # Cluster wide memory pools
+      - pattern: 'trino.memory<type=ClusterMemoryPool, name=(.+)><>(AssignedQueries|BlockedNodes|Nodes)'
+        name: 'trino_cluster_memory_pool_$2'
+        help: '$1 in the labelled cluster memory pool'
+        type: GAUGE
+        labels:
+          pool: '$1'
+      - pattern: 'trino.memory<type=ClusterMemoryPool, name=(.+)><>(Free|Reserved|ReservedRevocable|Total)DistributedBytes'
+        name: 'trino_cluster_memory_pool_$2_distributed_bytes'
+        help: '$1 distributed memory in the labelled cluster memory pool in bytes'
+        type: GAUGE
+        labels:
+          pool: '$1'
+
+      # Local memory
+      - pattern: 'trino.memory<type=MemoryPool, name=(.+)><>(Free|Max|Reserved|ReservedRevocable)Bytes'
+        name: 'trino_memory_pool_$2_bytes'
+        help: '$1 memory in the labelled memory pool in bytes'
+        type: GAUGE
+        labels:
+          pool: '$1'
+
+      - pattern: 'trino.metadata<name=DiscoveryNodeManager><>(Active|Inactive|ShuttingDown)NodeCount'
+        name: 'trino_metadata_$1_nodes'
+        help: 'Number of $1 nodes as seen by discovery service'
+        type: GAUGE
+
+      - pattern: 'trino.plugin.hive<type=CachingDirectoryLister, name=(.+)><>(Hit|Miss|Request)Count'
+        name: 'trino_plugin_hive_caching_directory_lister_$2_count_total'
+        help: '$2 count of the CachingDirectoryLister for the labelled catalog'
+        type: COUNTER
+        labels:
+          catalog: '$1'
+
+      - pattern: 'trino.plugin.hive<type=FileFormatDataSourceStats, name=(.+)><>(0Bto100KB|100KBto1MB|1MBto10MB|10MBPlus).AllTime.Count'
+        name: 'trino_plugin_hive_file_format_stats_count_total'
+        help: 'Total number of files observed with the labelled sizes for the labelled catalog'
+        type: COUNTER
+        labels:
+          catalog: '$1'
+          bucket: '$2'
+
+      - pattern: 'trino.plugin.hive<type=FileFormatDataSourceStats, name=(.+)><>ReadBytes.AllTime.(Avg|Min|Max)'
+        name: 'trino_plugin_hive_file_format_stats_read_bytes_$2'
+        help: '$2 bytes read from the labelled catalog'
+        type: GAUGE
+        labels:
+          catalog: '$1'
+      - pattern: 'trino.plugin.hive<type=FileFormatDataSourceStats, name=(.+)><>ReadBytes.AllTime.P(\d+)'
+        name: 'trino_plugin_hive_file_format_stats_read_bytes_$2'
+        help: 'Bytes read from the labelled catalog for the labelled quantile'
+        type: GAUGE
+        labels:
+          catalog: '$1'
+          quantile: '0.$2'
+      - pattern: 'trino.plugin.hive<type=FileFormatDataSourceStats, name=(.+)><>ReadBytes.AllTime.Total'
+        name: 'trino_plugin_hive_file_format_stats_read_bytes_sum'
+        help: 'Total bytes read from the labelled catalog'
+        type: COUNTER
+        labels:
+          catalog: '$1'
+
+      - pattern: 'trino.plugin.hive<type=NamenodeStats, name=(.+)><>(ListLocatedStatus|RemoteIteratorNext).Time.AllTime.(Avg|Min|Max)'
+        name: 'trino_plugin_hive_namenode_$2_seconds_$3'
+        help: '$3 time taken by $2 in seconds for the labelled catalog'
+        type: GAUGE
+        labels:
+          catalog: '$1'
+      - pattern: 'trino.plugin.hive<type=NamenodeStats, name=(.+)><>(ListLocatedStatus|RemoteIteratorNext).Time.AllTime.P(\d+)'
+        name: 'trino_plugin_hive_namenode_$2_seconds'
+        help: 'Time taken by $2 in seconds for the labelled quantile for the labelled catalog'
+        type: GAUGE
+        labels:
+          catalog: '$1'
+          quantile: '0.$3'
+      - pattern: 'trino.plugin.hive<type=NamenodeStats, name=(.+)><>(ListLocatedStatus|RemoteIteratorNext).Time.AllTime.Count'
+        name: 'trino_plugin_hive_namenode_$1_seconds_count'
+        help: 'Count of $2 for the labelled catalog'
+        type: COUNTER
+        labels:
+          catalog: '$1'
+
+      - pattern: 'trino.plugin.hive.metastore.cache<type=CachingHiveMetastore, name=(.+)><>(.+)Stats.(Hit|Miss)Rate'
+        name: 'trino_plugin_hive_metastore_$2_rate'
+        help: '$3 rate for the labelled catalog and operation'
+        type: GAUGE
+        labels:
+          catalog: '$1'
+          operation: '$2'
+      - pattern: 'trino.plugin.hive.metastore.glue<type=GlueHiveMetastore, name=(.+)><>(.+)Stats.(Hit|Miss)Rate'
+        name: 'trino_plugin_hive_metastore_$2_rate'
+        help: '$3 rate for the labelled catalog and operation'
+        type: GAUGE
+        labels:
+          catalog: '$1'
+          operation: '$2'
+
+      - pattern: 'trino.plugin.hive.s3<type=PrestoS3FileSystem, name=(.+), catalog=(.+)><>(.+).TotalCount'
+        name: 'trino_plugin_hive_s3_$3_count_total'
+        help: 'Total count of $3 for the labelled catalog'
+        type: COUNTER
+        labels:
+          catalog: '$2'
+
+      # AWS API calls histograms/summaries
+      - pattern: 'trino.plugin.hive.s3<type=PrestoS3FileSystem, name=(.+), catalog=(.+)><>(.+).AllTime.(Avg|Min|Max)'
+        valueFactor: 0.001
+        name: 'trino_plugin_hive_s3_$3_seconds_$4'
+        help: '$4 $3 in seconds for the labelled catalog'
+        type: GAUGE
+        labels:
+          catalog: '$2'
+      - pattern: 'trino.plugin.hive.s3<type=PrestoS3FileSystem, name=(.+), catalog=(.+)><>(.+).AllTime.P(\d+)'
+        valueFactor: 0.001
+        name: 'trino_plugin_hive_s3_$3_seconds'
+        help: '$3 in seconds for the labelled quantile and catalog'
+        type: GAUGE
+        labels:
+          catalog: '$2'
+          quantile: '0.$4'
+      - pattern: 'trino.plugin.hive.s3<type=PrestoS3FileSystem, name=(.+), catalog=(.+)><>(.+).AllTime.Count'
+        valueFactor: 0.001
+        name: 'trino_plugin_hive_s3_$3_seconds_count'
+        help: '$3 in seconds count for the labelled catalog'
+        type: COUNTER
+        labels:
+          catalog: '$2'
+
+      - pattern: 'trino.security<name=AccessControlManager><>(.+).TotalCount'
+        name: 'trino_security_$1_count_total'
+        help: 'Number of $1'
+        type: COUNTER
+
+      - pattern: 'trino.sql.gen<name=(.+)><>(.+).(Hit|Miss)Rate'
+        name: 'trino_sql_gen_$1_$2_$3_rate'
+        type: GAUGE
+      - pattern: 'trino.sql.gen<name=(.+)><>(.+).RequestCount'
+        name: 'trino_sql_gen_$1_$2_request_count'
+        type: COUNTER
+
+      - pattern: 'trino.sql.planner.(.+)<name=(.+), rule=(.+)><>(Failures|Hits)'
+        name: 'trino_sql_planner_$2_$4'
+        type: COUNTER
+        labels:
+          rule: '$3'
+
+      - pattern: 'trino.sql.planner.(.+)<name=(.+), rule=(.+)><>Time.(Avg|Min|Max)'
+        valueFactor: 0.000001
+        name: 'trino_sql_planner_$2_seconds_$4'
+        type: GAUGE
+        labels:
+          rule: '$3'
+      - pattern: 'trino.sql.planner.(.+)<name=(.+), rule=(.+)><>Time.P(\d+)'
+        valueFactor: 0.000001
+        name: 'trino_sql_planner_$2_seconds'
+        type: GAUGE
+        labels:
+          rule: '$3'
+          quantile: '0.$4'
+      - pattern: 'trino.sql.planner.(.+)<name=(.+), rule=(.+)><>Time.Count'
+        name: 'trino_sql_planner_$2_seconds_count'
+        type: COUNTER
+        labels:
+          rule: '$3'
+
+{{- end }}

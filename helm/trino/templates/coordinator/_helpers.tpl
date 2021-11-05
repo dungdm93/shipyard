@@ -32,6 +32,13 @@ Coordinator volumes
 - name: trino-catalog
   configMap:
     name: {{ include "trino.fullname" . }}-catalog
+{{- if .Values.metrics.enabled }}
+- name: jmx-exporter
+  emptyDir: {}
+- name: trino-metrics
+  configMap: 
+    name: {{ include "trino.fullname" . }}-metrics
+{{- end }}
 {{- with $coordinator.extraVolumes }}
 {{ toYaml . }}
 {{- end }}
@@ -47,6 +54,9 @@ Coordinator volumeMounts
   mountPath: /etc/trino
 - name: trino-catalog
   mountPath: /etc/trino/catalog
+{{- if .Values.metrics.enabled }}
+{{ include "trino.jmxMounts" . }}
+{{- end }}
 {{- with $coordinator.extraVolumeMounts }}
 {{ toYaml . }}
 {{- end }}
