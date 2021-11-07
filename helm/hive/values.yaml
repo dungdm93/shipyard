@@ -3,7 +3,7 @@ fullnameOverride: ""
 logLevel: INFO
 
 image:
-  repository: hub.teko.vn/data/hive
+  repository: hub.teko.vn/dataops/hive
   tag: 3.1.2-hadoop-3.1.0
   pullPolicy: IfNotPresent
   pullSecrets: []
