@@ -71,7 +71,7 @@ RUN set -eux; \
         cors thumbnails \
     ); \
     pip install "apache-superset[$(join ',' ${SUPERSET_PACKAGES[@]})]==${SUPERSET_VERSION}" \
-        "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=0.15" "redis~=3.5" "pylibmc~=1.6"; \
+        "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=0.15" "redis~=3.5" "pylibmc~=1.6" "statsd~=3.3.0"; \
     \
     rm -rf /usr/local/cx_Oracle-doc;
 
