@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/superset:1.2-b4
+  IMAGE: hub.teko.vn/dataops/superset:1.2-b5
 
 includes:
   docker: ../
