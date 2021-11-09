@@ -40,7 +40,7 @@ WORKDIR ${SUPERSET_HOME}
 
 FROM base AS builder
 
-ARG SUPERSET_VERSION=1.2.0
+ARG SUPERSET_VERSION=1.3.2
 
 RUN set -eux; \
     apt-get update; \
@@ -80,9 +80,7 @@ RUN set -eux; \
     pip install -r "https://github.com/facebook/prophet/raw/v${PROPHET_VERSION}/python/requirements.txt"; \
     pip install "prophet~=${PROPHET_VERSION}"
 
-COPY ./trino.py /usr/local/lib/python3.8/site-packages/superset/db_engine_specs/
-COPY ./base.py /usr/local/lib/python3.8/site-packages/superset/db_engine_specs/
-COPY ./core.py /usr/local/lib/python3.8/site-packages/superset/models/
+COPY ./patch/ /usr/local/lib/python3.8/site-packages/superset/
 
 FROM base
 
