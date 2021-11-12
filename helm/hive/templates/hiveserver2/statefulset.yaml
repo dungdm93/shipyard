@@ -56,9 +56,15 @@ spec:
               containerPort: 10002
           volumeMounts:
             {{- include "hive.volumeMounts" . | nindent 12 }}
+          startupProbe:
+            tcpSocket:
+              port: hs2
+            periodSeconds: 30
+            failureThreshold: 30
           livenessProbe:
             tcpSocket:
-              port: hiveserver2
+              port: hs2
+            periodSeconds: 30
           resources:
             {{- toYaml $hiveserver2.resources | nindent 12 }}
           securityContext:
