@@ -40,5 +40,6 @@ RUN pip install --no-cache-dir -e "${SPARK_HOME}/python"
 
 RUN set -eux; \
     conda install -c conda-forge -y \
+        mamba \
         pyarrow; \
     conda clean -fay;
