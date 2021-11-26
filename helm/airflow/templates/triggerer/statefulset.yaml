@@ -1,37 +1,37 @@
-{{- $worker := mergeOverwrite (deepCopy .Values.commons) .Values.worker -}}
+{{- $triggerer := mergeOverwrite (deepCopy .Values.commons) .Values.triggerer -}}
 {{- if eq (include "airflow.normalizeExecutor" .) "CeleryExecutor" }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "airflow.fullname" . }}-worker
+  name: {{ include "airflow.fullname" . }}-triggerer
   labels:
-    {{- include "airflow.worker.labels" . | nindent 4 }}
-    {{- with $worker.labels }}
+    {{- include "airflow.triggerer.labels" . | nindent 4 }}
+    {{- with $triggerer.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    {{- toYaml $worker.annotations | nindent 4 }}
+    {{- toYaml $triggerer.annotations | nindent 4 }}
 spec:
-  replicas: {{ $worker.replicas }}
-  serviceName: "{{ template "airflow.fullname" . }}-worker"
+  replicas: {{ $triggerer.replicas }}
+  serviceName: "{{ template "airflow.fullname" . }}-triggerer"
   podManagementPolicy: Parallel
   updateStrategy:
-    ## Kill the workers as soon as possible, the scheduler will restart the failed jobs later
+    ## Kill the triggerers as soon as possible, the scheduler will restart the failed jobs later
     type: RollingUpdate
   selector:
     matchLabels:
-      {{- include "airflow.worker.selectorLabels" . | nindent 6 }}
+      {{- include "airflow.triggerer.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "airflow.worker.selectorLabels" . | nindent 8 }}
-        {{- with $worker.podLabels }}
+        {{- include "airflow.triggerer.selectorLabels" . | nindent 8 }}
+        {{- with $triggerer.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
         {{- include "airflow.checksum" . | nindent 8 }}
-        {{- with $worker.podAnnotations }}
+        {{- with $triggerer.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -40,76 +40,69 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       enableServiceLinks: false
-      terminationGracePeriodSeconds: {{ $worker.terminationPeriod }}
+      terminationGracePeriodSeconds: {{ $triggerer.terminationPeriod }}
       initContainers:
       {{- if eq .Values.dags.fetcher "git" }}
         {{- include "airflow.gitsync.init" . | nindent 8 }}
       {{- end }}
       containers:
-        - name: airflow-worker
-          image: "{{ $worker.image.repository }}:{{ $worker.image.tag }}"
+        - name: airflow-triggerer
+          image: "{{ $triggerer.image.repository }}:{{ $triggerer.image.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          {{- with $worker.command }}
+          {{- with $triggerer.command }}
           command:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $worker.args }}
+          {{- with $triggerer.args }}
           args:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
-            {{- toYaml $worker.env | nindent 12 }}
+            {{- toYaml $triggerer.env | nindent 12 }}
           # envFrom:
           #   - configMapRef:
           #       name: "{{ template "airflow.fullname" . }}-env"
-          ports:
-            - name: worker
-              protocol: TCP
-              containerPort: 8793
           volumeMounts:
             {{- include "airflow.volumeMounts" . | nindent 12 }}
-            {{- with $worker.extraVolumeMounts }}
+            {{- with $triggerer.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           livenessProbe:
-            tcpSocket:
-              port: worker
             periodSeconds: 30
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                - airflow
-                - celery
-                - stop
+            timeoutSeconds: 10
+            exec:
+              command:
+              - python
+              - -Wignore
+              - /opt/airflow/scripts/triggerer_liveness_probe.py
           resources:
-            {{- toYaml $worker.resources | nindent 12 }}
+            {{- toYaml $triggerer.resources | nindent 12 }}
           securityContext:
-            {{- toYaml $worker.securityContext | nindent 12 }}
+            {{- toYaml $triggerer.securityContext | nindent 12 }}
         {{- if eq .Values.dags.fetcher "git" }}
         {{- include "airflow.gitsync.sidecar" . | nindent 8 }}
         {{- end }}
         {{- include "airflow.logGroomer.sidecar" . | nindent 8 }}
-      serviceAccountName: {{ include "airflow.worker.serviceAccountName" . }}
-      priorityClassName:  {{ $worker.priorityClassName }}
-      runtimeClassName:   {{ $worker.runtimeClassName }}
-      schedulerName:      {{ $worker.schedulerName }}
+      serviceAccountName: {{ include "airflow.triggerer.serviceAccountName" . }}
+      priorityClassName:  {{ $triggerer.priorityClassName }}
+      runtimeClassName:   {{ $triggerer.runtimeClassName }}
+      schedulerName:      {{ $triggerer.schedulerName }}
       securityContext:
-        {{- toYaml $worker.podSecurityContext | nindent 8 }}
+        {{- toYaml $triggerer.podSecurityContext | nindent 8 }}
       volumes:
         {{- include "airflow.volumes" . | nindent 8 }}
-      {{- with $worker.extraVolumes }}
+      {{- with $triggerer.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $worker.nodeSelector }}
+      {{- with $triggerer.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $worker.affinity }}
+      {{- with $triggerer.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $worker.tolerations }}
+      {{- with $triggerer.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

@@ -60,7 +60,14 @@ spec:
             {{- with $scheduler.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          # Scheduler has no ports & healchecks
+          livenessProbe:
+            periodSeconds: 30
+            timeoutSeconds: 10
+            exec:
+              command:
+              - python
+              - -Wignore
+              - /opt/airflow/scripts/scheduler_liveness_probe.py
           resources:
             {{- toYaml $scheduler.resources | nindent 12 }}
           securityContext:

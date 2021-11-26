@@ -43,7 +43,7 @@ airflow_local_settings: ""
 commons:
   image:
     repository: hub.teko.vn/dataops/airflow
-    tag: "2.1-b3"
+    tag: "2.2-b2"
   replicas: null
   command: []
   args: []
@@ -77,12 +77,16 @@ webserver:
 scheduler:
   args: [scheduler]
 
+triggerer:
+  args: [triggerer]
+  terminationPeriod: 120  # 2 minutes to worker complete its tasks
+
 worker:
-  args: [celery, worker]
+  args: [worker]
   terminationPeriod: 120  # 2 minutes to worker complete its tasks
 
 flower:
-  args: [celery, flower]
+  args: [flower]
   service:
     type: ClusterIP
     port: 5555

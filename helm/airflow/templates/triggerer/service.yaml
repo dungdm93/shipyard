@@ -1,0 +1,15 @@
+{{- $triggerer := mergeOverwrite (deepCopy .Values.commons) .Values.triggerer -}}
+{{- if eq (include "airflow.normalizeExecutor" .) "CeleryExecutor" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "airflow.fullname" . }}-triggerer
+  labels:
+    {{- include "airflow.triggerer.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "airflow.triggerer.selectorLabels" . | nindent 4 }}
+{{- end }}
