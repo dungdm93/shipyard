@@ -9,7 +9,7 @@ RUN set -eux; \
         libev4 libssl1.1 libisal2 libnss3 libsasl2-modules \
         libpq5 libmariadb3 libodbc1 \
         libldap-2.4-2 libkrb5-3 \
-        curl locales runit; \
+        curl locales; \
     \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
@@ -48,8 +48,8 @@ RUN set -eux; \
         unixodbc-dev \
         libev-dev
 
-ARG AIRFLOW_VERSION=2.1.4 \
-    DATAHUB_VERSION=0.8.14
+ARG AIRFLOW_VERSION=2.2.2 \
+    DATAHUB_VERSION=0.8.16
 
 RUN set -eux; \
     PYTHON_VERSION_SHORT="${PYTHON_VERSION%.*}"; \
@@ -58,18 +58,24 @@ RUN set -eux; \
     AIRFLOW_PACKAGES=( \
         # Core
         http ftp ssh grpc \
-        async cgroups redis rabbitmq \
-        celery dask docker cncf.kubernetes \
+        async cgroups redis rabbitmq leveldb \
+        celery dask pandas docker cncf.kubernetes \
         github_enterprise google_auth kerberos ldap password \
         # Database
-        mysql postgres microsoft.mssql oracle mongo elasticsearch jdbc odbc \
-        # Cloud Providers
-        amazon microsoft.azure google \
+        sqlite mysql postgres microsoft.mssql oracle \
+        mongo elasticsearch neo4j \
+        jdbc odbc \
         # BigData
-        apache.beam apache.cassandra apache.druid apache.kylin apache.pinot \
+        apache.beam apache.cassandra apache.drill apache.druid \
+        apache.kylin apache.pig apache.pinot apache.sqoop \
         presto trino \
+        # Cloud Providers
+        alibaba amazon microsoft.azure google \
+        # Cloud Services
+        databricks snowflake tableau vertica \
+        yandex facebook zendesk salesforce \
         # Others
-        crypto slack sendgrid \
+        crypto slack sendgrid telegram \
         sentry statsd hashicorp \
     ); \
     pip install --constraint "${CONSTRAINT_URL}" \
@@ -80,9 +86,8 @@ RUN pip install "acryl-datahub[all]~=${DATAHUB_VERSION}";
 RUN pip install \
         # force kubernetes>=12.0
         "kubernetes~=12.0" \
-        "authlib~=0.15" \
         # extra packages
-        "sqlparse~=0.4" \
+        "authlib~=0.15" \
         "lz4" "python-snappy";
 
 RUN rm -rf \
@@ -92,9 +97,8 @@ RUN rm -rf \
 FROM base
 
 COPY --from=builder /usr/local /usr/local
-COPY --chown=airflow:airflow ./runit /etc/airflow/runit
-COPY ./scripts/* /usr/local/bin/
+COPY ./scripts/ /usr/local/bin/
 
 USER airflow
 EXPOSE 8080 8793 5555
-ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

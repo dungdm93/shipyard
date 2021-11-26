@@ -5,14 +5,6 @@ import time
 from datetime import datetime
 
 
-def print_config(args):
-    import logging
-    logging.disable(logging.CRITICAL)
-
-    from airflow.configuration import conf
-    print(conf.get(args.section, args.key))
-
-
 def wait_for_database(retries: int, interval: float):
     from airflow.configuration import conf
     from sqlalchemy import create_engine, sql
@@ -81,11 +73,6 @@ def build_argparse():
     wait.add_argument('--retries', type=int, default=30, help='Maximum number of times to retry')
     wait.add_argument('--interval', type=float, default=3, help='The number of seconds sleeping for')
     wait.set_defaults(func=wait_service)
-
-    gcp = subparsers.add_parser('get-config', help='Get airflow config from file or envvar')
-    gcp.add_argument('section', type=str, help='Airflow config section')
-    gcp.add_argument('key', type=str, help='Airflow config key')
-    gcp.set_defaults(func=print_config)
 
     return parser
 

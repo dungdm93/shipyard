@@ -241,6 +241,8 @@ Airflow volumeMounts
 - name: airflow-config
   mountPath: /opt/airflow/config/airflow_local_settings.py
   subPath:   airflow_local_settings.py
+- name: airflow-probes
+  mountPath: /opt/airflow/scripts/
 
 {{- if eq .Values.dags.fetcher "git" }}
 - name: airflow-dags
@@ -268,6 +270,9 @@ Airflow volumes
 - name: airflow-config
   configMap:
     name: {{ include "airflow.fullname" . }}-config
+- name: airflow-probes
+  configMap:
+    name: {{ include "airflow.fullname" . }}-probes
 
 {{- $dags := .Values.dags -}}
 {{- if eq $dags.fetcher "git" }}

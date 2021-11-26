@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "airflow.fullname" . }}-probes
+  labels:
+    {{- include "airflow.labels" . | nindent 4 }}
+data:
+  scheduler_liveness_probe.py: |
+    #!/usr/bin/env python3
+    import os
+    os.environ['AIRFLOW__CORE__LOGGING_LEVEL'] = 'ERROR'
+    os.environ['AIRFLOW__LOGGING__LOGGING_LEVEL'] = 'ERROR'
+
+    from airflow.jobs.scheduler_job import SchedulerJob
+    from airflow.utils.db import create_session
+    from airflow.utils.net import get_hostname
+    import sys
+
+    with create_session() as session:
+        job = session.query(SchedulerJob).filter_by(hostname=get_hostname()).order_by(
+            SchedulerJob.latest_heartbeat.desc()).limit(1).first()
+
+    sys.exit(0 if job.is_alive() else 1)
+
+  triggerer_liveness_probe.py: |
+    #!/usr/bin/env python3
+    import os
+    os.environ['AIRFLOW__CORE__LOGGING_LEVEL'] = 'ERROR'
+    os.environ['AIRFLOW__LOGGING__LOGGING_LEVEL'] = 'ERROR'
+
+    from airflow.jobs.triggerer_job import TriggererJob
+    from airflow.utils.db import create_session
+    from airflow.utils.net import get_hostname
+    import sys
+
+    with create_session() as session:
+        job = session.query(TriggererJob).filter_by(hostname=get_hostname()).order_by(
+            TriggererJob.latest_heartbeat.desc()).limit(1).first()
+
+    sys.exit(0 if job.is_alive() else 1)
+
+  worker_liveness_probe.sh: |
+    #!/usr/bin/env bash
+    exec celery -A airflow.executors.celery_executor status -d celery@$HOSTNAME -t 5.0
