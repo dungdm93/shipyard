@@ -1,4 +1,4 @@
-FROM python:3.8.9-slim as base
+FROM python:3.8-slim as base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
@@ -15,7 +15,7 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # Firefox + Gecko driver. For Ubuntu, using `apt install firefox firefox-geckodriver`
-ARG GECKO_DRIVER_VERSION=v0.29.0
+ARG GECKO_DRIVER_VERSION=v0.30.0
 RUN set -eux; cd /tmp/; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
