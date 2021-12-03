@@ -6,8 +6,9 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
-        libev4 libssl1.1 libisal2 libnss3 \
-        libpq5 libmariadb3 \
+        libev4 libssl1.1 libisal2 libnss3 libsasl2-modules \
+        libpq5 libmariadb3 libodbc1 \
+        libldap-2.4-2 libkrb5-3 \
         curl locales; \
     \
     apt-get clean; \
