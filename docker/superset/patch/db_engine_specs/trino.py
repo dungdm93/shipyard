@@ -14,8 +14,9 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from urllib import parse
 
 import simplejson as json
@@ -23,6 +24,11 @@ from sqlalchemy.engine.url import make_url, URL
 
 from superset.db_engine_specs.base import BaseEngineSpec
 from superset.utils import core as utils
+
+if TYPE_CHECKING:
+    from superset.models.core import Database
+
+logger = logging.getLogger(__name__)
 
 
 class TrinoEngineSpec(BaseEngineSpec):
@@ -184,3 +190,74 @@ class TrinoEngineSpec(BaseEngineSpec):
             cost.append(statement_cost)
 
         return cost
+
+    @staticmethod
+    def get_extra_params(database: "Database") -> Dict[str, Any]:
+        """
+        Some databases require adding elements to connection parameters,
+        like passing certificates to `extra`. This can be done here.
+        :param database: database instance from which to extract extras
+        :raises CertificateException: If certificate is not valid/unparseable
+        """
+        extra: Dict[str, Any] = BaseEngineSpec.get_extra_params(database)
+        engine_params: Dict[str, Any] = extra.setdefault("engine_params", {})
+        connect_args: Dict[str, Any] = engine_params.setdefault("connect_args", {})
+
+        if database.server_cert:
+            connect_args["http_scheme"] = "https"
+            connect_args["verify"] = utils.create_ssl_cert_file(database.server_cert)
+
+        return extra
+
+    @staticmethod
+    def update_encrypted_extra_params(
+        database: "Database", params: Dict[str, Any]
+    ) -> None:
+        if not database.encrypted_extra:
+            return
+        try:
+            encrypted_extra = json.loads(database.encrypted_extra)
+            auth_method = encrypted_extra.pop("auth_method", None)
+            auth_params = encrypted_extra.pop("auth_params", {})
+            if not auth_method:
+                return
+
+            connect_args = params.setdefault("connect_args", {})
+            connect_args["http_scheme"] = "https"
+            # pylint: disable=import-outside-toplevel
+            if auth_method == "basic":
+                from trino.auth import BasicAuthentication as trino_auth  # noqa
+            elif auth_method == "kerberos":
+                from trino.auth import KerberosAuthentication as trino_auth  # noqa
+            elif auth_method == "jwt":
+                from trino.auth import JWTAuthentication as trino_auth  # noqa
+            else:
+                trino_auth = import_string(auth_method)
+
+            connect_args["auth"] = trino_auth(**auth_params)
+        except json.JSONDecodeError as ex:
+            logger.error(ex, exc_info=True)
+            raise ex
+
+
+def import_string(name: str) -> Any:
+    """
+    Import a dotted module path and return the attribute/class designated by the
+    last name in the path. Raise ImportError if the import failed.
+    """
+    try:
+        module_path, class_name = name.rsplit(":", 1)  # type: str, str
+    except ValueError as err:
+        raise ImportError(f"{name} doesn't look like a module path") from err
+
+    try:
+        # pylint: disable=import-outside-toplevel
+        from importlib import import_module
+
+        module = import_module(module_path)
+        return getattr(module, class_name)
+    except AttributeError as err:
+        raise ImportError(
+            f'Module "{module_path}" does not define '
+            f'a "{class_name}" attribute/class'
+        ) from err
