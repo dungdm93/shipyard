@@ -322,7 +322,14 @@ class Database(
                 effective_username = g.user.username
         return effective_username
 
-    @memoized(watch=("impersonate_user", "sqlalchemy_uri_decrypted", "extra"))
+    @memoized(
+        watch=(
+            "impersonate_user",
+            "sqlalchemy_uri_decrypted",
+            "extra",
+            "encrypted_extra",
+        )
+    )
     def get_sqla_engine(
         self,
         schema: Optional[str] = None,
@@ -357,7 +364,7 @@ class Database(
         if connect_args:
             params["connect_args"] = connect_args
 
-        params.update(self.get_encrypted_extra())
+        self.update_encrypted_extra_params(params)
 
         if DB_CONNECTION_MUTATOR:
             if not source and request and request.referrer:
@@ -627,6 +634,9 @@ class Database(
                 logger.error(ex, exc_info=True)
                 raise ex
         return encrypted_extra
+
+    def update_encrypted_extra_params(self, params: Dict[str, Any]) -> None:
+        self.db_engine_spec.update_encrypted_extra_params(self, params)
 
     def get_table(self, table_name: str, schema: Optional[str] = None) -> Table:
         extra = self.get_extra()
