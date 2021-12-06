@@ -3,6 +3,7 @@ from urllib.parse import *
 
 # https://docs.python.org/3/library/logging.html#logrecord-attributes
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)-5s] %(name)-15s:%(lineno)d: %(message)s')
+LOG_LEVEL = 'INFO'
 
 SECRET_KEY = {{ .Values.superset.secretKey | default (randAlphaNum 32) | quote }}
 SUPERSET_WEBSERVER_PROTOCOL = 'http'
