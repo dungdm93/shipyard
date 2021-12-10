@@ -1,7 +1,0 @@
-version: '3'
-
-vars:
-  IMAGE: hub.teko.vn/dataops/tensorflow-notebook:2.4
-
-includes:
-  docker: ../../
