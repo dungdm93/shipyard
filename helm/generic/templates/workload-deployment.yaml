@@ -1,12 +1,7 @@
 {{- $kind := lower .Values.app.kind -}}
-apiVersion: apps/v1
 {{- if eq $kind "deployment"  }}
+apiVersion: apps/v1
 kind: Deployment
-{{- else if eq $kind "statefulset"  }}
-kind: StatefulSet
-{{- else }}
-{{- fail (printf "unknow kind %s" $kind) }}
-{{- end }}
 metadata:
   name: {{ include "generic.fullname" . }}
   labels:
@@ -15,11 +10,12 @@ metadata:
     {{- toYaml .Values.app.annotations | nindent 4 }}
 spec:
   replicas: {{ .Values.app.replicas }}
-  {{- if eq $kind "statefulset"  }}
-  serviceName: {{ include "generic.fullname" . }}
+  {{- with .Values.app.deployment }}
+  {{- toYaml . | nindent 2 }}
   {{- end }}
   selector:
     matchLabels:
       {{- include "generic.selectorLabels" . | nindent 6 }}
   template:
     {{- include "generic.podTemplate" . | nindent 4 }}
+{{- end }}
