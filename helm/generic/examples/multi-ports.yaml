@@ -1,0 +1,40 @@
+image:
+  repository: grpc-gw-example
+  tag: 1.0.0
+  pullPolicy: IfNotPresent
+
+app:
+  ports:
+  - name: grpc
+    containerPort: 10000
+    protocol: TCP
+  - name: http
+    containerPort: 11000
+    protocol: TCP
+
+service:
+  type: ClusterIP
+  ports:
+  - name: grpc
+    port: 22000
+    targetPort: grpc
+    protocol: TCP
+  - name: http
+    port: 22000
+    targetPort: http
+    protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  ingressClassName: contour
+  hosts:
+  - host: example.com
+    paths:
+    - path: /
+      pathType: Prefix
+      portName: http
+    - path: /api
+      pathType: Prefix
+      portName: grpc

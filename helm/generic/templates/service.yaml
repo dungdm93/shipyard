@@ -1,3 +1,4 @@
+{{- if .Values.service.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,9 +10,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - port: {{ .Values.service.port }}
-    targetPort: http
-    protocol: TCP
-    name: http
+    {{- toYaml .Values.service.ports | nindent 4 }}
   selector:
     {{- include "generic.selectorLabels" . | nindent 4 }}
+{{- end }}

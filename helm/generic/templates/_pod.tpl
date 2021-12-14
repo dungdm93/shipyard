@@ -38,9 +38,7 @@ spec:
         {{- include "generic.envFrom" . | nindent 8 }}
       {{- end }}
       ports:
-        - name: http
-          containerPort: {{ .Values.app.port }}
-          protocol: TCP
+        {{- toYaml .Values.app.ports | nindent 8 }}
       {{- if .Values.volumeMounts }}
       volumeMounts:
         {{- toYaml .Values.volumeMounts | nindent 8 }}
