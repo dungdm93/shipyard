@@ -1,5 +1,5 @@
-{{- if .Values.autoscaling.enabled -}}
 {{- $kind := lower .Values.app.kind -}}
+{{- if and .Values.autoscaling.enabled (ne $kind "daemonset") -}}
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:

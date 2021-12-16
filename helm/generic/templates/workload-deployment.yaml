@@ -1,0 +1,21 @@
+{{- $kind := lower .Values.app.kind -}}
+{{- if eq $kind "deployment"  }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "generic.fullname" . }}
+  labels:
+    {{- include "generic.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.app.annotations | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  {{- with .Values.app.deployment }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "generic.selectorLabels" . | nindent 6 }}
+  template:
+    {{- include "generic.podTemplate" . | nindent 4 }}
+{{- end }}

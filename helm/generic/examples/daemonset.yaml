@@ -1,0 +1,9 @@
+app:
+  kind: DaemonSet
+  replicas: 1
+  command:
+  - spark
+  - history-server
+  daemonset:
+    updateStrategy:
+      type: OnDelete

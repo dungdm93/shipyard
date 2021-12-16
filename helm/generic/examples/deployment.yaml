@@ -1,0 +1,11 @@
+app:
+  kind: Deployment
+  replicas: 1
+  command:
+  - spark
+  - history-server
+  deployment:
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 50%

@@ -13,7 +13,10 @@ app:
   replicas: null
   command: null
   args: null
-  port: 80
+  ports:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
   annotations: {}
   podAnnotations: {}
     ## In order to get prometheus to scrape pods
@@ -35,11 +38,27 @@ app:
   runtimeClassName: null
   priorityClassName: null
 
+  ## Deployment specific configs, e.g:
+  deployment: {}
+    # strategy:
+    #   type: RollingUpdate
+    #   rollingUpdate:
+    #     maxSurge: 50%
+
+  ## StatefulSet specific configs, e.g:
+  statefulset: {}
+    # podManagementPolicy: Parallel
+
+  ## DaemonSet specific configs, e.g:
+  daemonset:
+    # updateStrategy:
+    #   type: OnDelete
+
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
@@ -131,8 +150,14 @@ securityContext: {}
 
 ########## Networking ##########
 service:
+  enabled: true
   type: ClusterIP
-  port: 80
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    protocol: TCP
+    # appProtocol
   annotations: {}
     ## In order to get prometheus to scrape service
     # prometheus.io/scrape: "true"
@@ -142,11 +167,14 @@ service:
 ingress:
   enabled: false
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+  ingressClassName:
   hosts:
   - host: example.com
-    paths: []
+    paths:
+    - path: /
+      pathType: Prefix
+      portName: http
   tls: []
   # - secretName: example.com-tls
   #   hosts:
