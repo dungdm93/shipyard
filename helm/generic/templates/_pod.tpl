@@ -17,6 +17,10 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   enableServiceLinks: false
+  {{- with .Values.app.initContainers }}
+  initContainers:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   containers:
     - name:  app
       image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -67,6 +71,9 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+  {{- with .Values.app.sidecarContainers }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   serviceAccountName: {{ include "generic.serviceAccountName" . }}
   {{- with .Values.app.priorityClassName }}
   priorityClassName:  {{ . }}
