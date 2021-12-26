@@ -1,0 +1,15 @@
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  ingressClassName:
+  hosts:
+    - host: example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          portName: http
+  tls:
+    - secretName: example.com-tls
+      hosts:
+        - example.com
