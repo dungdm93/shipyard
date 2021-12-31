@@ -23,11 +23,13 @@ RUN set -eux; \
 RUN tar -xf  "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" --no-same-owner; \
     mv       "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" "spark";
 
-# Update guava
-# ref: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/spark-docker/Dockerfile
+# Adding/Updating deps
+# * guava: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/spark-docker/Dockerfile
+# * spark-hadoop-cloud: https://spark.apache.org/docs/latest/cloud-integration.html
 RUN set -eux; cd "./spark/jars"; \
     rm guava-*.jar; \
-    curl -LO "https://repo1.maven.org/maven2/com/google/guava/guava/23.0/guava-23.0.jar";
+    curl -LO "https://repo1.maven.org/maven2/com/google/guava/guava/23.0/guava-23.0.jar"; \
+    curl -LO "https://repo1.maven.org/maven2/org/apache/spark/spark-hadoop-cloud_2.12/${SPARK_VERSION}/spark-hadoop-cloud_2.12-${SPARK_VERSION}.jar"
 
 RUN set -eux; \
     curl -LO "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini"; \
