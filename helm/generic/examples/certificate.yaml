@@ -1,0 +1,12 @@
+certificate:
+  enabled: true
+  annotations: {}
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  secretName: abc-tls
+  san:
+    dnsNames:
+      - foo.bar.com
+    ipAddresses:
+      - 1.1.1.1

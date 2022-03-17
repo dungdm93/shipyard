@@ -204,3 +204,15 @@ serviceMonitor:
   interval: 30s
   honorLabels: false
   relabellings: {}
+
+########## Certificate ##########
+certificate:
+  enabled: false
+  annotations: {}
+  issuerRef: {}
+  secretName:
+  san:
+    dnsNames: []
+    ipAddresses: []
+    uris: []
+    emailAddresses: []

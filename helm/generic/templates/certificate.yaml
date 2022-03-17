@@ -1,0 +1,32 @@
+{{- if .Values.certificate.enabled -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "generic.fullname" . }}
+  labels:
+    {{- include "generic.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.certificate.annotations | nindent 4 }}
+spec:
+  {{- with .Values.certificate.issuerRef }}
+  issuerRef:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  secretName: {{ .Values.certificate.secretName }}
+  {{- with .Values.certificate.san.dnsNames }}
+  dnsNames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.certificate.san.ipAddresses }}
+  ipAddresses:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.certificate.san.uris }}
+  uris:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.certificate.san.emailAddresses }}
+  emailAddresses:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
