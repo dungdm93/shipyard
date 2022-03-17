@@ -186,6 +186,17 @@ ingress:
   #   hosts:
   #   - example.com
 
+httpProxy:
+  enabled: false
+  annotations: {}
+  host: example.com
+  tls: {}
+  corsPolicy: {}
+  rateLimitPolicy: {}
+  routes:
+  - prefix: /
+    port: 8080
+
 ########## Observation ##########
 serviceMonitor:
   enabled: false

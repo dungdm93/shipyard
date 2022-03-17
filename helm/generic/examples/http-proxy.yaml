@@ -1,0 +1,17 @@
+httpProxy:
+  enabled: true
+  annotations:
+    abc: xyz
+  host: local.example.com
+  tls:
+    secretName: local.example.com-tls
+  corsPolicy:
+    allowOrigin: "*"
+    maxAge: 3h
+  rateLimitPolicy:
+    local:
+      requests: 100
+      unit: second
+  routes:
+  - prefix: /
+    port: 8080
