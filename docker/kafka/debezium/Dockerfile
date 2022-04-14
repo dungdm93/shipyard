@@ -7,13 +7,13 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y curl tar;
 
-ENV DEBEZIUM_VERSION=1.7.0.Final \
+ENV DEBEZIUM_VERSION=1.9.0.Final \
     MAVEN_REPO_CENTRAL=https://repo1.maven.org/maven2
 RUN set -eux; \
     DEBEZIUM_CONNECTOR=( \
         mysql postgres mongodb \
         sqlserver oracle db2 \
-        cassandra vitess \
+        cassandra-3 cassandra-4 vitess \
     ); \
     for connector in ${DEBEZIUM_CONNECTOR[@]}; do \
         curl -sSL "${MAVEN_REPO_CENTRAL}/io/debezium/debezium-connector-${connector}/${DEBEZIUM_VERSION}/debezium-connector-${connector}-${DEBEZIUM_VERSION}-plugin.tar.gz" \
