@@ -7,7 +7,7 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y curl tar;
 
-ENV DEBEZIUM_VERSION=1.9.0.Final \
+ENV DEBEZIUM_VERSION=1.9.1.Final \
     MAVEN_REPO_CENTRAL=https://repo1.maven.org/maven2
 RUN set -eux; \
     DEBEZIUM_CONNECTOR=( \
