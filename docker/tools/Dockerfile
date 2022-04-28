@@ -10,7 +10,7 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
         ca-certificates gnupg openssl openssh-client bash-completion \
         curl git make tar zip unzip gzip bzip2 tree vim gettext-base jq \
-        netcat iproute2 net-tools telnet iputils-* dnsutils; \
+        netcat iproute2 net-tools telnet iputils-* dnsutils colordiff; \
     curl -sSL https://github.com/mikefarah/yq/releases/download/${YQ_VERSION#v}/yq_linux_amd64 -o /usr/bin/yq; \
     chmod +x  /usr/bin/yq; \
     yq shell-completion > /etc/bash_completion.d/yq; \
