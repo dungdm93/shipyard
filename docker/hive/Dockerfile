@@ -13,7 +13,7 @@ RUN apk add -U curl gnupg tar
 #   * https://apache.org/mirrors
 ARG APACHE_DIST=https://archive.apache.org/dist
 ARG APACHE_MIRROR=${APACHE_DIST}
-ARG HIVE_VERSION=3.1.2
+ARG HIVE_VERSION=3.1.3
 
 RUN set -eux; \
     curl -L  "${APACHE_DIST}/hive/KEYS" | gpg --batch --import -; \
@@ -23,7 +23,12 @@ RUN set -eux; \
 RUN tar -xf  "apache-hive-${HIVE_VERSION}-bin.tar.gz" --no-same-owner; \
     mv       "apache-hive-${HIVE_VERSION}-bin" "hive";
 
-
+ARG ICEBERG_VERSION=0.13.1
+ARG DELTALAKE_VERSION=0.4.0
+RUN set -eux; \
+    mkdir ./jars/; cd ./jars/; \
+    curl -LO "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-hive-runtime/${ICEBERG_VERSION}/iceberg-hive-runtime-${ICEBERG_VERSION}.jar"; \
+    curl -LO "https://github.com/delta-io/connectors/releases/download/v${DELTALAKE_VERSION}/delta-hive-assembly_2.11-${DELTALAKE_VERSION}.jar";
 
 FROM hub.teko.vn/dataops/hadoop:${HADOOP_VERSION}
 
@@ -37,6 +42,8 @@ RUN set -eux; \
 ENV HIVE_HOME="/opt/hive" \
     PATH="/opt/hive/bin:${PATH}"
 
-COPY --from=downloader "/build/hive" "${HIVE_HOME}"
+COPY --from=downloader "/build/hive"  "${HIVE_HOME}"
+COPY --from=downloader "/build/jars/" "${HIVE_HOME}/lib/"
+
 # COPY ./entrypoint.sh /opt/
 # ENTRYPOINT [ "/opt/entrypoint.sh" ]
