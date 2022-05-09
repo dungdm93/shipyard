@@ -1,0 +1,12 @@
+dataNode:
+  kind: statefulset
+
+  statefulset:
+    replicas: 1
+
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: foobar
+    accessModes:
+    - ReadWriteOnce

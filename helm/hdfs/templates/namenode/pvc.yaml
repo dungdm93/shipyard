@@ -1,0 +1,26 @@
+{{- if .Values.nameNode.persistence.enabled -}}
+{{- $pvc := .Values.nameNode.persistence }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "hdfs.fullname" . }}-namenode
+  labels:
+    {{- include "hdfs.namenode.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  {{- with $pvc.accessModes }}
+  accessModes:
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
+  {{- if $pvc.storageClass }}
+  {{- if eq "-" $pvc.storageClass }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ $pvc.storageClass | quote }}
+  {{- end }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $pvc.size | quote }}
+{{- end -}}

@@ -1,0 +1,95 @@
+{{- $namenode := mergeOverwrite (deepCopy .Values.commons) .Values.nameNode -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "hdfs.fullname" . }}-namenode
+  labels:
+    {{- include "hdfs.namenode.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $namenode.annotations | nindent 4 }}
+spec:
+  serviceName: {{ include "hdfs.fullname" . }}-namenode
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "hdfs.namenode.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hdfs.namenode.selectorLabels" . | nindent 8 }}
+        {{- with $namenode.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "hdfs.checksum" . | nindent 8 }}
+        {{- with $namenode.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+      - name: namenode
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        command:
+        - /usr/local/scripts/hadoop-start.sh
+        - namenode
+        ports:
+        - name: rpc
+          protocol: TCP
+          containerPort: 8020
+        - name: http
+          protocol: TCP
+          containerPort: 9870
+        readinessProbe:
+          httpGet:
+            port: http
+            path: /
+        livenessProbe:
+          httpGet:
+            port: http
+            path: /
+        resources:
+          {{- toYaml $namenode.resources | nindent 10 }}
+        volumeMounts:
+        - name: hdfs-configs
+          mountPath: /etc/hdfs/
+        - name: hdfs-scripts
+          mountPath: /usr/local/scripts/
+        - name: data
+          mountPath: /var/lib/hdfs/
+        securityContext:
+          {{- toYaml $namenode.securityContext | nindent 10 }}
+      volumes:
+      - name: hdfs-configs
+        configMap:
+          name: {{ include "hdfs.fullname" . }}-configs
+      - name: hdfs-scripts
+        configMap:
+          name: {{ include "hdfs.fullname" . }}-scripts
+          defaultMode: 0755
+      - name: data
+        {{- if $namenode.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "hdfs.fullname" . }}-namenode
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      securityContext:
+        {{- toYaml $namenode.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "hdfs.serviceAccountName" . }}
+      priorityClassName:  {{ $namenode.priorityClassName }}
+      runtimeClassName:   {{ $namenode.runtimeClassName }}
+      schedulerName:      {{ $namenode.schedulerName }}
+      {{- with $namenode.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $namenode.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $namenode.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

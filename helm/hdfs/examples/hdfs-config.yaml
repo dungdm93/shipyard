@@ -1,0 +1,15 @@
+hdfsConfig:
+  core-site.xml:
+    foobar: abcxyz
+
+  hdfs-site.xml:
+    dfs.datanode.use.datanode.hostname: true
+    dfs.client.use.datanode.hostname: true
+    dfs.replication: 1
+    dfs.datanode.data.dir: file:///var/lib/hdfs/datanode
+    dfs.namenode.name.dir: file:///var/lib/hdfs/namenode
+    dfs.namenode.datanode.registration.ip-hostname-check: false
+    dfs.namenode.rpc-bind-host: 0.0.0.0
+    dfs.namenode.servicerpc-bind-host: 0.0.0.0
+    dfs.webhdfs.enabled: true
+    dfs.permissions: false
