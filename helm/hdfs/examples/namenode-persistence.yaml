@@ -1,0 +1,8 @@
+nameNode:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: abcxyz
+    accessModes:
+    - ReadWriteOnce
+    - ReadWriteAny

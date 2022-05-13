@@ -1,0 +1,81 @@
+# The base hadoop image to use for all components.
+image:
+  repository: hub.teko.vn/dataops/hadoop
+  tag: 3.3.1
+  pullPolicy: IfNotPresent
+
+hdfsConfig:
+  core-site.xml: {}
+  hdfs-site.xml:
+    dfs.replication: 1
+    dfs.client.use.datanode.hostname: false
+    dfs.datanode.use.datanode.hostname: false
+    dfs.namenode.rpc-bind-host: 0.0.0.0
+    dfs.namenode.http-bind-host: 0.0.0.0
+
+    # AuthN/Z: disable by default
+    dfs.permissions.enabled: false
+    dfs.namenode.acls.enabled: false
+    dfs.namenode.posix.acl.inheritance.enabled: true
+
+commons:
+  env: []
+
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+
+  resources: {}
+
+  schedulerName: null
+  runtimeClassName: null
+  priorityClassName: null
+
+  affinity: {}
+  tolerations: []
+  nodeSelector: {}
+
+  securityContext: {}
+  podSecurityContext: {}
+
+nameNode:
+  persistence:
+    enabled: false
+    size: 5Gi
+    storageClass: null
+    accessModes:
+    - ReadWriteOnce
+
+dataNode:
+  kind: statefulset
+
+  daemonset: {}
+
+  statefulset:
+    replicas: 1
+    podManagementPolicy: Parallel
+
+  persistence:
+    enabled: false
+    size: 5Gi
+    storageClass: null
+    accessModes:
+    - ReadWriteOnce
+
+  hostPath:
+    enabled: false
+    path: /data/hdfs/
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name:
+
+########## Observation ##########
+serviceMonitor:
+  enabled: true
+  additionalLabels: {}
+  interval: 30s
+  honorLabels: false
+  relabellings: {}

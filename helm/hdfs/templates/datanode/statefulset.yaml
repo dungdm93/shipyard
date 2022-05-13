@@ -1,0 +1,119 @@
+{{- if eq (lower .Values.dataNode.kind) "statefulset"  }}
+{{- $datanode := mergeOverwrite (deepCopy .Values.commons) .Values.dataNode -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "hdfs.fullname" . }}-datanode
+  labels:
+    {{- include "hdfs.datanode.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $datanode.annotations | nindent 4 }}
+spec:
+  serviceName: {{ include "hdfs.fullname" . }}-datanode
+  selector:
+    matchLabels:
+      {{- include "hdfs.datanode.selectorLabels" . | nindent 6 }}
+  {{- with $datanode.statefulset }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "hdfs.datanode.selectorLabels" . | nindent 8 }}
+        {{- with $datanode.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "hdfs.checksum" . | nindent 8 }}
+        {{- with $datanode.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+      - name: datanode
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        command:
+        - /usr/local/scripts/hadoop-start.sh
+        - datanode
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 9864
+        - name: ipc
+          protocol: TCP
+          containerPort: 9867
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources:
+          {{- toYaml $datanode.resources | nindent 10 }}
+        volumeMounts:
+        - name: hdfs-configs
+          mountPath: /etc/hdfs/
+        - name: hdfs-scripts
+          mountPath: /usr/local/scripts/
+        - name: data
+          mountPath: /var/lib/hdfs/
+        securityContext:
+          {{- toYaml $datanode.securityContext | nindent 10 }}
+      volumes:
+      - name: hdfs-configs
+        configMap:
+          name: {{ include "hdfs.fullname" . }}-configs
+      - name: hdfs-scripts
+        configMap:
+          name: {{ include "hdfs.fullname" . }}-scripts
+          defaultMode: 0755
+      {{- if not $datanode.persistence.enabled }}
+      - name: data
+        emptyDir: {}
+      {{- end }}
+      securityContext:
+        {{- toYaml $datanode.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "hdfs.serviceAccountName" . }}
+      priorityClassName:  {{ $datanode.priorityClassName }}
+      runtimeClassName:   {{ $datanode.runtimeClassName }}
+      schedulerName:      {{ $datanode.schedulerName }}
+      {{- with $datanode.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $datanode.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $datanode.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if $datanode.persistence.enabled }}
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: data
+    spec:
+      {{- with $datanode.persistence.accessModes }}
+      accessModes:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- if $datanode.persistence.storageClass }}
+      {{- if eq "-" $datanode.persistence.storageClass }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: {{ $datanode.persistence.storageClass | quote }}
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ $datanode.persistence.size | quote }}
+  {{- end }}
+{{- end }}

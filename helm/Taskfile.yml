@@ -33,6 +33,7 @@ tasks:
     - helm upgrade --install {{.RELEASE}} .
         --namespace={{.NAMESPACE}}
         --values={{.VALUES}}
+        --create-namespace
 
   show:
     cmds:

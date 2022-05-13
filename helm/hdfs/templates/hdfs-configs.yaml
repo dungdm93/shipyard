@@ -1,0 +1,45 @@
+{{- $coreSite := index .Values.hdfsConfig "core-site.xml" }}
+{{- $hdfsSite := index .Values.hdfsConfig "hdfs-site.xml" }}
+
+{{- if .Values.serviceMonitor.enabled }}
+  {{- $_ := set $coreSite "hadoop.prometheus.endpoint.enabled" true }}
+{{- end }}
+
+{{- if eq .Values.dataNode.kind "daemonset" }}
+  {{- $_ := set $hdfsSite "dfs.namenode.datanode.registration.ip-hostname-check" false }}
+{{- end }}
+
+{{- $_ := set $coreSite "fs.defaultFS" (printf "hdfs://%s-namenode:8020/" (include "hdfs.fullname" .))}}
+{{- $_ := set $hdfsSite "dfs.namenode.name.dir" "file:/var/lib/hdfs/namenode" }}
+{{- $_ := set $hdfsSite "dfs.datanode.data.dir" "file:/var/lib/hdfs/datanode" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hdfs.fullname" . }}-configs
+  labels:
+    {{- include "hdfs.labels" . | nindent 4 }}
+data:
+  core-site.xml: |
+    <?xml version="1.0"?>
+    <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+    <configuration>
+    {{- range $name, $value := $coreSite }}
+      <property>
+        <name>{{ $name }}</name>
+        <value>{{ $value }}</value>
+      </property>
+    {{ end }}
+    </configuration>
+
+  hdfs-site.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+    <configuration>
+    {{- range $name, $value := $hdfsSite }}
+      <property>
+        <name>{{ $name }}</name>
+        <value>{{ $value }}</value>
+      </property>
+    {{ end }}
+    </configuration>

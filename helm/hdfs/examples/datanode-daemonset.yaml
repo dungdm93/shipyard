@@ -1,0 +1,5 @@
+dataNode:
+  kind: daemonset
+  hostPath:
+    enabled: true
+    path: /data/hdfs/
