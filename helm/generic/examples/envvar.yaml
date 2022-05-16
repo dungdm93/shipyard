@@ -14,6 +14,22 @@ env:
     value: xyz
   - name: foo
     value: bar
+  - name: multivalue
+    value: >-
+      first-value
+      second-value
+  - name: multivalue-w-final-newline
+    value: >
+      first-value
+      second-value
+  - name: multiline
+    value: |-
+      first-line
+      second-lind
+  - name: multiline-w-final-newline
+    value: |
+      first-line
+      second-lind
   - name: first
     valueFrom:
       configMapKeyRef:
