@@ -3,6 +3,6 @@ name: generic
 description: A generic helm chart
 keywords: [generic]
 type: application
-version: 0.7.0
+version: 0.7.1
 appVersion: 1.0.0
 engine: gotpl

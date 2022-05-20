@@ -201,6 +201,7 @@ httpProxy:
 serviceMonitor:
   enabled: false
   additionalLabels: {}
+  port: http
   interval: 30s
   honorLabels: false
   relabellings: {}

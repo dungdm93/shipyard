@@ -10,7 +10,7 @@ metadata:
   {{- end }}
 spec:
   endpoints:
-  - port: http
+  - port: {{ .Values.serviceMonitor.port }}
     interval: {{ .Values.serviceMonitor.interval }}
     {{- if .Values.serviceMonitor.scrapeTimeout }}
     scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
