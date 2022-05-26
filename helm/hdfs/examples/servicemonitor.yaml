@@ -1,0 +1,7 @@
+serviceMonitor:
+  enabled: true
+  additionalLabels: {}
+  interval: 30s
+  honorLabels: false
+  relabellings:
+    foo: bar
