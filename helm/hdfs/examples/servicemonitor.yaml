@@ -3,5 +3,5 @@ serviceMonitor:
   additionalLabels: {}
   interval: 30s
   honorLabels: false
-  relabellings:
+  relabelings:
     foo: bar
