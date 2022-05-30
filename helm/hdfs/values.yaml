@@ -78,4 +78,5 @@ serviceMonitor:
   additionalLabels: {}
   interval: 30s
   honorLabels: false
-  relabellings: {}
+  metricRelabelings: {}
+  relabelings: {}

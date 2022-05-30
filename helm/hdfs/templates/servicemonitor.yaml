@@ -17,8 +17,12 @@ spec:
     scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
     {{- end }}
     honorLabels: {{ .Values.serviceMonitor.honorLabels }}
-    {{- with .Values.serviceMonitor.relabellings }}
+    {{- with .Values.serviceMonitor.metricRelabelings }}
     metricRelabelings:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.serviceMonitor.relabelings }}
+    relabelings:
     {{- toYaml . | nindent 6 }}
     {{- end }}
   namespaceSelector:
