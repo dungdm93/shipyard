@@ -6,10 +6,10 @@ WORKDIR /build/plugins
 ENV KAFKA_CONNECTOR_PATH=/usr/share/confluent-hub-components
 RUN set -eux; \
     KAFKA_CONNECTOR=( \
-        confluentinc/kafka-connect-jdbc:10.2.5 \
-        confluentinc/kafka-connect-elasticsearch:11.1.3 \
-        dariobalinzo/kafka-connect-elasticsearch-source:1.3 \
-        mongodb/kafka-connect-mongodb:1.6.1 \
+        confluentinc/kafka-connect-jdbc:10.4.1 \
+        confluentinc/kafka-connect-elasticsearch:13.0.0 \
+        dariobalinzo/kafka-connect-elasticsearch-source:1.5.0 \
+        mongodb/kafka-connect-mongodb:1.7.0 \
         \
         # snowflakeinc/snowflake-kafka-connector:1.6.0 \
         # datastax/kafka-connect-cassandra-sink:1.4.0 \
