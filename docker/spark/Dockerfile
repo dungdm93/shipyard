@@ -42,7 +42,8 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends curl;
 
-ARG HADOOP_TOOLS="hadoop-aliyun,hadoop-aws,hadoop-azure,hadoop-azure-datalake,hadoop-kafka,hadoop-openstack"
+# ARG HADOOP_TOOLS="hadoop-aliyun,hadoop-aws,hadoop-azure,hadoop-azure-datalake,hadoop-kafka,hadoop-openstack"
+ARG HADOOP_TOOLS="hadoop-aws"
 
 RUN set -eux; \
     mkdir -p "./lib/native/"; \
@@ -69,23 +70,33 @@ RUN set -eux; \
         cp ${JARS//:/ } "./lib/tools/"; \
     done;
 
-# Cloud Storage connector for Hadoop + Spark
-# https://cloud.google.com/dataproc/docs/concepts/connectors/cloud-storage
-# https://github.com/GoogleCloudDataproc/hadoop-connectors/tree/master/gcs
-COPY ./etc/hadoop-gcs.sh "./libexec/shellprofile.d/"
+ARG ICEBERG_VERSION=0.13.1
+ARG AWSSDK_V2_VERSION=2.15.40
+COPY ./etc/hadoop-iceberg.sh "./libexec/shellprofile.d/"
 RUN set -eux; cd "./lib/tools/"; \
-    curl -LO "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop3-2.1.4.jar";
+    curl -LO "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.2_2.12/${ICEBERG_VERSION}/iceberg-spark-runtime-3.2_2.12-${ICEBERG_VERSION}.jar"; \
+    curl -L  "https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/${AWSSDK_V2_VERSION}/bundle-${AWSSDK_V2_VERSION}.jar" \
+         -o  "awssdk-bundle-${AWSSDK_V2_VERSION}.jar"; \
+    curl -L  "https://repo1.maven.org/maven2/software/amazon/awssdk/url-connection-client/${AWSSDK_V2_VERSION}/url-connection-client-${AWSSDK_V2_VERSION}.jar" \
+         -o  "awssdk-url-connection-client-${AWSSDK_V2_VERSION}.jar";
 
-# BigQuery connector for Hadoop
-# * https://cloud.google.com/dataproc/docs/concepts/connectors/bigquery
-# * https://github.com/GoogleCloudDataproc/hadoop-connectors/tree/master/bigquery
-# BigQuery connector for Spark
-# * https://github.com/GoogleCloudDataproc/spark-bigquery-connector
-# * https://cloud.google.com/dataproc/docs/tutorials/bigquery-connector-spark-example
-COPY ./etc/hadoop-bigquery.sh "./libexec/shellprofile.d/"
-RUN set -eux; cd "./lib/tools/"; \
-    curl -LO "https://storage.googleapis.com/hadoop-lib/bigquery/bigquery-connector-hadoop3-1.1.4.jar"; \
-    curl -LO "https://storage.googleapis.com/spark-lib/bigquery/spark-bigquery-with-dependencies_2.12-0.17.1.jar";
+# # Cloud Storage connector for Hadoop + Spark
+# # https://cloud.google.com/dataproc/docs/concepts/connectors/cloud-storage
+# # https://github.com/GoogleCloudDataproc/hadoop-connectors/tree/master/gcs
+# COPY ./etc/hadoop-gcs.sh "./libexec/shellprofile.d/"
+# RUN set -eux; cd "./lib/tools/"; \
+#     curl -LO "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop3-2.1.4.jar";
+#
+# # BigQuery connector for Hadoop
+# # * https://cloud.google.com/dataproc/docs/concepts/connectors/bigquery
+# # * https://github.com/GoogleCloudDataproc/hadoop-connectors/tree/master/bigquery
+# # BigQuery connector for Spark
+# # * https://github.com/GoogleCloudDataproc/spark-bigquery-connector
+# # * https://cloud.google.com/dataproc/docs/tutorials/bigquery-connector-spark-example
+# COPY ./etc/hadoop-bigquery.sh "./libexec/shellprofile.d/"
+# RUN set -eux; cd "./lib/tools/"; \
+#     curl -LO "https://storage.googleapis.com/hadoop-lib/bigquery/bigquery-connector-hadoop3-1.1.4.jar"; \
+#     curl -LO "https://storage.googleapis.com/spark-lib/bigquery/spark-bigquery-with-dependencies_2.12-0.17.1.jar";
 
 FROM ubuntu:focal
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"

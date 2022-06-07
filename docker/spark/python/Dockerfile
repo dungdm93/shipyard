@@ -9,7 +9,7 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
         ca-certificates gnupg curl;
 
-ARG CONDA_VERSION=4.10.3
+ARG CONDA_VERSION=4.12.0
 ARG PYTHON_VERSION=3.9
 ENV CONDA_HOME=/opt/conda
 
@@ -39,7 +39,14 @@ ENV PATH="${CONDA_HOME}/bin:${PATH}"
 RUN pip install --no-cache-dir -e "${SPARK_HOME}/python"
 
 RUN set -eux; \
-    conda install -c conda-forge -y \
-        mamba \
+    conda install mamba -n base -c conda-forge --no-update-deps -y; \
+    conda clean -fay;
+
+RUN set -eux; \
+    mamba install -c conda-forge --no-update-deps -y \
+        numpy \
+        pandas \
         pyarrow; \
     conda clean -fay;
+
+ENV PYARROW_IGNORE_TIMEZONE=1
