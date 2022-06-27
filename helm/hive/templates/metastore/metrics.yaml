@@ -1,0 +1,121 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hive.fullname" . }}-metrics
+  labels:
+    {{- include "hive.metastore.labels" . | nindent 4 }}
+data:
+  hive-metastore-metrics.yaml: |
+    lowercaseOutputName: true
+    whitelistObjectNames:
+    - "metrics:name=*"
+
+    rules:
+      # metrics:name=open_connections
+      - pattern: 'metrics<name=open_connections><>Value: (-?\d+\.?\d*)'
+        name: 'hive_metastore_open_connections'
+        type: GAUGE
+        value: $1
+      # metrics:name=(create_total_count_dbs|delete_total_count_dbs|total_count_dbs)
+      - pattern: 'metrics<name=(.+)_dbs><>(Count|Value): (-?\d+\.?\d*)'
+        name: 'hive_metastore_db_$1'
+        type: COUNTER
+        value: $3
+      # metrics:name=(create_total_count_tables|delete_total_count_tables|total_count_tables)
+      - pattern: 'metrics<name=(.+)_tables><>(Count|Value): (-?\d+\.?\d*)'
+        name: 'hive_metastore_tables_$1'
+        type: COUNTER
+        value: $3
+      # metrics:name=(create_total_count_partitions|delete_total_count_partitions|total_count_partitions)
+      - pattern: 'metrics<name=(.+)_partitions><>(Count|Value): (-?\d+\.?\d*)'
+        name: 'hive_metastore_partitions_$1'
+        type: COUNTER
+        value: $3
+      # metrics:name=directsql_errors
+      - pattern: 'metrics<name=directsql_errors><>Count: (-?\d+\.?\d*)'
+        name: 'hive_metastore_directsql_errors'
+        type: GAUGE
+        value: $1
+      # metrics:name=(heap|non-heap|total).(committed|init|max|usage|used)
+      - pattern: 'metrics<name=(heap|non-heap|total).(.+)><>(Count|Value): (-?\d+\.?\d*)'
+        name: 'hive_metastore_memory'
+        type: GAUGE
+        labels:
+          type: $1
+          metric: $2
+        value: $4
+      # metrics:name=jvm.pause.extraSleepTime|info-threshold|warn-threshold
+      - pattern: 'metrics<name=jvm.pause.(.+)><>(Count|Value): (-?\d+\.?\d*)'
+        name: 'hive_metastore_jvm_pause_$1'
+        type: GAUGE
+        value: $3
+      # metrics:name=daemon.count
+      - pattern: 'metrics<name=daemon.count><>Value: (-?\d+\.?\d*)'
+        name: 'hive_metastore_threads_daemon_thread_count'
+        type: GAUGE
+        value: $1
+      # metrics:name=deadlock.count
+      - pattern: 'metrics<name=deadlock.count><>Value: (-?\d+\.?\d*)'
+        name: 'hive_metastore_threads_deadlock_thread_count'
+        type: GAUGE
+        value: $1
+      # metrics:name=api_init
+      # metrics:name=api_get_(all_functions|config_value|current_notificationEventId|databases|multi_table|next_notification|table_objects_by_name_req|tables_by_type)
+      # metrics:name=api_set_ugi
+      # metrics:name=api_shutdown
+      - pattern: 'metrics<name=api_(.+)><>(.+): (.+)'
+        name: 'hive_metastore_api_init'
+        help: 'Rate Unit = events/second'
+        type: GAUGE
+        labels:
+          type: $1
+          attribute: $2
+        value: $3
+      # metrics:name=active_calls_get_all_functions|config_value|databases|multi_tables|tables_by_type
+      - pattern: 'metrics<name=active_calls_get_(.+)><>Count: (-?\d+)'
+        name: 'hive_metastore_active_calls_get'
+        type: GAUGE
+        labels:
+          type: $1
+        value: $2
+      # metrics:name=pools.Code-Cache.usage
+      # metrics:name=pools.Compressed-Class-Space.usage
+      # metrics:name=pools.Metaspace.usage
+      # metrics:name=pools.PS-Eden-Space.usage
+      # metrics:name=pools.PS-Old-Gen.usage
+      # metrics:name=pools.PS-Survivor-Space.usage
+      - pattern: 'metrics<name=pools.(.+).usage><>Value: (-?\d+\.?\d*)'
+        name: 'hive_metastore_memory_pool'
+        type: GAUGE
+        labels:
+          type: $1
+        value: $2
+      # metrics:name=PS-MarkSweep.count
+      # metrics:name=PS-MarkSweep.time
+      # metrics:name=PS-Scavenge.count
+      # metrics:name=PS-Scavenge.time
+      - pattern: 'metrics<name=PS-(.+).(count|time)><>Value: (-?\d+\.?\d*)'
+        name: 'hive_metastore_garbage_collector'
+        type: GAUGE
+        labels:
+          type: $1
+          attribute: $2
+        value: $4
+      # metrics:name=blocked.count
+      # metrics:name=count
+      # metrics:name=deadlocks
+      # metrics:name=direct.capacity
+      # metrics:name=direct.count
+      # metrics:name=direct.used
+      # metrics:name=loaded
+      # metrics:name=mapped.capacity
+      # metrics:name=mapped.count
+      # metrics:name=mapped.used
+      # metrics:name=new.count
+      # metrics:name=runnable.count
+      # metrics:name=terminated.count
+      # metrics:name=timed_waiting.count
+      # metrics:name=unloaded
+      # metrics:name=waiting.count
+{{- end }}

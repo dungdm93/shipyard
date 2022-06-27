@@ -1,0 +1,26 @@
+{{- if (and .Values.metrics.enabled .Values.metrics.podMonitor.enabled) }}
+{{- $metastore := mergeOverwrite (deepCopy .Values.commons) .Values.metastore -}}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "hive.fullname" . }}
+  labels:
+    {{- include "hive.metastore.labels" . | nindent 4 }}
+    {{- with $metastore.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/component
+  selector:
+    matchLabels:
+      {{- include "hive.metastore.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  podMetricsEndpoints:
+  - port: metrics
+    path: /metrics
+{{- end -}}

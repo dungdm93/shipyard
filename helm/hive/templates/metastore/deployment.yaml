@@ -33,6 +33,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+      initContainers:
+      {{- if .Values.metrics.enabled }}
+        {{- include "hive.initContainers.jmxAgents" . | nindent 8 }}
+      {{- end }}
       enableServiceLinks: false
       containers:
         - name: hive-metastore
@@ -48,6 +52,11 @@ spec:
             - name: metastore
               protocol: TCP
               containerPort: 9083
+          {{- if .Values.metrics.enabled }}
+            - name: metrics
+              protocol: TCP
+              containerPort: {{ .Values.metrics.port }}
+          {{- end }}
           volumeMounts:
             {{- include "hive.volumeMounts" . | nindent 12 }}
           livenessProbe:
