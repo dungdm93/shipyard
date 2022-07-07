@@ -1,0 +1,35 @@
+image:
+  repository: hub.teko.vn/dataops/hive
+  tag: 3.1.3
+
+metrics:
+  enabled: true
+  port: 9028
+  podMonitor:
+    enabled: false
+
+filesystem:
+  s3a:
+    enabled: true
+    endpoint:  http://minio-test:9001/
+    accessKey: admin
+    secretKey: PKfBThT7Mn
+
+    buckets:
+      apps-hive:
+        accessKey: admin
+        secretKey: PKfBThT7Mn
+
+hiveserver2:
+  enabled: false
+
+postgresql:
+  enabled: false
+
+externalDatabase:
+  type: postgres
+  host: test-postgresql
+  port: 5432
+  database: metastore
+  username: postgres
+  password: z9TGY7d6XO

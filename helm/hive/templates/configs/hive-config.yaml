@@ -3,14 +3,19 @@
 {{- $dbDriverMap := (include "hive.dbDriverMap" .) | fromYaml }}
 {{- if .Values.postgresql.enabled }}
 {{- $pg := .Values.postgresql }}
-{{- $pgHost := include "call-nested" (list . "postgresql" "postgresql.fullname") }}
-{{- $pgURL  := dict "type" "postgres" "host" $pgHost "port" $pg.service.port "database" $pg.postgresqlDatabase }}
+
+{{- $pgUsername := include "postgresql.username" .Subcharts.postgresql }}
+{{- $pgPassword := $pg.auth.password }}
+{{- $pgHost := include "postgresql.primary.fullname" .Subcharts.postgresql }}
+{{- $pgPort := include "postgresql.service.port" .Subcharts.postgresql }}
+{{- $pgDatabase := include "postgresql.database" .Subcharts.postgresql }}
+{{- $pgURL := dict "type" "postgres" "host" $pgHost "port" $pgPort "database" $pgDatabase }}
 
 {{- $_ := set $hiveSite "hive.metastore.db.type" "postgres" }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionURL" (include "hive.dbConnectionURL" $pgURL) }}
 {{- $_ := set $hiveSite "javax.jdo.option.ConnectionDriverName" $dbDriverMap.postgres }}
-{{- $_ := set $hiveSite "javax.jdo.option.ConnectionUserName"   $pg.postgresqlUsername }}
-{{- $_ := set $hiveSite "javax.jdo.option.ConnectionPassword"   $pg.postgresqlPassword }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionUserName"   $pgUsername }}
+{{- $_ := set $hiveSite "javax.jdo.option.ConnectionPassword"   $pgPassword }}
 {{- else }}
 {{- $db := .Values.externalDatabase }}
 
@@ -26,6 +31,10 @@
 {{- $msPort := $metastore.service.port }}
 {{- $_ := set $hiveSite "hive.metastore.uris" (printf "thrift://%s:%s" $msHost (toString $msPort)) }}
 {{- $_ := set $hiveSite "hive.metastore.warehouse.dir" .Values.warehouse.dir }}
+
+{{- if .Values.metrics.enabled }}
+{{- $_ := set $hiveSite "hive.metastore.metrics.enabled" "true" }}
+{{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -45,3 +54,8 @@ data:
       </property>
     {{ end }}
     </configuration>
+
+{{- if .Values.metrics.enabled }}
+  hive-env.sh: |
+    export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS -javaagent:/jmx-exporter/jmx_prometheus_javaagent.jar={{ .Values.metrics.port }}:/jmx-exporter/conf/hive-metastore-metrics.yaml"
+{{- end }}

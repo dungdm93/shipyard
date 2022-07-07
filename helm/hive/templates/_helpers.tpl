@@ -72,6 +72,12 @@ Hive volumeMounts
   mountPath: {{ .Values.hiveConfig.path }}
 - name: hive-scripts
   mountPath: /usr/local/scripts/
+{{- if .Values.metrics.enabled }}
+- name: jmx-exporter
+  mountPath: /jmx-exporter
+- name: hive-metrics
+  mountPath: /jmx-exporter/conf
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -88,6 +94,13 @@ Hive volumes
   configMap:
     name: {{ include "hive.fullname" . }}-hive-scripts
     defaultMode: 0755
+{{- if .Values.metrics.enabled }}
+- name: jmx-exporter
+  emptyDir: {}
+- name: hive-metrics
+  configMap:
+    name: {{ include "hive.fullname" . }}-metrics
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -154,22 +167,6 @@ jdbc:oracle:thin://{{.host}}:{{.port | default (index $dbPortMap .type)}}/{{.dat
 {{- end -}}
 
 {{/*
-Execute a template in a subchart:
-https://github.com/helm/helm/issues/4535#issuecomment-477778391
-https://stackoverflow.com/a/52024583
-*/}}
-{{- define "call-nested" -}}
-{{- $dot := index . 0 }}
-{{- $subchart := index . 1 | splitList "." }}
-{{- $template := index . 2 }}
-{{- $values := $dot.Values }}
-{{- range $subchart }}
-{{- $values = index $values . }}
-{{- end }}
-{{- include $template (dict "Chart" (dict "Name" (last $subchart)) "Values" $values "Release" $dot.Release "Capabilities" $dot.Capabilities) }}
-{{- end -}}
-
-{{/*
 Remove empty-value entry from dict
 */}}
 {{- define "dict-cleanup" -}}
@@ -179,4 +176,17 @@ Remove empty-value entry from dict
     {{- $_ := unset $dict $k }}
   {{- end -}}
 {{- end -}}
+{{- end -}}
+
+{{- define "hive.initContainers.jmxAgents" -}}
+- name: jmx-agent
+  image: "bitnami/jmx-exporter:0.17.0"
+  imagePullPolicy: IfNotPresent
+  command:
+    - cp
+    - /opt/bitnami/jmx-exporter/jmx_prometheus_javaagent.jar
+    - /jmx-exporter/jmx_prometheus_javaagent.jar
+  volumeMounts:
+    - name: jmx-exporter
+      mountPath: /jmx-exporter
 {{- end -}}

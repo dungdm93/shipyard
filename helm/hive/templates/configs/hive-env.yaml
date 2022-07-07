@@ -16,4 +16,4 @@ metadata:
   labels:
     {{- include "hive.labels" . | nindent 4 }}
 data:
-  HADOOP_OPTIONAL_TOOLS: {{ join "," $hadoopTools }}
+  HADOOP_OPTIONAL_TOOLS: {{ join "," $hadoopTools | quote }}

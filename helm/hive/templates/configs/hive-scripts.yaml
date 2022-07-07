@@ -37,9 +37,9 @@ data:
     HERE=$(dirname "${BASH_SOURCE[0]}")
 
     DB_TYPE="{{ .Values.postgresql.enabled | ternary "postgres" .Values.externalDatabase.type }}"
-    {{- if ($pg := .Values.postgresql).enabled }}
-    DB_HOST="{{ include "call-nested" (list . "postgresql" "postgresql.fullname") }}"
-    DB_PORT="{{ $pg.service.port }}"
+    {{- if .Values.postgresql.enabled }}
+    DB_HOST="{{ include "postgresql.primary.fullname" .Subcharts.postgresql }}"
+    DB_PORT="{{ include "postgresql.service.port" .Subcharts.postgresql }}"
     {{- else if not ($db := .Values.externalDatabase).url }}
     DB_HOST="{{ $db.host }}"
     DB_PORT="{{ $db.port | default (index $dbPortMap $db.type) }}"
