@@ -59,7 +59,7 @@ postgresql:
 
   auth:
     enablePostgresUser: false
-    username: postgres
+    username: hive-metastore
     password: hive-metastore
     database: hive-metastore
 
