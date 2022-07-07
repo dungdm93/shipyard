@@ -23,8 +23,16 @@ RUN set -eux; \
 RUN tar -xf  "apache-hive-${HIVE_VERSION}-bin.tar.gz" --no-same-owner; \
     mv       "apache-hive-${HIVE_VERSION}-bin" "hive";
 
-ARG ICEBERG_VERSION=0.13.1
-ARG DELTALAKE_VERSION=0.4.0
+# PostgreSQL 14+ make SCRAM-SHA-256 as default require JDBC driver >=42.2
+# https://stackoverflow.com/a/65758688
+ARG POSTGRESQL_JDBC_VERSION=42.3.6
+RUN set -eux; \
+    cd ./hive/lib/; \
+    rm -v postgresql-*.jre?.jar; \
+    curl -LO "https://repo1.maven.org/maven2/org/postgresql/postgresql/${POSTGRESQL_JDBC_VERSION}/postgresql-${POSTGRESQL_JDBC_VERSION}.jar";
+
+ARG ICEBERG_VERSION=0.13.2
+ARG DELTALAKE_VERSION=0.4.1
 RUN set -eux; \
     mkdir ./jars/; cd ./jars/; \
     curl -LO "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-hive-runtime/${ICEBERG_VERSION}/iceberg-hive-runtime-${ICEBERG_VERSION}.jar"; \
