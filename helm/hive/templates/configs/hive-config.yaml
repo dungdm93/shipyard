@@ -57,5 +57,7 @@ data:
 
 {{- if .Values.metrics.enabled }}
   hive-env.sh: |
-    export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS -javaagent:/jmx-exporter/jmx_prometheus_javaagent.jar={{ .Values.metrics.port }}:/jmx-exporter/conf/hive-metastore-metrics.yaml"
+    if [ "$SERVICE" = "metastore" ]; then
+      export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS -javaagent:/jmx-exporter/jmx_prometheus_javaagent.jar={{ .Values.metrics.port }}:/jmx-exporter/conf/hive-metastore-metrics.yaml"
+    fi
 {{- end }}
