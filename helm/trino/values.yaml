@@ -128,6 +128,16 @@ coordinator: {}
 worker:
   replicas: null
 
+cache:
+  enabled: false
+
+  persistence:
+    enabled: false
+    accessModes:
+    - ReadWriteOnce
+    storageClass: "-"
+    size: 10Gi
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true

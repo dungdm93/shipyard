@@ -2,7 +2,7 @@
 {{- $httpServer := .Values.httpServer }}
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "trino.fullname" . }}-worker
   labels:
@@ -19,6 +19,7 @@ spec:
   selector:
     matchLabels:
       {{- include "trino.worker.selectorLabels" . | nindent 6 }}
+  podManagementPolicy: Parallel
   template:
     metadata:
       labels:
@@ -71,6 +72,10 @@ spec:
           {{- end }}
           volumeMounts:
             {{- include "trino.worker.volumeMounts" . | nindent 12 }}
+            {{- if .Values.cache.enabled }}
+            - name: cache
+              mountPath: /opt/cache
+            {{- end }}
           livenessProbe:
             tcpSocket:
               port: {{ $httpServer.http.enabled | ternary "http" "https" }}
@@ -86,6 +91,10 @@ spec:
         {{- toYaml $worker.podSecurityContext | nindent 8 }}
       volumes:
         {{- include "trino.worker.volumes" . | nindent 8 }}
+        {{- if and .Values.cache.enabled (not .Values.cache.persistence.enable) }}
+        - name: cache
+          emptyDir: {}
+        {{- end }}
     {{- with $worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -98,3 +107,26 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+  {{- if and .Values.cache.enabled .Values.cache.persistence.enabled }}
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: cache
+    spec:
+      {{- with .Values.cache.persistence.accessModes }}
+      accessModes:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- if .Values.cache.persistence.storageClass }}
+      {{- if eq "-" .Values.cache.persistence.storageClass }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: {{ .Values.cache.persistence.storageClass | quote }}
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.cache.persistence.size | quote }}
+  {{- end }}
