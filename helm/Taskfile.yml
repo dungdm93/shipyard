@@ -48,4 +48,4 @@ tasks:
     cmds:
     - task: dep
     # TODO: BasicAuth https://github.com/chartmuseum/helm-push#basic-auth
-    - helm push . teko
+    - helm cm-push . teko
