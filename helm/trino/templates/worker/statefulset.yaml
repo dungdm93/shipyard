@@ -16,6 +16,7 @@ spec:
   {{- with $worker.replicas }}
   replicas: {{ . }}
   {{- end }}
+  serviceName: {{ include "trino.fullname" . }}-worker
   selector:
     matchLabels:
       {{- include "trino.worker.selectorLabels" . | nindent 6 }}
