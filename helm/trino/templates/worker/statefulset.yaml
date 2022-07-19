@@ -78,8 +78,13 @@ spec:
               mountPath: /opt/cache
             {{- end }}
           livenessProbe:
-            tcpSocket:
-              port: {{ $httpServer.http.enabled | ternary "http" "https" }}
+            httpGet:
+              path: /v1/info
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /v1/info
+              port: http
           resources:
             {{- toYaml $worker.resources | nindent 12 }}
           securityContext:
