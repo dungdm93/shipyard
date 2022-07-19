@@ -70,8 +70,13 @@ spec:
           volumeMounts:
             {{- include "trino.coordinator.volumeMounts" . | nindent 12 }}
           livenessProbe:
-            tcpSocket:
-              port: {{ $httpServer.http.enabled | ternary "http" "https" }}
+            httpGet:
+              path: /v1/info
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /v1/info
+              port: http
           resources:
             {{- toYaml $coordinator.resources | nindent 12 }}
           securityContext:
