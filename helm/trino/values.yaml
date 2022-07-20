@@ -3,7 +3,7 @@ fullnameOverride: ""
 
 image:
   repository: trinodb/trino
-  tag: "360"
+  tag: "390"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
