@@ -75,7 +75,7 @@ spec:
             {{- include "trino.worker.volumeMounts" . | nindent 12 }}
             {{- if .Values.cache.enabled }}
             - name: cache
-              mountPath: /opt/cache
+              mountPath: /opt/trino/cache
             {{- end }}
           livenessProbe:
             httpGet:
