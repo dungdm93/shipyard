@@ -98,6 +98,21 @@ Remove empty-value entry from dict
       mountPath: /jmx-exporter
 {{- end -}}
 
+{{- define "trino.initContainer.cacheDirCreator" -}}
+- name: cache-dir-creator
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  command:
+    - bash
+    - /etc/trino/scripts/mkcachedir.sh
+  volumeMounts:
+    - name: cache
+      mountPath: /opt/trino/cache
+    - name: trino-scripts
+      mountPath: /etc/trino/scripts
+    - name: trino-catalog
+      mountPath: /etc/trino/catalog
+{{- end -}}
 
 {{- define "trino.jmxMounts" -}}
 - name: jmx-exporter

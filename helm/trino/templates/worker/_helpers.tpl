@@ -32,6 +32,9 @@ Worker volumes
 - name: trino-catalog
   configMap:
     name: {{ include "trino.fullname" . }}-catalog
+- name: trino-scripts
+  configMap:
+    name: {{ include "trino.fullname" . }}-scripts
 {{- if .Values.metrics.enabled }}
 - name: jmx-exporter
   emptyDir: {}
@@ -53,6 +56,8 @@ Coordinator volumeMounts
   mountPath: /etc/trino
 - name: trino-catalog
   mountPath: /etc/trino/catalog
+- name: trino-scripts
+  mountPath: /etc/trino/scripts
 {{- if .Values.metrics.enabled }}
 {{ include "trino.jmxMounts" . }}
 {{- end }}
