@@ -1,0 +1,4 @@
+Configuration references:
+- CDH Hive metastore configuration: https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/cdh_ig_hive_metastore_configure.html
+- CDH Hive tuning: https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/admin_hive_tuning.html
+- AWS EMR Hive configuration: https://aws.amazon.com/premiumsupport/knowledge-center/emr-hive-outofmemoryerror-heap-space/
