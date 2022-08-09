@@ -3,8 +3,8 @@ name: trino
 description: Trino helm chart
 icon: https://trino.io/assets/images/trino-logo/trino-ko_tiny-alt.svg
 type: application
-version: 0.7.1
-appVersion: "360"
+version: 0.8.0
+appVersion: "391"
 # kubeVersion: ^1.15
 maintainers:
 - name: Teko's DataOps team

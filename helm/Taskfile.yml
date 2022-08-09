@@ -10,8 +10,7 @@ tasks:
 
   gen:
     cmds:
-    - mkdir -p ./build
-    - rm   -rf ./build/*
+    - rm -rf ./build/
     - helm template {{.RELEASE}} .
         --namespace={{.NAMESPACE}}
         --values={{.VALUES}}
