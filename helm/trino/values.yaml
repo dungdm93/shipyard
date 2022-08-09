@@ -3,7 +3,7 @@ fullnameOverride: ""
 
 image:
   repository: trinodb/trino
-  tag: "390"
+  tag: "391"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
@@ -53,40 +53,50 @@ httpServer:
     key:
 
 authen:
-  # Option: custom | kerberos | ldap | passwordFile | oauth2
-  type: custom
+  enabled: false
 
-  kerberos:
-    config: /etc/krb5.conf
-    keytab:
-    # ref: https://web.mit.edu/kerberos/krb5-1.12/doc/appdev/gssapi.html#name-types
-    nameType: # HOSTBASED_SERVICE (default) | USER_NAME
-    serviceName:
-    principalHostname:
+  # Option: CUSTOM | KERBEROS | PASSWORD | OAUTH2
+  type: CUSTOM
+  sharedSecret:
 
-  ldap:
-    url:
-    userBaseDN:
-    userBindPattern:
-    groupAuthPattern:
-    cacheTtl:
+  kerberos: {}
+    # config: /etc/krb5.conf
+    # keytab:
+    ## ref: https://web.mit.edu/kerberos/krb5-1.12/doc/appdev/gssapi.html#name-types
+    # nameType: # HOSTBASED_SERVICE (default) | USER_NAME
+    # service-name:
+    # principal-hostname:
 
-    # Trino server can use dedicated LDAP service user for doing user group membership queries.
-    bindDN:
-    bindPassword:
+  ## TODO: Support password authentication
+  # password:
+  #   # Option: file | ldap
+  #   type: file
 
-  passwordFile:
-    path:
-    refreshPeriod:
-    cacheSize:
+  #   ldap:
+  #     # url:
+  #     # user-base-dn:
+  #     # user-bind-pattern:
+  #     # group-auth-pattern:
+  #     # cache-ttl:
 
-  oauth2:
-    authUrl:
-    jwksUrl:
-    tokenUrl:
-    clientId:
-    clientSecret:
-    principalField:
+  #     ## Trino server can use dedicated LDAP service user for doing user group membership queries.
+  #     # bind-dn:
+  #     # bind-password:
+
+  #   file:
+  #     # password-file:
+  #     # refresh-period:
+  #     # auth-token-cache.max-size:
+
+  oauth2: {}
+    # issuer:
+    # auth-url:
+    # jwks-url:
+    # token-url:
+    # client-id:
+    # client-secret:
+    # principal-field:
+    # oidc.discovery: true
 
 systemAccessControl:
   # Option: custom | allow-all | read-only | file
