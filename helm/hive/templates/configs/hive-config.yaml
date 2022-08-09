@@ -58,6 +58,6 @@ data:
 {{- if .Values.metrics.enabled }}
   hive-env.sh: |
     if [ "$SERVICE" = "metastore" ]; then
-      export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS -javaagent:/jmx-exporter/jmx_prometheus_javaagent.jar={{ .Values.metrics.port }}:/jmx-exporter/conf/hive-metastore-metrics.yaml"
+      export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS -javaagent:/jmx-exporter/jmx_prometheus_javaagent.jar={{ .Values.metrics.port }}:/jmx-exporter/conf/hive-metastore-metrics.yaml -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9025 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
     fi
 {{- end }}
