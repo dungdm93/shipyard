@@ -9,7 +9,9 @@ data:
   hive-metastore-metrics.yaml: |
     lowercaseOutputName: true
     whitelistObjectNames:
-    - "metrics:name=*"
+    - "metrics:*"
+    - "java.lang:*"
+    - "java.nio:*"
 
     rules:
       # metrics:name=open_connections
@@ -39,11 +41,10 @@ data:
         value: $1
       # metrics:name=(heap|non-heap|total).(committed|init|max|usage|used)
       - pattern: 'metrics<name=(heap|non-heap|total).(.+)><>(Count|Value): (-?\d+\.?\d*)'
-        name: 'hive_metastore_memory'
+        name: 'hive_metastore_memory_$2'
         type: GAUGE
         labels:
-          type: $1
-          metric: $2
+          area: $1
         value: $4
       # metrics:name=jvm.pause.extraSleepTime|info-threshold|warn-threshold
       - pattern: 'metrics<name=jvm.pause.(.+)><>(Count|Value): (-?\d+\.?\d*)'
@@ -65,7 +66,7 @@ data:
       # metrics:name=api_set_ugi
       # metrics:name=api_shutdown
       - pattern: 'metrics<name=api_(.+)><>(.+): (.+)'
-        name: 'hive_metastore_api_init'
+        name: 'hive_metastore_api'
         help: 'Rate Unit = events/second'
         type: GAUGE
         labels:
@@ -85,23 +86,10 @@ data:
       # metrics:name=pools.PS-Eden-Space.usage
       # metrics:name=pools.PS-Old-Gen.usage
       # metrics:name=pools.PS-Survivor-Space.usage
-      - pattern: 'metrics<name=pools.(.+).usage><>Value: (-?\d+\.?\d*)'
-        name: 'hive_metastore_memory_pool'
-        type: GAUGE
-        labels:
-          type: $1
-        value: $2
       # metrics:name=PS-MarkSweep.count
       # metrics:name=PS-MarkSweep.time
       # metrics:name=PS-Scavenge.count
       # metrics:name=PS-Scavenge.time
-      - pattern: 'metrics<name=PS-(.+).(count|time)><>Value: (-?\d+\.?\d*)'
-        name: 'hive_metastore_garbage_collector'
-        type: GAUGE
-        labels:
-          type: $1
-          attribute: $2
-        value: $4
       # metrics:name=blocked.count
       # metrics:name=count
       # metrics:name=deadlocks
@@ -118,4 +106,93 @@ data:
       # metrics:name=timed_waiting.count
       # metrics:name=unloaded
       # metrics:name=waiting.count
+
+      - pattern: 'java.lang<name=(.+), type=GarbageCollector><>CollectionCount'
+        name: 'jvm_gc_total'
+        help: 'Total number of garbage collections'
+        type: COUNTER
+        labels:
+          name: '$1'
+      - pattern: 'java.lang<name=(.+), type=GarbageCollector><>CollectionTime'
+        valueFactor: 0.001
+        name: 'jvm_gc_time_seconds_total'
+        help: 'Total time in seconds spent on garbage collections'
+        type: COUNTER
+        labels:
+          name: '$1'
+      - pattern: 'java.lang<name=(.+), type=GarbageCollector><LastGcInfo>duration'
+        valueFactor: 0.000001
+        name: 'jvm_gc_duration_seconds'
+        help: 'Garbage collection duration in seconds'
+        type: GAUGE
+        labels:
+          name: '$1'
+      - pattern: 'java.lang<name=(.+), type=GarbageCollector><LastGcInfo>GcThreadCount'
+        name: 'jvm_gc_threads'
+        help: 'Garbage collection threads used'
+        type: GAUGE
+        labels:
+          name: '$1'
+      - pattern: 'java.lang<type=Memory><(Heap|NonHeap)MemoryUsage>(max|init|committed|used)'
+        name: 'jvm_memory_$2_bytes'
+        help: '$2 bytes in $1 memory'
+        type: GAUGE
+        labels:
+          area: '$1'
+
+      - pattern: 'java.lang<type=OperatingSystem><>AvailableProcessors'
+        name: 'jvm_os_processors'
+        help: 'Number of CPU cores available'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(CommittedVirtualMemory|FreePhysicalMemory|TotalPhysicalMemory|FreeSwapSpace|TotalSwapSpace)Size'
+        name: 'jvm_os_$1_bytes'
+        help: '$1 in bytes'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(Max|Open)FileDescriptorCount'
+        name: 'jvm_os_$1_file_descriptors'
+        help: '$1 file descriptors'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(Process|System)CpuLoad'
+        name: 'jvm_os_$1_cpu_load'
+        help: '$1 cpu load'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(Process|System)CpuTime'
+        name: 'jvm_os_$1_cpu_time_seconds'
+        help: '$1 cpu time in seconds'
+        type: COUNTER
+      - pattern: 'java.lang<type=OperatingSystem><>SystemLoadAverage'
+        name: 'jvm_os_system_load_avg'
+        help: 'System load average'
+        type: GAUGE
+      - pattern: 'java.lang<type=OperatingSystem><>(Arch|Name|Version): (.+)'
+        name: 'jvm_os_info'
+        value: 1
+        help: 'A metric with constant 1 value labelled with OS information'
+        type: GAUGE
+        labels:
+          '$1': '$2'
+      - pattern: 'java.lang<type=Runtime><>Uptime'
+        valueFactor: 0.001
+        name: 'jvm_runtime_uptime_seconds'
+        help: 'JVM uptime in seconds'
+        type: COUNTER
+
+      - pattern: 'java.lang<type=Threading><>(Daemon|Peak|TotalStarted|)ThreadCount'
+        name: 'jvm_threading_$1_threads'
+        help: 'JVM $1 thread count'
+        type: GAUGE
+
+      - pattern: 'java.nio<name=(.+), type=BufferPool><>Count'
+        name: 'jvm_nio_buffer_pool_buffers'
+        help: 'Number of buffers in NIO buffer pool'
+        type: GAUGE
+        labels:
+          pool: '$1'
+      - pattern: 'java.nio<name=(.+), type=BufferPool><>(MemoryUsed|TotalCapacity)'
+        name: 'jvm_nio_buffer_pool_$2_bytes'
+        help: 'NIO buffer pool $2 in bytes'
+        type: GAUGE
+        labels:
+          pool: '$1'
+
 {{- end }}
