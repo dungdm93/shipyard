@@ -60,28 +60,15 @@ class OAuth2ClientCredentialAuthentication(Authentication):
         for k, v in session_configs.items():
             setattr(self.client, k, v)
 
-        self.client.update_token = self.update_token()
-
-    def set_client_session(self, client_session):
-        pass
+        self.client.update_token = self._update_token()
 
     def set_http_session(self, http_session):
         if not self.client.token:
-            self.initialize_token()
+            self._initialize_token()
         http_session.auth = self.client.token_auth
         return http_session
 
-    def setup(self, trino_client):
-        self.set_client_session(trino_client.client_session)
-        self.set_http_session(trino_client.http_session)
-
-    def get_exceptions(self):
-        return ()
-
-    def handle_error(self, handle_error):
-        pass
-
-    def update_token(self):
+    def _update_token(self):
         def func(token: OAuth2Token,
                  refresh_token: str = None,
                  access_token: str = None):
@@ -92,7 +79,7 @@ class OAuth2ClientCredentialAuthentication(Authentication):
 
         return func
 
-    def initialize_token(self):
+    def _initialize_token(self):
         token: OAuth2Token = cache_manager.cache.get(self._cache_key)
         if token is None:
             token = self.client.fetch_token(grant_type="client_credentials")

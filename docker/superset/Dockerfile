@@ -1,4 +1,4 @@
-FROM python:3.8-slim as base
+FROM python:3.9-slim as base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
@@ -15,7 +15,7 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # Firefox + Gecko driver. For Ubuntu, using `apt install firefox firefox-geckodriver`
-ARG GECKO_DRIVER_VERSION=v0.30.0
+ARG GECKO_DRIVER_VERSION=v0.31.0
 RUN set -eux; cd /tmp/; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -41,7 +41,7 @@ WORKDIR ${SUPERSET_HOME}
 
 FROM base AS builder
 
-ARG SUPERSET_VERSION=1.3.2
+ARG SUPERSET_VERSION=1.5.1
 
 RUN set -eux; \
     apt-get update; \
@@ -72,14 +72,14 @@ RUN set -eux; \
         cors thumbnails \
     ); \
     pip install "apache-superset[$(join ',' ${SUPERSET_PACKAGES[@]})]==${SUPERSET_VERSION}" \
-        "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=0.15" "redis~=3.5" "pylibmc~=1.6" "statsd~=3.3.0"; \
+        # See https://github.com/pallets/markupsafe/issues/283
+        # breaking change introduced in markupsafe causes jinja, flask to break
+        "markupsafe<2.1"; \
+    pip install \
+        "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=1.0" \
+        "redis~=4.3" "pylibmc~=1.6" "statsd~=3.3" "prophet~=1.1"; \
     \
     rm -rf /usr/local/cx_Oracle-doc;
-
-ARG PROPHET_VERSION=1.0
-RUN set -eux; \
-    pip install -r "https://github.com/facebook/prophet/raw/v${PROPHET_VERSION}/python/requirements.txt"; \
-    pip install "prophet~=${PROPHET_VERSION}"
 
 COPY ./patch/ /usr/local/lib/python3.8/site-packages/superset/
 
@@ -88,6 +88,7 @@ FROM base
 COPY --from=builder /usr/local /usr/local
 COPY ./scripts/* /usr/local/bin/
 
+ENV FLASK_APP=superset
 USER superset
 EXPOSE 8088 5555
 ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
