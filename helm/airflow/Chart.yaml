@@ -3,7 +3,7 @@ name: airflow
 description: Airflow helm chart
 icon: https://airflow.apache.org/docs/stable/_images/pin_large.png
 type: application
-version: 0.8.0
+version: 0.8.1
 appVersion: 2.2.0
 # kubeVersion: ^1.15
 dependencies:
@@ -12,7 +12,7 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   condition: postgresql.enabled
 - name: redis
-  version: 12.x.x
+  version: 17.x.x
   repository: https://charts.bitnami.com/bitnami
   condition: redis.enabled
 maintainers:

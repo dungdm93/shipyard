@@ -188,6 +188,12 @@ logs:
     # Option 2: existing PVC
     existingClaim: null
 
+  ephemeral:
+    enabled: false
+    storageClass: null
+    accessMode: ReadWriteMany
+    size: 1G
+
 postgresql:
   enabled: true
 

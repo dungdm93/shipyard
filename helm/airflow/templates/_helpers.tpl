@@ -174,11 +174,11 @@ Airflow celery broker connection url
 {{- define "airflow.celeryBroker" -}}
 {{- if .Values.redis.enabled -}}
   {{- $redis := .Values.redis }}
-  {{- $redisHost := include "call-nested" (list . "redis" "redis.fullname") }}
+  {{- $redisHost := include "call-nested" (list . "redis" "common.names.fullname") }}
   {{- if not $redis.sentinel.enabled -}}
     {{- $redisHost = printf "%s-master" $redisHost }}
   {{- end -}}
-  {{- $redisPort := $redis.sentinel.enabled | ternary $redis.sentinel.service.redisPort $redis.master.service.port }}
+  {{- $redisPort := $redis.sentinel.enabled | ternary $redis.sentinel.service.ports.redis $redis.master.service.ports.redis }}
   {{- $redisAuthority := (empty $redis.password) | ternary "" (printf ":%s@" $redis.password) }}
   {{- printf "redis://%s%s:%s/0" $redisAuthority $redisHost (toString $redisPort) -}}
 {{- else -}}
@@ -302,6 +302,17 @@ Airflow volumes
 - name: airflow-logs
   persistentVolumeClaim:
     claimName: {{ $logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .)) }}
+{{- else if and (not $logs.remoteLogConnId) $logs.ephemeral.enabled }}
+- name: airflow-logs
+  ephemeral:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - {{ $logs.ephemeral.accessMode }}
+        resources:
+          requests:
+            storage: {{ $logs.ephemeral.size }}
+        storageClassName: {{ $logs.ephemeral.storageClass }}
 {{- else }}
 - name: airflow-logs
   emptyDir: {}

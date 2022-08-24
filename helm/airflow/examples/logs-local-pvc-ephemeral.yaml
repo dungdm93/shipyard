@@ -1,0 +1,8 @@
+logs:
+  baseLogFolder: /opt/airflow/logging
+
+  ephemeral:
+    enabled: true
+    storageClass: topolvm-hdd
+    accessMode: ReadWriteMany
+    size: 1G
