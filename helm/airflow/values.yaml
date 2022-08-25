@@ -212,8 +212,10 @@ externalDatabase: ""
 
 redis:
   enabled: true
+  architecture: standalone
 
-  password: airflow
+  auth:
+    password: airflow
 
   cluster:
     enabled: false
