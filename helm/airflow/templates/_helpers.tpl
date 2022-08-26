@@ -179,7 +179,7 @@ Airflow celery broker connection url
     {{- $redisHost = printf "%s-master" $redisHost }}
   {{- end -}}
   {{- $redisPort := $redis.sentinel.enabled | ternary $redis.sentinel.service.ports.redis $redis.master.service.ports.redis }}
-  {{- $redisAuthority := (empty $redis.password) | ternary "" (printf ":%s@" $redis.password) }}
+  {{- $redisAuthority := (empty $redis.auth.password) | ternary "" (printf ":%s@" $redis.auth.password) }}
   {{- printf "redis://%s%s:%s/0" $redisAuthority $redisHost (toString $redisPort) -}}
 {{- else -}}
   {{- .Values.externalCeleryBroker }}
@@ -298,11 +298,11 @@ Airflow volumes
 {{- end }}
 
 {{- $logs := .Values.logs }}
-{{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled }}
+{{- if $logs.persistence.enabled }}
 - name: airflow-logs
   persistentVolumeClaim:
     claimName: {{ $logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" .)) }}
-{{- else if and (not $logs.remoteLogConnId) $logs.ephemeral.enabled }}
+{{- else if $logs.ephemeral.enabled }}
 - name: airflow-logs
   ephemeral:
     volumeClaimTemplate:
