@@ -13,21 +13,18 @@ cleanup-conda() {
     rm -rf $CONDA_DIR/share/jupyter/lab/staging
 }
 
-cleanup-npm() {
+cleanup-node() {
     npm cache clean --force
     rm -rf \
-        /home/$NB_USER/.npm     \
-        /home/$NB_USER/.yarn    \
+        /home/$NB_USER/.npm  \
+        /home/$NB_USER/.yarn \
         /home/$NB_USER/.node-gyp
 }
 
 cleanup-home() {
     rm -rf \
-        /home/$NB_USER/.cache   \
-        /home/$NB_USER/.empty   \
-        /home/$NB_USER/.npm     \
-        /home/$NB_USER/.yarn    \
-        /home/$NB_USER/.node-gyp
+        /home/$NB_USER/.cache \
+        /home/$NB_USER/.empty
 }
 
 for type in "$@"; do
@@ -38,8 +35,8 @@ for type in "$@"; do
         conda)
             cleanup-conda
             ;;
-        npm)
-            cleanup-npm
+        node)
+            cleanup-node
             ;;
         home)
             cleanup-home
@@ -47,7 +44,7 @@ for type in "$@"; do
         *)
             cleanup-apt
             cleanup-conda
-            cleanup-npm
+            cleanup-node
             cleanup-home
             ;;
     esac
