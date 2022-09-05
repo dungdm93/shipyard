@@ -4,16 +4,13 @@ WORKDIR /build
 RUN apk add -U curl gnupg tar
 
 # Main Apache distributions:
-#   * https://apache.org/dist
 #   * https://archive.apache.org/dist
 #   * https://dist.apache.org/repos/dist/release
-# List all Apache mirrors:
-#   * https://apache.org/mirrors
 ARG APACHE_DIST=https://downloads.apache.org
 ARG APACHE_MIRROR=${APACHE_DIST}
-ARG HADOOP_VERSION=3.2
-ARG SPARK_VERSION=3.2.1
-ARG TINI_VERSION=0.19.0
+ARG HADOOP_VERSION=3.2 \
+    SPARK_VERSION=3.2.2 \
+    TINI_VERSION=0.19.0
 
 RUN set -eux; \
     curl -L  "${APACHE_DIST}/spark/KEYS" | gpg --batch --import -; \
@@ -70,8 +67,8 @@ RUN set -eux; \
         cp ${JARS//:/ } "./lib/tools/"; \
     done;
 
-ARG ICEBERG_VERSION=0.13.1
-ARG AWSSDK_V2_VERSION=2.15.40
+ARG ICEBERG_VERSION=0.14.0 \
+    AWSSDK_V2_VERSION=2.15.40
 COPY ./etc/hadoop-iceberg.sh "./libexec/shellprofile.d/"
 RUN set -eux; cd "./lib/tools/"; \
     curl -LO "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.2_2.12/${ICEBERG_VERSION}/iceberg-spark-runtime-3.2_2.12-${ICEBERG_VERSION}.jar"; \
@@ -105,8 +102,8 @@ SHELL [ "/bin/bash", "-c" ]
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
+        openjdk-8-jre-headless ca-certificates tzdata \
         # Hadoop native packages
-        openjdk-8-jre-headless ca-certificates libc6 \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libssl1.1 libisal2 libnss3 libpam-modules krb5-user procps \
         # Spark native packages
