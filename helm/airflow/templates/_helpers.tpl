@@ -258,7 +258,7 @@ Airflow volumeMounts
 {{- $logs := .Values.logs }}
 - name: airflow-logs
   mountPath: {{ $logs.baseLogFolder }}
-  {{- if and (not $logs.remoteLogConnId) $logs.persistence.enabled $logs.persistence.subPath }}
+  {{- if and $logs.persistence.enabled $logs.persistence.subPath }}
   subPath: {{ $logs.persistence.subPath }}
   {{- end }}
 {{- end -}}
