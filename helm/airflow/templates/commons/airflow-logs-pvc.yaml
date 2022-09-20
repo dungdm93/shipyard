@@ -20,5 +20,5 @@ spec:
       storage: {{ $logs.persistence.size }}
   accessModes:
     - {{ $logs.persistence.accessMode }}
-  volumeMode: filesystem
+  volumeMode: Filesystem
 {{- end }}
