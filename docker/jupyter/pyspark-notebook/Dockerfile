@@ -29,7 +29,7 @@ ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" \
     OPENBLAS_NUM_THREADS=1 \
     MKL_NUM_THREADS=1
 
-COPY --chown=$NB_UID:$NB_GID --from=hub.teko.vn/dataops/spark:3.2.1 \
+COPY --chown=$NB_UID:$NB_GID --from=hub.teko.vn/dataops/spark:3.2.2 \
         /opt/spark  ${SPARK_HOME}
 RUN pip install --no-cache-dir -e "${SPARK_HOME}/python"
 # Alternative solutions:
