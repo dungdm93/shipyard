@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/dataops/jupyter/kotlin-notebook:1.8
+
+includes:
+  docker: ../../
