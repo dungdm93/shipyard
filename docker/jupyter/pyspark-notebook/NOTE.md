@@ -30,3 +30,14 @@ conda config --remove channels conda-forge [--system | --env]
 
 conda config --set use_local True
 ```
+
+## 2.3 Jupyter
+Generate configs via:
+```bash
+jupyter notebook --generate-config
+jupyter lab --generate-config
+jupyter server --generate-config
+```
+
+* [The IPython directory](https://ipython.readthedocs.io/en/stable/config/intro.html#systemwide-configuration)
+* [Common Directories and File Locations](https://jupyter.readthedocs.io/en/latest/use/jupyter-directories.html)
