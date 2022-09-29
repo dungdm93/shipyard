@@ -8,8 +8,8 @@ RUN apk add -U curl gnupg tar
 #   * https://dist.apache.org/repos/dist/release
 ARG APACHE_DIST=https://downloads.apache.org
 ARG APACHE_MIRROR=${APACHE_DIST}
-ARG HADOOP_VERSION=3.2 \
-    SPARK_VERSION=3.2.2 \
+ARG HADOOP_VERSION=3 \
+    SPARK_VERSION=3.3.0 \
     TINI_VERSION=0.19.0
 
 RUN set -eux; \
@@ -32,7 +32,7 @@ RUN set -eux; \
     curl -LO "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini"; \
     chmod +x tini;
 
-FROM hub.teko.vn/dataops/hadoop:3.3.1 as hadoop
+FROM hub.teko.vn/dataops/hadoop:3.3.2 as hadoop
 WORKDIR /build/hadoop
 
 RUN set -eux; \
@@ -67,11 +67,11 @@ RUN set -eux; \
         cp ${JARS//:/ } "./lib/tools/"; \
     done;
 
-ARG ICEBERG_VERSION=0.14.0 \
+ARG ICEBERG_VERSION=0.14.1 \
     AWSSDK_V2_VERSION=2.15.40
 COPY ./etc/hadoop-iceberg.sh "./libexec/shellprofile.d/"
 RUN set -eux; cd "./lib/tools/"; \
-    curl -LO "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.2_2.12/${ICEBERG_VERSION}/iceberg-spark-runtime-3.2_2.12-${ICEBERG_VERSION}.jar"; \
+    curl -LO "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.3_2.12/${ICEBERG_VERSION}/iceberg-spark-runtime-3.3_2.12-${ICEBERG_VERSION}.jar"; \
     curl -L  "https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/${AWSSDK_V2_VERSION}/bundle-${AWSSDK_V2_VERSION}.jar" \
          -o  "awssdk-bundle-${AWSSDK_V2_VERSION}.jar"; \
     curl -L  "https://repo1.maven.org/maven2/software/amazon/awssdk/url-connection-client/${AWSSDK_V2_VERSION}/url-connection-client-${AWSSDK_V2_VERSION}.jar" \
@@ -95,7 +95,7 @@ RUN set -eux; cd "./lib/tools/"; \
 #     curl -LO "https://storage.googleapis.com/hadoop-lib/bigquery/bigquery-connector-hadoop3-1.1.4.jar"; \
 #     curl -LO "https://storage.googleapis.com/spark-lib/bigquery/spark-bigquery-with-dependencies_2.12-0.17.1.jar";
 
-FROM ubuntu:focal
+FROM ubuntu:jammy
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL [ "/bin/bash", "-c" ]
 
@@ -105,10 +105,9 @@ RUN set -eux; \
         openjdk-8-jre-headless ca-certificates tzdata \
         # Hadoop native packages
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
-        libssl1.1 libisal2 libnss3 libpam-modules krb5-user procps \
+        libssl3 libisal2 libnss3 libpam-modules krb5-user procps \
         # Spark native packages
         libopenblas-base libatlas3-base libarpack2; \
-    ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 

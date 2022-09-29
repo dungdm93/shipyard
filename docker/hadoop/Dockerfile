@@ -4,14 +4,11 @@ WORKDIR /build
 RUN apk add -U curl gnupg tar
 
 # Main Apache distributions:
-#   * https://apache.org/dist
 #   * https://archive.apache.org/dist
 #   * https://dist.apache.org/repos/dist/release
-# List all Apache mirrors:
-#   * https://apache.org/mirrors
-ARG APACHE_DIST=https://archive.apache.org/dist
+ARG APACHE_DIST=https://downloads.apache.org
 ARG APACHE_MIRROR=${APACHE_DIST}
-ARG HADOOP_VERSION=3.3.1
+ARG HADOOP_VERSION=3.3.2
 
 RUN set -eux; \
     curl -L  "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \
@@ -24,7 +21,7 @@ RUN tar -xf  "hadoop-${HADOOP_VERSION}.tar.gz" --no-same-owner \
 
 
 
-FROM  ubuntu:focal
+FROM  ubuntu:jammy
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL [ "/bin/bash", "-c" ]
 
@@ -33,8 +30,7 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
         openjdk-8-jre-headless ca-certificates libc6 \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
-        libssl1.1 libisal2 libnss3 libpam-modules krb5-user procps; \
-    ln -s libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so; \
+        libssl3 libisal2 libnss3 libpam-modules krb5-user procps; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
@@ -49,7 +45,7 @@ ENV PATH="${HADOOP_HOME}/bin:${PATH}"
 # Native library checking:
 # hadoop:  true /opt/hadoop/lib/native/libhadoop.so.1.0.0
 # zlib:    true /lib/x86_64-linux-gnu/libz.so.1
-# zstd  :  true /lib/x86_64-linux-gnu/libzstd.so.1
+# zstd:    true /lib/x86_64-linux-gnu/libzstd.so.1
 # bzip2:   true /lib/x86_64-linux-gnu/libbz2.so.1
 # openssl: true /lib/x86_64-linux-gnu/libcrypto.so
 # ISA-L:   true /lib/x86_64-linux-gnu/libisal.so.2
