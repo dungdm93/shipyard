@@ -60,6 +60,9 @@ spec:
           mountPath: /var/lib/hdfs/
         securityContext:
           {{- toYaml $namenode.securityContext | nindent 10 }}
+      {{- if $namenode.extraContainers }}
+      {{- toYaml $namenode.extraContainers | nindent 6}}
+      {{- end }}
       volumes:
       - name: hdfs-configs
         configMap:

@@ -1,0 +1,48 @@
+checkpointNode:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: null
+    accessModes:
+    - ReadWriteOnce
+  extraContainers:
+    - name: hadoop-hdfs-fsimage-exporter
+      image: "marcelmay/hadoop-hdfs-fsimage-exporter:1.4.5"
+      imagePullPolicy: IfNotPresent
+      command:
+        - "java"
+        - "-jar"
+        - "/opt/fsimage-exporter/fsimage-exporter.jar"
+        - "0.0.0.0"
+        - "9709"
+        - "/opt/fsimage-exporter/conf/fsimage-exporter-configs.yml"
+      ports:
+        - name: exporter
+          protocol: TCP
+          containerPort: 9709
+      volumeMounts:
+        - name: fsimage-exporter-configs
+          mountPath: /opt/fsimage-exporter/conf
+        - name: data
+          mountPath: /var/lib/hdfs
+      securityContext:
+        runAsUser: 0
+
+  extraVolumes:
+    - name: fsimage-exporter-configs
+      configMap:
+        name: fsimage-exporter-configs
+
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}
+  interval: 30s
+  honorLabels: false
+  metricRelabelings: {}
+  relabelings: {}
+
+
+hdfsConfig:
+  hdfs-site.xml:
+    dfs.namenode.checkpoint.period: 300

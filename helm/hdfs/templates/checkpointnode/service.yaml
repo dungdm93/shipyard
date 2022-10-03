@@ -1,0 +1,19 @@
+{{- if .Values.checkpointNode.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hdfs.fullname" . }}-checkpointnode
+  labels:
+    {{- include "hdfs.checkpointnode.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: http
+    port: 50105
+    targetPort: http
+    protocol: TCP
+  selector:
+    {{- include "hdfs.checkpointnode.selectorLabels" . | nindent 4 }}
+  publishNotReadyAddresses: true
+{{- end}}

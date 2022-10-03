@@ -46,6 +46,18 @@ nameNode:
     storageClass: null
     accessModes:
     - ReadWriteOnce
+  extraContainers: []
+
+checkpointNode:
+  enabled: false
+  persistence:
+    enabled: false
+    size: 5Gi
+    storageClass: null
+    accessModes:
+    - ReadWriteOnce
+  extraContainers: []
+  extraVolumes: []
 
 dataNode:
   kind: statefulset

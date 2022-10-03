@@ -1,0 +1,125 @@
+{{- if .Values.checkpointNode.enabled -}}
+{{- $checkpointnode := mergeOverwrite (deepCopy .Values.commons) .Values.checkpointNode -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "hdfs.fullname" . }}-checkpointnode
+  labels:
+    {{- include "hdfs.checkpointnode.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml $checkpointnode.annotations | nindent 4 }}
+spec:
+  serviceName: {{ include "hdfs.fullname" . }}-checkpointnode
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "hdfs.checkpointnode.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hdfs.checkpointnode.selectorLabels" . | nindent 8 }}
+        {{- with $checkpointnode.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "hdfs.checksum" . | nindent 8 }}
+        {{- with $checkpointnode.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      enableServiceLinks: false
+      containers:
+      - name: checkpointnode
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        command:
+        - /usr/local/scripts/hadoop-start.sh
+        - checkpointnode
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 50105
+        readinessProbe:
+          httpGet:
+            port: http
+            path: /
+        livenessProbe:
+          httpGet:
+            port: http
+            path: /
+        resources:
+          {{- toYaml $checkpointnode.resources | nindent 10 }}
+        volumeMounts:
+        - name: hdfs-configs
+          mountPath: /etc/hdfs/
+        - name: hdfs-scripts
+          mountPath: /usr/local/scripts/
+        - name: data
+          mountPath: /var/lib/hdfs/
+        securityContext:
+          {{- toYaml $checkpointnode.securityContext | nindent 10 }}
+      {{- with $checkpointnode.extraContainers }}
+        {{- toYaml . | nindent 6}}
+      {{- end }}
+      volumes:
+      - name: hdfs-configs
+        configMap:
+          name: {{ include "hdfs.fullname" . }}-configs
+      - name: hdfs-scripts
+        configMap:
+          name: {{ include "hdfs.fullname" . }}-scripts
+          defaultMode: 0755
+      {{- if not $checkpointnode.persistence.enabled }}
+      - name: data
+        emptyDir: {}
+      {{- end }}
+      {{- with $checkpointnode.extraVolumes }}
+        {{- toYaml . | nindent 6}}
+      {{- end }}
+      securityContext:
+        {{- toYaml $checkpointnode.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "hdfs.serviceAccountName" . }}
+      priorityClassName:  {{ $checkpointnode.priorityClassName }}
+      runtimeClassName:   {{ $checkpointnode.runtimeClassName }}
+      schedulerName:      {{ $checkpointnode.schedulerName }}
+      {{- with $checkpointnode.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $checkpointnode.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $checkpointnode.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if $checkpointnode.persistence.enabled }}
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: data
+    spec:
+      {{- with $checkpointnode.persistence.accessModes }}
+      accessModes:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- if $checkpointnode.persistence.storageClass }}
+      {{- if eq "-" $checkpointnode.persistence.storageClass }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: {{ $checkpointnode.persistence.storageClass | quote }}
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ $checkpointnode.persistence.size | quote }}
+  {{- end }}
+{{- end }}
