@@ -20,8 +20,11 @@ def cleanup_log(log_folder: str, retention: timedelta):
             return
         mtime = datetime.fromtimestamp(f.stat().st_mtime)
         if now - mtime > retention:
-            os.remove(f)
-            logger.info("mtime=%s removed %s", mtime, f)
+            try:
+                os.remove(f)
+                logger.info("mtime=%s removed %s", mtime, f)
+            except FileNotFoundError:
+                logger.info("File %s does not exists or removed.", f)
 
 
 def main():
