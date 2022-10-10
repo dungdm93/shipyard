@@ -24,16 +24,39 @@ data:
       exec ${HADOOP_HOME}/bin/hdfs namenode
     }
 
+    function start_checkpointnode() {
+      mkdir -p $namedir
+      exec ${HADOOP_HOME}/bin/hdfs namenode -checkpoint
+    }
+
+    function start_backupnode() {
+      mkdir -p $namedir
+      exec ${HADOOP_HOME}/bin/hdfs namenode -backup
+    }
+
     function start_datanode() {
       exec ${HADOOP_HOME}/bin/hdfs datanode
+    }
+
+    function start_secondarynamenode() {
+      exec ${HADOOP_HOME}/bin/hdfs secondarynamenode
     }
 
     case $1 in
       namenode)
         start_namenode
       ;;
+      checkpointnode)
+        start_checkpointnode
+      ;;
+      backupnode)
+        start_backupnode
+      ;;
       datanode)
         start_datanode
+      ;;
+      secondarynamenode)
+        start_secondarynamenode
       ;;
       *)
         exec "$@"
