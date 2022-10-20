@@ -1,4 +1,4 @@
-FROM  ubuntu:20.04
+FROM  ubuntu:22.04
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL [ "/bin/bash", "-c" ]
 
@@ -19,3 +19,4 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./rootfs /
+RUN chmod 600 /root/.ssh/config
