@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/base:1.0
+FROM hub.teko.vn/tools/base:2.0
 
 RUN set -eux; \
     apt-get update; \
@@ -8,14 +8,13 @@ RUN set -eux; \
         python3-wheel \
         python3-setuptools; \
     \
-    ln -s /usr/bin/pip3 /usr/bin/pip; \
     pip config set --global global.no-cache-dir True; \
     pip completion --bash > /etc/bash_completion.d/pip; \
     \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
-ARG ANSIBLE_VERSION=2.9.*
+ARG ANSIBLE_VERSION=6.5.*
 
 RUN pip install ansible==${ANSIBLE_VERSION} \
         Jinja2  \
