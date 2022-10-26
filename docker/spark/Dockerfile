@@ -99,10 +99,11 @@ FROM ubuntu:jammy
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL [ "/bin/bash", "-c" ]
 
+ARG JAVA_VERSION=8
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        openjdk-8-jre-headless ca-certificates tzdata \
+        openjdk-${JAVA_VERSION}-jre-headless ca-certificates tzdata \
         # Hadoop native packages
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libssl3 libisal2 libnss3 libpam-modules krb5-user procps \
@@ -116,7 +117,7 @@ RUN set -eux; \
     chgrp root  /etc/passwd; \
     chmod ug+rw /etc/passwd;
 
-ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" \
+ENV JAVA_HOME="/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64" \
     SPARK_HOME="/opt/spark" \
     # https://spark.apache.org/docs/latest/ml-linalg-guide.html#spark-configuration
     OPENBLAS_NUM_THREADS=1 \
