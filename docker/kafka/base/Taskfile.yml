@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/kafka/connect:2.8.1
+  IMAGE: hub.teko.vn/dataops/kafka/connect:3.2.1
 
 includes:
   docker: ../../
