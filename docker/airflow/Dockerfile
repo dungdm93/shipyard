@@ -1,4 +1,4 @@
-FROM python:3.9-slim AS base
+FROM python:3.10-slim AS base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
@@ -36,6 +36,8 @@ RUN set -eux; \
         build-essential \
         # pip install mysqlclient
         default-libmysqlclient-dev \
+        # pip install psycopg2
+        libpq-dev \
         # pip install sasl
         libsasl2-dev \
         # pip install pykerberos
@@ -44,11 +46,11 @@ RUN set -eux; \
         libldap2-dev \
         # pip install python-snappy
         libsnappy-dev \
-        # pip install unixodbc-dev
+        # pip install pyodbc
         unixodbc-dev \
         libev-dev
 
-ARG AIRFLOW_VERSION=2.3.2
+ARG AIRFLOW_VERSION=2.4.2
 
 RUN set -eux; \
     PYTHON_VERSION_SHORT="${PYTHON_VERSION%.*}"; \
@@ -80,11 +82,8 @@ RUN set -eux; \
     pip install --constraint "${CONSTRAINT_URL}" \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
 
-RUN pip install "lz4" "python-snappy";
-
-RUN rm -rf \
-        /usr/local/bin/__pycache__ \
-        /usr/local/cx_Oracle-doc;
+RUN pip install "lz4" "python-snappy"
+RUN rm -rf /usr/local/bin/__pycache__
 
 FROM base
 
