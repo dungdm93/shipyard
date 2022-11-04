@@ -11,7 +11,7 @@ def wait_for_database(retries: int, interval: float):
     from sqlalchemy.engine.base import Engine
     from sqlalchemy.exc import OperationalError
 
-    db_conn = conf.get("core", "sql_alchemy_conn")
+    db_conn = conf.get("database", "sql_alchemy_conn")
     engine: Engine = create_engine(db_conn)
     uri = repr(engine.url)
     for i in range(retries):

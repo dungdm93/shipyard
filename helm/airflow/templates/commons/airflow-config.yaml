@@ -1,5 +1,6 @@
 {{- $airflow := .Values.airflow }}
 {{- $core := (dict "core" dict | mergeOverwrite $airflow).core }}
+{{- $database := (dict "database" dict | mergeOverwrite $airflow).database }}
 {{- $logging := (dict "logging" dict | mergeOverwrite $airflow).logging }}
 {{- $celery := (dict "celery" dict | mergeOverwrite $airflow).celery }}
 {{- $kubernetes := (dict "kubernetes" dict | mergeOverwrite $airflow).kubernetes }}
@@ -13,7 +14,8 @@
 
 {{- $_ := set $core "dags_folder" (include "airflow.dags.folder" $dags) }}
 {{- $_ := set $core "donot_pickle" $dags.doNotPickle }}
-{{- $_ := set $core "sql_alchemy_conn" (include "airflow.database" .) }}
+
+{{- $_ := set $database "sql_alchemy_conn" (include "airflow.database" .) }}
 
 {{- $_ := set $logging "logging_level" $logs.level }}
 {{- $_ := set $logging "base_log_folder" $logs.baseLogFolder }}
