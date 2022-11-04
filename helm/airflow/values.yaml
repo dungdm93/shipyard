@@ -43,7 +43,7 @@ airflow_local_settings: ""
 commons:
   image:
     repository: hub.teko.vn/dataops/airflow
-    tag: "2.2-b2"
+    tag: 2.3-b1
   replicas: null
   command: []
   args: []
@@ -196,13 +196,13 @@ logs:
 
 postgresql:
   enabled: true
+  architecture: standalone
 
-  postgresqlUsername: postgres
-  postgresqlPassword: airflow
-  postgresqlDatabase: airflow
-
-  replication:
-    enabled: false
+  auth:
+    enablePostgresUser: false
+    username: postgres
+    password: airflow
+    database: airflow
 
   persistence:
     enabled: true
@@ -213,8 +213,10 @@ externalDatabase: ""
 redis:
   enabled: true
   architecture: standalone
+  architecture: standalone
 
   auth:
+    enabled: true
     password: airflow
 
   cluster:

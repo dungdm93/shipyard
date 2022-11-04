@@ -161,8 +161,12 @@ Airflow database connection url
 {{- define "airflow.database" -}}
 {{- if .Values.postgresql.enabled -}}
   {{- $pg := .Values.postgresql }}
-  {{- $pgHost := include "call-nested" (list . "postgresql" "common.names.fullname") }}
-  {{- printf "postgresql+psycopg2://%s:%s@%s:%s/%s" $pg.postgresqlUsername $pg.postgresqlPassword $pgHost (toString $pg.service.port) $pg.postgresqlDatabase -}}
+  {{- $pgUsername := include "postgresql.username" .Subcharts.postgresql }}
+  {{- $pgPassword := $pg.auth.password }}
+  {{- $pgHost := include "postgresql.primary.fullname" .Subcharts.postgresql }}
+  {{- $pgPort := include "postgresql.service.port" .Subcharts.postgresql }}
+  {{- $pgDatabase := include "postgresql.database" .Subcharts.postgresql }}
+  {{- printf "postgresql://%s:%s@%s:%s/%s" $pgUsername $pgPassword $pgHost $pgPort $pgDatabase -}}
 {{- else -}}
   {{- .Values.externalDatabase }}
 {{- end -}}
@@ -174,12 +178,13 @@ Airflow celery broker connection url
 {{- define "airflow.celeryBroker" -}}
 {{- if .Values.redis.enabled -}}
   {{- $redis := .Values.redis }}
-  {{- $redisHost := include "call-nested" (list . "redis" "common.names.fullname") }}
+  {{- $redisHost := include "common.names.fullname" .Subcharts.redis }}
   {{- if not $redis.sentinel.enabled -}}
     {{- $redisHost = printf "%s-master" $redisHost }}
   {{- end -}}
   {{- $redisPort := $redis.sentinel.enabled | ternary $redis.sentinel.service.ports.redis $redis.master.service.ports.redis }}
-  {{- $redisAuthority := (empty $redis.auth.password) | ternary "" (printf ":%s@" $redis.auth.password) }}
+  {{- $redisAuthority := include "redis.password" .Subcharts.redis }}
+  {{- $redisAuthority = (empty $redisAuthority) | ternary "" (printf ":%s@" $redisAuthority)  }}
   {{- printf "redis://%s%s:%s/0" $redisAuthority $redisHost (toString $redisPort) -}}
 {{- else -}}
   {{- .Values.externalCeleryBroker }}
@@ -194,22 +199,6 @@ Airflow celery broker connection url
   {{- $scheme := regexReplaceAll "(\\w+)(\\+\\w+)?" $dbUrlParts.scheme "db+${1}" }}
   {{- $_ := set $dbUrlParts "scheme" $scheme }}
   {{- urlJoin $dbUrlParts }}
-{{- end -}}
-
-{{/*
-Execute a template in a subchart:
-https://github.com/helm/helm/issues/4535#issuecomment-477778391
-https://stackoverflow.com/a/52024583
-*/}}
-{{- define "call-nested" -}}
-{{- $dot := index . 0 }}
-{{- $subchart := index . 1 | splitList "." }}
-{{- $template := index . 2 }}
-{{- $values := $dot.Values }}
-{{- range $subchart }}
-{{- $values = index $values . }}
-{{- end }}
-{{- include $template (dict "Chart" (dict "Name" (last $subchart)) "Values" $values "Release" $dot.Release "Capabilities" $dot.Capabilities) }}
 {{- end -}}
 
 {{/*

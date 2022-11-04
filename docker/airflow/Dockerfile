@@ -1,4 +1,4 @@
-FROM python:3.8-slim AS base
+FROM python:3.9-slim AS base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
@@ -48,8 +48,7 @@ RUN set -eux; \
         unixodbc-dev \
         libev-dev
 
-ARG AIRFLOW_VERSION=2.2.2 \
-    DATAHUB_VERSION=0.8.16
+ARG AIRFLOW_VERSION=2.3.2
 
 RUN set -eux; \
     PYTHON_VERSION_SHORT="${PYTHON_VERSION%.*}"; \
@@ -66,11 +65,11 @@ RUN set -eux; \
         mongo elasticsearch neo4j \
         jdbc odbc \
         # BigData
-        apache.beam apache.cassandra apache.drill apache.druid \
-        apache.kylin apache.pig apache.pinot apache.sqoop \
+        apache.beam apache.cassandra apache.drill apache.druid apache.hdfs \
+        apache.hive apache.kylin apache.pig apache.pinot apache.sqoop \
         presto trino \
         # Cloud Providers
-        alibaba amazon microsoft.azure google \
+        alibaba amazon microsoft.azure google github \
         # Cloud Services
         databricks snowflake tableau vertica \
         yandex facebook zendesk salesforce \
@@ -81,14 +80,7 @@ RUN set -eux; \
     pip install --constraint "${CONSTRAINT_URL}" \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
 
-RUN pip install "acryl-datahub[all]~=${DATAHUB_VERSION}";
-
-RUN pip install \
-        # force kubernetes>=12.0
-        "kubernetes~=12.0" \
-        # extra packages
-        "authlib~=0.15" \
-        "lz4" "python-snappy";
+RUN pip install "lz4" "python-snappy";
 
 RUN rm -rf \
         /usr/local/bin/__pycache__ \
