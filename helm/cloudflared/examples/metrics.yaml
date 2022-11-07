@@ -1,0 +1,6 @@
+token: foobar
+
+metrics:
+  enabled: true
+  podMonitor:
+    enabled: true
