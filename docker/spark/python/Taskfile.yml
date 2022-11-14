@@ -1,8 +1,8 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/spark:3.3.0-python-3.9
-  BUILD_ARGS: --build-arg BASE_IMAGE=hub.teko.vn/dataops/spark:3.3.0
+  IMAGE: hub.teko.vn/dataops/spark:3.3.1-python-3.9
+  BUILD_ARGS: --build-arg BASE_IMAGE=hub.teko.vn/dataops/spark:3.3.1-java-8
 
 includes:
   docker: ../../

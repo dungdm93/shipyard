@@ -6,7 +6,7 @@ fi
 
 function _hadoop-iceberg_hadoop_classpath
 {
-  local jar="${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}/iceberg-spark-runtime-3.3_2.12-0.14.1.jar"
+  local jar="${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}/iceberg-spark-runtime-3.3_2.12-1.0.0.jar"
   if [[ -f "$jar" ]]; then
     hadoop_add_classpath "$jar"
   fi

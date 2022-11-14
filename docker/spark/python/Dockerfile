@@ -29,10 +29,11 @@ RUN set -eux; \
 
 FROM ${BASE_IMAGE}
 
-ENV CONDA_HOME=/opt/conda
-COPY --from=builder ${CONDA_HOME} ${CONDA_HOME}
+ENV CONDA_HOME="/opt/conda" \
+    PATH="/opt/conda/bin:${PATH}" \
+    PYARROW_IGNORE_TIMEZONE=1
 
-ENV PATH="${CONDA_HOME}/bin:${PATH}"
+COPY --from=builder ${CONDA_HOME} ${CONDA_HOME}
 
 # Alternative solutions:
 # export PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip"
@@ -48,5 +49,3 @@ RUN set -eux; \
         pandas \
         pyarrow; \
     conda clean -fay;
-
-ENV PYARROW_IGNORE_TIMEZONE=1

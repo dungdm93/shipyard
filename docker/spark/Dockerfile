@@ -9,7 +9,7 @@ RUN apk add -U curl gnupg tar
 ARG APACHE_DIST=https://downloads.apache.org
 ARG APACHE_MIRROR=${APACHE_DIST}
 ARG HADOOP_VERSION=3 \
-    SPARK_VERSION=3.3.0 \
+    SPARK_VERSION=3.3.1 \
     TINI_VERSION=0.19.0
 
 RUN set -eux; \
@@ -67,7 +67,7 @@ RUN set -eux; \
         cp ${JARS//:/ } "./lib/tools/"; \
     done;
 
-ARG ICEBERG_VERSION=0.14.1 \
+ARG ICEBERG_VERSION=1.0.0 \
     AWSSDK_V2_VERSION=2.15.40
 COPY ./etc/hadoop-iceberg.sh "./libexec/shellprofile.d/"
 RUN set -eux; cd "./lib/tools/"; \
