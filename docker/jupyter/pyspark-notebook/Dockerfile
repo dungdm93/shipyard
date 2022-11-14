@@ -1,4 +1,4 @@
-FROM jupyter/scipy-notebook:python-3.10.6
+FROM jupyter/scipy-notebook:python-3.10
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 USER root
 COPY ./scripts/ /usr/local/bin/
@@ -25,7 +25,7 @@ ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" \
     OPENBLAS_NUM_THREADS=1 \
     MKL_NUM_THREADS=1
 
-COPY --chown=$NB_UID:$NB_GID --from=hub.teko.vn/dataops/spark:3.3.0 \
+COPY --chown=$NB_UID:$NB_GID --from=hub.teko.vn/dataops/spark:3.3.1-java-8 \
         /opt/spark  ${SPARK_HOME}
 RUN pip install --no-cache-dir -e "${SPARK_HOME}/python"
 # Alternative solutions:
