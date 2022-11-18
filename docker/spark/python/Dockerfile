@@ -10,7 +10,7 @@ RUN set -eux; \
         ca-certificates gnupg curl;
 
 ARG CONDA_VERSION=4.12.0 \
-    PYTHON_VERSION=3.9
+    PYTHON_VERSION=3.10
 ENV CONDA_HOME=/opt/conda
 
 RUN curl -LO "https://repo.continuum.io/miniconda/Miniconda3-py${PYTHON_VERSION/./}_${CONDA_VERSION}-Linux-x86_64.sh";
