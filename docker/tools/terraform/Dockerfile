@@ -1,7 +1,7 @@
-FROM hub.teko.vn/tools/base:1.0
+FROM hub.teko.vn/tools/base:2.1
 
 # Terraform
-ENV TERRAFORM_VERSION=1.0.*
+ENV TERRAFORM_VERSION=1.3.*
 RUN set -eux; \
     source /etc/os-release; \
     curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -; \
@@ -14,16 +14,16 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # Terragrunt
-ENV TERRAGRUNT_VERSION=v0.31.3
+ENV TERRAGRUNT_VERSION=v0.40.2
 RUN set -eux; cd /usr/local/bin/; \
     curl -L  "https://github.com/gruntwork-io/terragrunt/releases/download/${TERRAGRUNT_VERSION}/terragrunt_linux_amd64" \
          -o  terragrunt; \
     chmod +x terragrunt;
 
 # https://www.terraform.io/docs/cli/config/config-file.html#provider-installation
-ENV TERRAFORM_LOCAL_MIRROR_DIR=/usr/local/share/terraform/plugins/
-WORKDIR ${TERRAFORM_LOCAL_MIRROR_DIR}
-COPY providers.tf ./
-RUN terraform providers mirror "${TERRAFORM_LOCAL_MIRROR_DIR}"
+# ENV TERRAFORM_LOCAL_MIRROR_DIR=/usr/local/share/terraform/plugins/
+# WORKDIR ${TERRAFORM_LOCAL_MIRROR_DIR}
+# COPY providers.tf ./
+# RUN terraform providers mirror "${TERRAFORM_LOCAL_MIRROR_DIR}"
 
 COPY ./scripts /usr/local/bin/
