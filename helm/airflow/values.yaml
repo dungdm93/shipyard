@@ -43,7 +43,7 @@ airflow_local_settings: ""
 commons:
   image:
     repository: hub.teko.vn/dataops/airflow
-    tag: 2.3-b1
+    tag: 2.4-b1
   replicas: null
   command: []
   args: []
@@ -135,7 +135,7 @@ dags:
 
     image:
       repository: k8s.gcr.io/git-sync/git-sync
-      tag:   v3.3.4
+      tag:   v3.6.1
 
     auth:
       username:
@@ -212,7 +212,6 @@ externalDatabase: ""
 
 redis:
   enabled: true
-  architecture: standalone
   architecture: standalone
 
   auth:
