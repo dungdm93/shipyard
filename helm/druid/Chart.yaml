@@ -3,11 +3,11 @@ name: druid
 description: Druid helm chart
 icon: https://raw.githubusercontent.com/apache/druid/druid-0.21.0/web-console/assets/druid.png
 type: application
-version: 0.3.1
+version: 0.3.2
 appVersion: 0.21.1
 dependencies:
 - name: zookeeper
-  version: 6.x.x
+  version: 7.x.x
   repository: https://charts.bitnami.com/bitnami
   condition: zookeeper.enabled
 - name: postgresql

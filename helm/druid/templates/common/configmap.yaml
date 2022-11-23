@@ -8,7 +8,7 @@
 
 {{- if .Values.postgresql.enabled }}
 {{- $host := include "call-nested" (list . "postgresql" "common.names.fullname") }}
-{{- $port := include "call-nested" (list . "postgresql" "postgresql.port") }}
+{{- $port := include "call-nested" (list . "postgresql" "postgresql.servicePort") }}
 {{- $username := include "call-nested" (list . "postgresql" "postgresql.username") }}
 {{- $password := include "call-nested" (list . "postgresql" "postgresql.password") }}
 {{- $database := include "call-nested" (list . "postgresql" "postgresql.database") }}
