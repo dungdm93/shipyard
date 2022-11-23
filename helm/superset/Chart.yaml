@@ -3,16 +3,16 @@ name: superset
 description: Superset helm chart
 icon: https://github.com/apache/superset/raw/master/docs/src/images/s.png
 type: application
-version: 0.13.4
+version: 1.0.0
 appVersion: 1.0.0
-# kubeVersion: ^1.15
+# kubeVersion: ^1.19
 dependencies:
 - name: postgresql
-  version: 8.x.x
+  version: 12.x.x
   repository: https://charts.bitnami.com/bitnami
   condition: postgresql.enabled
 - name: redis
-  version: 12.x.x
+  version: 17.x.x
   repository: https://charts.bitnami.com/bitnami
   condition: redis.enabled
 maintainers:

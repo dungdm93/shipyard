@@ -15,10 +15,10 @@ WEBDRIVER_BASEURL = 'http://{{ include "superset.fullname" . }}-webserver:8088/'
 {{ $pg  := .Values.postgresql -}}
 {{ if $pg.enabled -}}
 SQLA_TYPE     = "postgresql"
-SQLA_HOST     = {{ include "call-nested" (list . "postgresql" "postgresql.fullname") | quote }}
-SQLA_PORT     = {{ include "call-nested" (list . "postgresql" "postgresql.port")     | quote }}
+SQLA_HOST     = {{ include "call-nested" (list . "postgresql" "postgresql.primary.fullname") | quote }}
+SQLA_PORT     = {{ include "call-nested" (list . "postgresql" "postgresql.service.port") | quote }}
 SQLA_USERNAME = {{ include "call-nested" (list . "postgresql" "postgresql.username") | quote }}
-SQLA_PASSWORD = {{ include "call-nested" (list . "postgresql" "postgresql.password") | quote }}
+SQLA_PASSWORD = "{{ $pg.auth.password }}"
 SQLA_DATABASE = {{ include "call-nested" (list . "postgresql" "postgresql.database") | quote }}
 {{- else -}}
 {{ $xdb := .Values.externalDatabase -}}
@@ -34,11 +34,16 @@ SQLALCHEMY_DATABASE_URI = f'{SQLA_TYPE}://{SQLA_USERNAME}:{SQLA_PASSWORD}@{SQLA_
 
 {{ $redis  := .Values.redis -}}
 {{ if $redis.enabled -}}
+{{- $redisHost := include "common.names.fullname" .Subcharts.redis }}
+{{- if not $redis.sentinel.enabled -}}
+    {{- $redisHost = printf "%s-master" $redisHost }}
+{{- end -}}
+{{- $redisPort := $redis.sentinel.enabled | ternary $redis.sentinel.service.ports.redis $redis.master.service.ports.redis }}
 from cachelib.redis import RedisCache
 from celery.schedules import crontab
 
-REDIS_HOST = '{{ printf "%s-master" (include "call-nested" (list . "redis" "redis.fullname")) }}'
-REDIS_PORT = '{{ $redis.master.service.port }}'
+REDIS_HOST = '{{ $redisHost }}'
+REDIS_PORT = '{{ $redisPort }}'
 {{ if $redis.usePassword -}}
 REDIS_PASSWORD = '{{ include "call-nested" (list . "redis" "redis.password") }}'
 {{- else -}}

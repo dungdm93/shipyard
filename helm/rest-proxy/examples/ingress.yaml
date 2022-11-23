@@ -1,0 +1,14 @@
+ingress:
+  enabled: true
+  ingressClassName: contour
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: rest-proxy.local
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+  tls:
+   - secretName: rest-proxy-tls
+     hosts:
+       - rest-proxy.local
