@@ -3,5 +3,5 @@ name: rest-proxy
 description: Confluent Kafka REST Proxy helm chart
 icon: null
 type: application
-version: 0.2.1
+version: 1.0.0
 appVersion: 6.1.0
