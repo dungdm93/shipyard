@@ -1,10 +1,6 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "schema-registry.fullname" . -}}
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- else -}}
-apiVersion: extensions/v1beta1
-{{- end }}
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -13,6 +9,9 @@ metadata:
   annotations:
     {{- toYaml .Values.ingress.annotations | nindent 4 }}
 spec:
+  {{- if hasKey .Values.ingress "ingressClassName" }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
   {{- if .Values.ingress.tls }}
   tls:
     {{- range .Values.ingress.tls }}
@@ -29,10 +28,13 @@ spec:
       http:
         paths:
           {{- range .paths }}
-          - path: {{ . }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
             backend:
-              serviceName: {{ $fullName }}
-              servicePort: http
+              service:
+                name: {{ $fullName }}
+                port:
+                  name: http
           {{- end }}
     {{- end }}
   {{- end }}
