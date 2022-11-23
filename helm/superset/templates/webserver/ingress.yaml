@@ -1,11 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $webService := printf "%s-webserver" (include "superset.fullname" .) -}}
 ---
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- else -}}
-apiVersion: extensions/v1beta1
-{{- end }}
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "superset.fullname" . }}
@@ -14,6 +10,9 @@ metadata:
   annotations:
     {{- toYaml .Values.ingress.annotations | nindent 4 }}
 spec:
+{{- if hasKey .Values.ingress "ingressClassName" }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+{{- end }}
 {{- if .Values.ingress.tls }}
   tls:
   {{- range .Values.ingress.tls }}
@@ -30,8 +29,11 @@ spec:
     http:
       paths:
       - path: {{ .path | default "/" }}
+        pathType: {{ .pathType | default "Prefix" }}
         backend:
-          serviceName: {{ $webService }}
-          servicePort: web
+          service:
+            name: {{ $webService }}
+            port:
+              name: web
   {{- end }}
 {{- end }}
