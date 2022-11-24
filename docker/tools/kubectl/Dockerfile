@@ -1,14 +1,14 @@
-FROM hub.teko.vn/tools/base:1.0
+FROM hub.teko.vn/tools/base:2.0
 
 # Install kubectl
-ENV KUBECTL_VERSION=v1.20.6
+ENV KUBECTL_VERSION=v1.25.4
 RUN set -eux; \
-    curl -sSL "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
+    curl -sSL "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
           -o /usr/local/bin/kubectl; \
     chmod +x /usr/local/bin/kubectl; \
     kubectl completion bash > /etc/bash_completion.d/kubectl;
 
-ENV KUSTOMIZE_VERSION=v4.1.2
+ENV KUSTOMIZE_VERSION=v4.5.7
 RUN set -eux; \
     curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
         | tar -xzvf - -C /usr/local/bin/; \
@@ -38,5 +38,4 @@ RUN kubectl krew install \
 RUN set -eux; \
     curl -sSL "https://dl.min.io/client/mc/release/linux-amd64/mc" \
           -o /usr/local/bin/mc; \
-    chmod +x /usr/local/bin/mc; \
-    mc --autocompletion;
+    chmod +x /usr/local/bin/mc;
