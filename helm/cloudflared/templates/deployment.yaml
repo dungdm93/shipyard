@@ -42,8 +42,6 @@ spec:
         - name: cloudflared
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          restartPolicy: Always
-          terminationGracePeriodSeconds: 30
           args:
             - tunnel
             - --no-autoupdate
@@ -66,6 +64,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+      terminationGracePeriodSeconds: 30
       serviceAccountName: {{ include "cloudflared.serviceAccountName" . }}
       priorityClassName:  {{ .Values.priorityClassName }}
       runtimeClassName:   {{ .Values.runtimeClassName }}
