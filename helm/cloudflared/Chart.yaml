@@ -1,0 +1,10 @@
+apiVersion: v2
+name: cloudflared
+description: Cloudflare Tunnel client
+icon: https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Cloudflare_Logo.png/480px-Cloudflare_Logo.png
+type: application
+version: 0.1.0
+appVersion: 2022.10.3
+maintainers:
+- name: Teko's DataOps team
+  email: dataops@teko.vn
