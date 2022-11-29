@@ -81,7 +81,7 @@ RUN set -eux; \
     \
     rm -rf /usr/local/cx_Oracle-doc;
 
-COPY ./patch/ /usr/local/lib/python3.8/site-packages/superset/
+COPY ./patch/ /usr/local/lib/python3.9/site-packages/superset/
 
 FROM base
 
