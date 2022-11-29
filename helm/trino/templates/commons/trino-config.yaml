@@ -24,7 +24,7 @@
 
 {{- if $authen.enabled }}
   {{- $_ := set $coordinatorConfig "http-server.authentication.type" $authen.type }}
-  {{- $_ := set $coordinatorConfig "internal-communication.https.required" true }}
+  {{- $_ := set $coordinatorConfig "internal-communication.https.required" false }}
   {{- $sharedSecret := required "sharedSecret is required when authentication is enabled" $authen.sharedSecret }}
   {{- $_ := set $coordinatorConfig "internal-communication.shared-secret" $sharedSecret }}
   {{- $_ := set $workerConfig "internal-communication.shared-secret" $sharedSecret }}
