@@ -39,16 +39,13 @@ SQLALCHEMY_DATABASE_URI = f'{SQLA_TYPE}://{SQLA_USERNAME}:{SQLA_PASSWORD}@{SQLA_
     {{- $redisHost = printf "%s-master" $redisHost }}
 {{- end -}}
 {{- $redisPort := $redis.sentinel.enabled | ternary $redis.sentinel.service.ports.redis $redis.master.service.ports.redis }}
+{{- $redisPassword := include "redis.password" .Subcharts.redis }}
 from cachelib.redis import RedisCache
 from celery.schedules import crontab
 
 REDIS_HOST = '{{ $redisHost }}'
 REDIS_PORT = '{{ $redisPort }}'
-{{ if $redis.usePassword -}}
-REDIS_PASSWORD = '{{ include "call-nested" (list . "redis" "redis.password") }}'
-{{- else -}}
-REDIS_PASSWORD = None
-{{- end }}
+REDIS_PASSWORD = '{{ $redisPassword }}'
 REDIS_AUTHORITY = f':{REDIS_PASSWORD}@' if REDIS_PASSWORD else ''
 
 class CeleryConfig:
