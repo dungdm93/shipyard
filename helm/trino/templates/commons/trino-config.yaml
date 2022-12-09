@@ -61,14 +61,14 @@ data:
   coordinator-config.properties: |
     coordinator=true
     node-scheduler.include-coordinator=false
-    discovery.uri={{ printf "http://%s:8080" (include "trino.fullname" .) }}
+    discovery.uri={{ printf "http://%s-discovery:8080" (include "trino.fullname" .) }}
     {{- range $key, $value := $coordinatorConfig }}
     {{ $key }}={{ $value }}
     {{- end }}
 
   worker-config.properties: |
     coordinator=false
-    discovery.uri={{ printf "http://%s:8080" (include "trino.fullname" .) }}
+    discovery.uri={{ printf "http://%s-discovery:8080" (include "trino.fullname" .) }}
     {{- range $key, $value := $workerConfig }}
     {{ $key }}={{ $value }}
     {{- end }}
