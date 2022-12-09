@@ -3,7 +3,7 @@ fullnameOverride: ""
 
 image:
   repository: trinodb/trino
-  tag: "391"
+  tag: "403"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
@@ -53,10 +53,7 @@ httpServer:
     key:
 
 authen:
-  enabled: false
-
-  # Option: CUSTOM | KERBEROS | PASSWORD | OAUTH2
-  type: CUSTOM
+  type: null  # PASSWORD | OAUTH2 | KERBEROS | CERTIFICATE | JWT | HEADER
   sharedSecret:
 
   kerberos: {}
@@ -69,20 +66,19 @@ authen:
 
   ## TODO: Support password authentication
   # password:
-  #   # Option: file | ldap
-  #   type: file
-
+  #   type: file  # file | ldap | salesforce
+  #
   #   ldap:
   #     # url:
   #     # user-base-dn:
   #     # user-bind-pattern:
   #     # group-auth-pattern:
   #     # cache-ttl:
-
+  #
   #     ## Trino server can use dedicated LDAP service user for doing user group membership queries.
   #     # bind-dn:
   #     # bind-password:
-
+  #
   #   file:
   #     # password-file:
   #     # refresh-period:

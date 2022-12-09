@@ -22,26 +22,25 @@
 {{- $coordinatorConfig := deepCopy $config }}
 {{- $workerConfig := deepCopy $config }}
 
-{{- if $authen.enabled }}
-  {{- $_ := set $coordinatorConfig "http-server.authentication.type" $authen.type }}
-  {{- $_ := set $coordinatorConfig "internal-communication.https.required" false }}
+{{- if $authen.type }}
+  {{- $authenType := lower $authen.type }}
+  {{- $_ := set $coordinatorConfig "web-ui.authentication.type" $authenType }}
+  {{- $_ := set $coordinatorConfig "http-server.authentication.type" $authenType }}
   {{- $sharedSecret := required "sharedSecret is required when authentication is enabled" $authen.sharedSecret }}
   {{- $_ := set $coordinatorConfig "internal-communication.shared-secret" $sharedSecret }}
-  {{- $_ := set $workerConfig "internal-communication.shared-secret" $sharedSecret }}
+  {{- $_ := set $workerConfig      "internal-communication.shared-secret" $sharedSecret }}
 
-  {{- if eq $authen.type "OAUTH2" }}
-    {{- $_ := set $coordinatorConfig "web-ui.authentication.type" "oauth2" }}
+  {{- if eq $authenType "oauth2" }}
     {{- range $key, $value := $authen.oauth2 }}
       {{- $_ := set $coordinatorConfig (printf "http-server.authentication.oauth2.%s" $key) $value }}
     {{- end }}
   {{- end }}
 
   ## TODO: Support password authentication
-  # {{- if eq $authen.type "PASSWORD" }}
+  # {{- if eq $authenType "password" }}
   # {{- end }}
 
-  {{- if eq $authen.type "KERBEROS" }}
-    {{- $_ := set $coordinatorConfig "web-ui.authentication.type" "kerberos" }}
+  {{- if eq $authenType "kerberos" }}
     {{- range $key, $value := $authen.kerberos }}
       {{- $_ := set $coordinatorConfig (printf "http-server.authentication.krb5.%s" $key) $value }}
     {{- end }}
@@ -62,7 +61,6 @@ data:
   coordinator-config.properties: |
     coordinator=true
     node-scheduler.include-coordinator=false
-    discovery-server.enabled=true
     discovery.uri={{ printf "http://%s:8080" (include "trino.fullname" .) }}
     {{- range $key, $value := $coordinatorConfig }}
     {{ $key }}={{ $value }}
