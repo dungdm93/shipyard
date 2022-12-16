@@ -15,7 +15,7 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # Firefox + Gecko driver. For Ubuntu, using `apt install firefox firefox-geckodriver`
-ARG GECKO_DRIVER_VERSION=v0.31.0
+ARG GECKO_DRIVER_VERSION=v0.32.0
 RUN set -eux; cd /tmp/; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -41,7 +41,7 @@ WORKDIR ${SUPERSET_HOME}
 
 FROM base AS builder
 
-ARG SUPERSET_VERSION=1.5.1
+ARG SUPERSET_VERSION=1.5.2
 
 RUN set -eux; \
     apt-get update; \
@@ -80,8 +80,6 @@ RUN set -eux; \
         "redis~=4.3" "pylibmc~=1.6" "statsd~=3.3" "prophet~=1.1"; \
     \
     rm -rf /usr/local/cx_Oracle-doc;
-
-COPY ./patch/ /usr/local/lib/python3.9/site-packages/superset/
 
 FROM base
 
