@@ -1,0 +1,8 @@
+trino:
+  config.properties:
+    null.value: null
+    empty.value: ""
+    true.value: true
+    false.value: false
+    empty.list: []
+    empty.dict: {}

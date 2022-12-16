@@ -78,7 +78,7 @@ Remove empty-value entry from dict
 {{- define "dict-cleanup" -}}
 {{- $dict := . }}
 {{- range $k, $v := $dict -}}
-  {{- if not $v -}}
+  {{- if kindIs "invalid" $v -}}
     {{- $_ := unset $dict $k }}
   {{- end -}}
 {{- end -}}
