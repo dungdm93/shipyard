@@ -1,6 +1,7 @@
 {{- $trino := .Values.trino }}
 {{- $config := index $trino "config.properties" | default dict }}
 {{- $authen := .Values.authen }}
+{{- $faultTolerant := .Values.faultTolerant }}
 
 {{- $_ := unset $config "coordinator" }}
 {{- $_ := unset $config "node-scheduler.include-coordinator" }}
@@ -17,6 +18,39 @@
   {{- $_ := set $config "http-server.https.keystore.key"    $httpServer.keystore.key  }}
   {{- $_ := set $config "http-server.https.truststore.path" $httpServer.truststore.path }}
   {{- $_ := set $config "http-server.https.truststore.key"  $httpServer.truststore.key  }}
+{{- end }}
+
+{{- $exchangeManager := $faultTolerant.exchangeManager }}
+{{- $exchangeConfig := dict -}}
+{{- if $faultTolerant.policy }}
+  {{- $_ := set $config "retry-policy" $faultTolerant.policy }}
+  {{- if $exchangeManager.type }}
+    {{- range $key, $value := $exchangeManager.tunning }}
+      {{- $_ := set $exchangeConfig (printf "exchange.%s" $key) $value }}
+    {{- end }}
+    {{- if $exchangeManager.compress }}
+    {{- $_ := set $config "exchange.compression-enabled" true }}
+    {{- end }}
+    {{- $_ := set $exchangeConfig "exchange-manager.name" "filesystem" }}
+    {{- $_ := set $exchangeConfig "exchange.base-directories" $exchangeManager.baseDirectories }}
+    {{- $exchangeStorageType := lower $exchangeManager.type }}
+    {{- if eq $exchangeStorageType "s3" }}
+      {{- range $key, $value := $exchangeManager.s3 }}
+        {{- $_ := set $exchangeConfig (printf "exchange.s3.%s" $key) $value }}
+      {{- end }}
+    {{- else if eq $exchangeStorageType "gcs" }}
+      {{- range $key, $value := $exchangeManager.s3 }}
+        {{- $_ := set $exchangeConfig (printf "exchange.s3.%s" $key) $value }}
+      {{- end }}
+      {{- range $key, $value := $exchangeManager.gcs }}
+        {{- $_ := set $exchangeConfig (printf "exchange.gcs.%s" $key) $value }}
+      {{- end }}
+    {{- else if eq $exchangeStorageType "azure" }}
+      {{- range $key, $value := $exchangeManager.azure }}
+        {{- $_ := set $exchangeConfig (printf "exchange.azure.%s" $key) $value }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 
 {{- $coordinatorConfig := deepCopy $config }}
@@ -72,3 +106,10 @@ data:
     {{- range $key, $value := $workerConfig }}
     {{ $key }}={{ $value }}
     {{- end }}
+
+  {{ if (and  $faultTolerant.policy $exchangeManager.type ) -}}
+  exchange-manager.properties: |
+    {{- range $key, $value := $exchangeConfig }}
+    {{ $key }}={{ $value }}
+    {{- end }}
+  {{- end }}
