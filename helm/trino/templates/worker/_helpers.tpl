@@ -29,7 +29,7 @@ Worker volumes
         items:
         - key:  worker-config.properties
           path: config.properties
-        {{- if (and .Values.faultTolerant.enabled .Values.faultTolerant.exchangeManager.enabled ) }}
+        {{- if (and .Values.faultTolerant.policy .Values.faultTolerant.exchangeManager.type ) }}
         - key:  exchange-manager.properties
           path: exchange-manager.properties
         {{- end }}
