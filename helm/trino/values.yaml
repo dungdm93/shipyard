@@ -144,6 +144,32 @@ cache:
     storageClass: "-"
     size: 10Gi
 
+faultTolerant:
+  policy: null # null | QUERY, TASK
+
+  exchangeManager:
+    type: null # null | s3, azure, gcs
+    baseDirectories: ""
+    compress: false
+
+    tunning: {}
+      # sink-buffer-pool-min-size:
+      # sink-buffers-per-partition:
+      # sink-max-file-size:
+      # source-concurrent-reader:
+
+    s3: {}
+      # region: my-region
+      # aws-access-key: access-key
+      # aws-secret-key: secret-key
+      # max-error-retries: 3
+      # path-style-access: true
+      # upload.part-size:
+    azure: {}
+      # connection-string: connection-string
+    gcs: {}
+      # json-key-file-path: /path/to/gcs_keyfile.json
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true

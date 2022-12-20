@@ -29,6 +29,10 @@ Coordinator volumes
         items:
         - key:  coordinator-config.properties
           path: config.properties
+        {{- if (and .Values.faultTolerant.enabled .Values.faultTolerant.exchangeManager.enabled ) }}
+        - key:  exchange-manager.properties
+          path: exchange-manager.properties
+        {{- end }}
 - name: trino-catalog
   configMap:
     name: {{ include "trino.fullname" . }}-catalog
@@ -36,7 +40,7 @@ Coordinator volumes
 - name: jmx-exporter
   emptyDir: {}
 - name: trino-metrics
-  configMap: 
+  configMap:
     name: {{ include "trino.fullname" . }}-metrics
 {{- end }}
 {{- with $coordinator.extraVolumes }}
