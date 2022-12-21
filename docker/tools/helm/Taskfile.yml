@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/tools/helm:3.6
+  IMAGE: hub.teko.vn/tools/helm:3.10
 
 includes:
   docker: ../../
