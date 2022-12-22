@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "loki.fullname" . }}-memberlist
+  labels:
+    {{- include "loki.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "loki.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/part-of: memberlist
+  ports:
+    - name: memberlist
+      port: 7946
+      targetPort: memberlist
+      protocol: TCP
+
+## Components in memberlist
+# * [x] distributor
+# * [x] ingester
+# * [x] querier
+# * [ ] query-frontend
+# * [ ] query-scheduler
+# * [x] ruler
+# * [x] compactor
+# * [ ] index-gateway
+# * [ ] table-manager

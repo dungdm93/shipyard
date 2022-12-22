@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "loki.fullname" . }}-write
+  labels:
+    {{- include "loki.write.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "loki.write.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: http
+    port: 3100
+    targetPort: http
+    protocol: TCP
+    appProtocol: http
+  - name: grpc
+    port: 9095
+    targetPort: grpc
+    protocol: TCP
+    appProtocol: gRPC
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "loki.fullname" . }}-write-headless
+  labels:
+    {{- include "loki.write.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "loki.write.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: http
+    port: 3100
+    targetPort: http
+    protocol: TCP
+    appProtocol: http
+  - name: grpc
+    port: 9095
+    targetPort: grpc
+    protocol: TCP
+    appProtocol: gRPC

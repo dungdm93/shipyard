@@ -1,0 +1,209 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: grafana/loki
+  tag: 2.7.1
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+config:
+  server:
+    http_listen_port: 3100
+    grpc_listen_port: 9095
+    log_level: info
+  storage_config:
+    boltdb_shipper:
+      active_index_directory: /loki/index
+      cache_location: /loki/index-cache
+      cache_ttl: 24h
+      resync_interval: 5m
+  ingester:
+    max_transfer_retries: 0 # require when wal enabled
+    wal:
+      enabled: true
+      dir: /loki/wal
+  ruler:
+    rule_path: /loki/rules
+    wal:
+      dir: /loki/ruler-wal
+  compactor:
+    working_directory: /loki/compactor
+
+ringKVStore:
+  store: memberlist  # consul | etcd | inmemory | memberlist
+
+  memberlist:
+    bind_port: 7946
+
+  # consul:
+  #   [host: <string> | default = "localhost:8500"]
+  #   [acl_token: <string>]
+  #   [http_client_timeout: <duration> | default = 20s]
+  #   [consistent_reads: <boolean> | default = true]
+
+  # etcd:
+  #   # [endpoints: <list of string> | default = []]
+  #   # [dial_timeout: <duration> | default = 10s]
+  #   # [max_retries: <int> | default = 10]
+
+storage: {}
+  # azure:
+  #   [environment: <string> | default = "AzureGlobal"]
+  #   [account_name: <string> | default = ""]
+  #   [account_key: <string> | default = ""]
+  #   [container_name: <string> | default = "loki"]
+  #   [endpoint_suffix: <string> | default = ""]
+  #   [use_managed_identity: <boolean> | default = false]
+  #   [user_assigned_id: <string> | default = ""]
+  #   [chunk_delimiter: <string> | default = "-"]
+  #   [download_buffer_size: <int> | default = 512000]
+  #   [upload_buffer_size: <int> | default = 256000]
+  #   [upload_buffer_count: <int> | default = 1]
+  #   [request_timeout: <duration> | default = 30s]
+  #   [max_retries: <int> | default = 5]
+  #   [min_retry_delay: <duration> | default = 10ms]
+  #   [max_retry_delay: <duration> | default = 500ms]
+
+  # gcs:
+  #   [bucket_name: <string> | default = ""]
+  #   [service_account: <string> | default = ""]
+  #   [chunk_buffer_size: <int> | default = 0]
+  #   [request_timeout: <duration> | default = 0s]
+  #   [enable_http2: <boolean> | default = true]
+
+  # s3:
+  #   [s3: <url> | default = ]
+  #   [s3forcepathstyle: <boolean> | default = false]
+  #   [bucketnames: <string> | default = ""]
+  #   [endpoint: <string> | default = ""]
+  #   [region: <string> | default = ""]
+  #   [access_key_id: <string> | default = ""]
+  #   [secret_access_key: <string> | default = ""]
+  #   [insecure: <boolean> | default = false]
+  #   [sse_encryption: <boolean> | default = false]
+  #   http_config:
+  #     [idle_conn_timeout: <duration> | default = 1m30s]
+  #     [response_header_timeout: <duration> | default = 0s]
+  #     [insecure_skip_verify: <boolean> | default = false]
+  #     [ca_file: <string> | default = ""]
+
+  # swift:
+  #   [auth_url: <string> | default = ""]
+  #   [username: <string> | default = ""]
+  #   [user_domain_name: <string> | default = ""]
+  #   [user_domain_id: <string> | default = ""]
+  #   [user_id: <string> | default = ""]
+  #   [password: <string> | default = ""]
+  #   [domain_id: <string> | default = ""]
+  #   [domain_name: <string> | default = ""]
+  #   [project_id: <string> | default = ""]
+  #   [project_name: <string> | default = ""]
+  #   [project_domain_id: <string> | default = ""]
+  #   [project_domain_name: <string> | default = ""]
+  #   [region_name: <string> | default = ""]
+  #   [container_name: <string> | default = ""]
+
+  # filesystem:
+  #   [chunks_directory: <filename> | default = ""]
+  #   [rules_directory: <filename> | default = ""]
+
+  # bos:
+  #   [bucket_name: <string> | default = ""]
+  #   [endpoint: <string> | default = "bj.bcebos.com"]
+  #   [access_key_id: <string> | default = ""]
+  #   [secret_access_key: <string> | default = ""]
+
+  # hedging:
+  #   [at: <duration> | default = 0]
+  #   [up_to: <int> | default = 2]
+  #   [max_per_second: <int> | default = 5]
+
+commons:
+  replicas: null
+  extraArgs: []
+
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  schedulerName: null
+  runtimeClassName: null
+  priorityClassName: null
+
+  affinity: {}
+  tolerations: []
+  nodeSelector: {}
+
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  podDisruptionBudget:
+    enabled: false
+    # minAvailable
+    # maxUnavailable
+  persistence:
+    enabled: false
+    storageClass: null
+    size: 10Gi
+    annotations: {}
+
+write: {}
+
+read:
+  # consider using StatefulSet in those cases:
+  # * boltdb-shipper w/o index-gateway
+  # * ruler using local storage
+  stateful: true  # true=StatefulSet | false=Deployment
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+  automountServiceAccountToken: true
+  imagePullSecrets: []
+
+ingress:  # TODO
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+autoscaling:  # TODO
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
