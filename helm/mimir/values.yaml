@@ -198,6 +198,16 @@ write:
 # querier + query-frontend
 read:
   target: [read]
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    metrics: []
+    # - type: Resource
+    #   resource:
+    #     name: cpu
+    #     target:
+    #       averageUtilization: 80
 
 # alertmanager + compactor + ruler + store-gateway + query-scheduler
 backend:
@@ -230,10 +240,3 @@ ingress:  # TODO
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
-
-autoscaling:  # TODO
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
