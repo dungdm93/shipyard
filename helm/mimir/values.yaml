@@ -171,6 +171,21 @@ commons:
     # minAvailable
     # maxUnavailable
 
+  service:
+    type: ClusterIP
+    clusterIP:
+    loadBalancerIP:
+    loadBalancerClass:
+    allocateLoadBalancerNodePorts: true
+    nodePorts:
+      http:
+      grpc:
+    sessionAffinity:
+    sessionAffinityConfig:
+    internalTrafficPolicy:
+    externalTrafficPolicy:
+    annotations: {}
+
 # distributor + ingester
 write:
   target: [write]
