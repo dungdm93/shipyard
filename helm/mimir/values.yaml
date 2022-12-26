@@ -1,0 +1,224 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: grafana/mimir
+  tag: 2.5.0
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+config:
+  server:
+    http_listen_port: 9009
+    grpc_listen_port: 9095
+    log_format: logfmt
+    log_level: info
+  api:
+    prometheus_http_prefix: /prometheus
+    alertmanager_http_prefix: /alertmanager
+  blocks_storage:
+    storage_prefix: blocks
+    bucket_store: # store-gateway
+      sync_dir: /mimir/tsdb-sync
+    tsdb: # ingester
+      dir: /mimir/tsdb
+      wal_compression_enabled: true
+  compactor:
+    data_dir: /mimir/compactor
+  ruler:
+    rule_path: /mimir/rules
+  ruler_storage:
+    storage_prefix: rules
+  alertmanager:
+    data_dir: /mimir/alerts
+  alertmanager_storage:
+    storage_prefix: alerts
+
+ringKVStore:
+  store: memberlist  # consul | etcd | inmemory | memberlist
+
+  memberlist:
+    bind_port: 7946
+
+  # consul:
+  #   [host: <string> | default = "localhost:8500"]
+  #   [acl_token: <string>]
+  #   [http_client_timeout: <duration> | default = 20s]
+  #   [consistent_reads: <boolean> | default = true]
+  #   [watch_rate_limit: <float> | default = 1]
+  #   [watch_burst_size: <int> | default = 1]
+  #   [cas_retry_delay: <duration> | default = 1s]
+
+  # etcd:
+  #   [endpoints: <list of string> | default = []]
+  #   [dial_timeout: <duration> | default = 10s]
+  #   [max_retries: <int> | default = 10]
+  #   [tls_enabled: <boolean> | default = false]
+  #   [tls_cert_path: <string> | default = ""]
+  #   [tls_key_path: <string> | default = ""]
+  #   [tls_ca_path: <string> | default = ""]
+  #   [tls_server_name: <string> | default = ""]
+  #   [tls_insecure_skip_verify: <boolean> | default = false]
+  #   [tls_cipher_suites: <string> | default = ""]
+  #   [tls_min_version: <string> | default = ""]
+  #   [username: <string> | default = ""]
+  #   [password: <string> | default = ""]
+
+storage:
+  backend: filesystem # s3 | gcs | azure | swift | filesystem
+
+  # s3:
+  #   endpoint:
+  #   region:
+  #   bucket_name:
+  #   secret_access_key:
+  #   access_key_id:
+  #   insecure: false
+  #   signature_version:
+  #   sse:
+  #     type:
+  #     kms_key_id:
+  #     kms_encryption_context:
+  #   http:
+  #     idle_conn_timeout:
+  #     response_header_timeout:
+  #     insecure_skip_verify:
+  #     tls_handshake_timeout:
+  #     expect_continue_timeout:
+  #     max_idle_connections:
+  #     max_idle_connections_per_host:
+  #     max_connections_per_host:
+
+  # gcs:
+  #   bucket_name:
+  #   service_account:
+
+  # azure:
+  #   account_name:
+  #   account_key:
+  #   container_name:
+  #   endpoint_suffix:
+  #   max_retries:
+  #   msi_resource:
+  #   user_assigned_id:
+
+  # swift:
+  #   auth_version: 0
+  #   auth_url:
+  #   username:
+  #   user_domain_name:
+  #   user_domain_id:
+  #   user_id:
+  #   password:
+  #   domain_id:
+  #   domain_name:
+  #   project_id:
+  #   project_name:
+  #   project_domain_id:
+  #   project_domain_name:
+  #   region_name:
+  #   container_name:
+  #   max_retries: 3
+  #   connect_timeout: 10s
+  #   request_timeout: 5s
+
+  # filesystem:
+  #   dir:
+
+commons:
+  replicas: null
+  extraArgs: []
+
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  schedulerName: null
+  runtimeClassName: null
+  priorityClassName: null
+
+  affinity: {}
+  tolerations: []
+  nodeSelector: {}
+
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  podDisruptionBudget:
+    enabled: false
+    # minAvailable
+    # maxUnavailable
+
+# distributor + ingester
+write:
+  target: [write]
+  persistence:
+    enabled: false
+    storageClass: null
+    size: 10Gi
+    annotations: {}
+
+# querier + query-frontend
+read:
+  target: [read]
+
+# alertmanager + compactor + ruler + store-gateway + query-scheduler
+backend:
+  target: [backend]
+  persistence:
+    enabled: false
+    storageClass: null
+    size: 10Gi
+    annotations: {}
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+  automountServiceAccountToken: true
+  imagePullSecrets: []
+
+ingress:  # TODO
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+autoscaling:  # TODO
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80

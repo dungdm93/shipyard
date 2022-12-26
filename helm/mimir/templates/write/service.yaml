@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mimir.fullname" . }}-write
+  labels:
+    {{- include "mimir.write.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "mimir.write.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: http
+    port: 9009
+    targetPort: http
+    protocol: TCP
+    appProtocol: http
+  - name: grpc
+    port: 9095
+    targetPort: grpc
+    protocol: TCP
+    appProtocol: gRPC
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mimir.fullname" . }}-write-headless
+  labels:
+    {{- include "mimir.write.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "mimir.write.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: http
+    port: 9009
+    targetPort: http
+    protocol: TCP
+    appProtocol: http
+  - name: grpc
+    port: 9095
+    targetPort: grpc
+    protocol: TCP
+    appProtocol: gRPC

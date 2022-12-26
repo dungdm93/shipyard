@@ -1,0 +1,19 @@
+{{- $write := mergeOverwrite (deepCopy .Values.commons) .Values.write -}}
+{{- if and $write.podDisruptionBudget.enabled (gt (int $write.replicas | default 1) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "mimir.fullname" . }}-write
+  labels:
+   {{- include "mimir.write.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "mimir.write.selectorLabels" . | nindent 4 }}
+  {{- if $write.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $write.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $write.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $write.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,151 @@
+{{- $write := mergeOverwrite (deepCopy .Values.commons) .Values.write -}}
+{{- $persistence := $write.persistence -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mimir.fullname" . }}-write
+  labels:
+    {{- include "mimir.write.labels" . | nindent 4 }}
+    app.kubernetes.io/part-of: memberlist
+    {{- with $write.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $write.annotations | nindent 4 }}
+spec:
+  replicas: {{ $write.replicas }}
+  serviceName: "{{ include "mimir.fullname" . }}-write-headless"
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "mimir.write.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mimir.write.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/part-of: memberlist
+        {{- with $write.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "mimir.checksum" . | nindent 8 }}
+        {{- with $write.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: {{ $write.terminationPeriod }}
+      containers:
+        - name: mimir-write
+          image: {{ include "mimir.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - -target={{ $write.target | join "," }}
+            - -config.file=/etc/mimir/config.yaml
+            {{- with .Values.write.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with $write.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $write.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.config.server.http_listen_port }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.config.server.grpc_listen_port }}
+              protocol: TCP
+            - name: memberlist
+              containerPort: {{ .Values.ringKVStore.memberlist.bind_port }}
+              protocol: TCP
+          volumeMounts:
+            {{- include "mimir.volumeMounts" . | nindent 12 }}
+            - name: data
+              mountPath: /mimir/
+            {{- with $write.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /api/v1/status/buildinfo
+              port: http
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 30
+          {{- with $write.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $write.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+      serviceAccountName: {{ include "mimir.serviceAccountName" . }}
+      priorityClassName:  {{ $write.priorityClassName }}
+      runtimeClassName:   {{ $write.runtimeClassName }}
+      schedulerName:      {{ $write.schedulerName }}
+      {{- with $write.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- include "mimir.volumes" . | nindent 8 }}
+        {{- if not $persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+        {{- with $write.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $write.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $write.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $write.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if $persistence.enabled }}
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        creationTimestamp: null
+        name: data
+        {{- with $persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        volumeMode: Filesystem
+        accessModes: [ReadWriteOnce]
+        {{- with $persistence.storageClass }}
+        storageClassName: {{ eq "-" . | ternary "" . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $persistence.size | quote }}
+        {{- with $persistence.selector }}
+        selector:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+  {{- end }}

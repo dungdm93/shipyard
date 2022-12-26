@@ -1,0 +1,19 @@
+{{- $read := mergeOverwrite (deepCopy .Values.commons) .Values.read -}}
+{{- if and $read.podDisruptionBudget.enabled (gt (int $read.replicas | default 1) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "mimir.fullname" . }}-read
+  labels:
+   {{- include "mimir.read.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "mimir.read.selectorLabels" . | nindent 4 }}
+  {{- if $read.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $read.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $read.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $read.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}
