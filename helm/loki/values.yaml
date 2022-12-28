@@ -199,6 +199,17 @@ read:
     size: 10Gi
     annotations: {}
 
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    metrics: []
+    # - type: Resource
+    #   resource:
+    #     name: cpu
+    #     target:
+    #       averageUtilization: 80
+
 serviceAccount:
   create: true
   annotations: {}
@@ -221,13 +232,6 @@ ingress:  # TODO
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
-
-autoscaling:  # TODO
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
 
 metrics:
   enabled: false

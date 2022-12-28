@@ -1,0 +1,10 @@
+read:
+  stateful: false
+  autoscaling:
+    enabled: true
+    metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          averageUtilization: 80

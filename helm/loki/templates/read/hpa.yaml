@@ -1,0 +1,18 @@
+{{- $autoscaling := .Values.read.autoscaling -}}
+{{- if and $autoscaling.enabled (not .Values.read.stateful) }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "loki.fullname" . }}-read
+  labels:
+    {{- include "loki.read.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "loki.fullname" . }}-read
+  minReplicas: {{ $autoscaling.minReplicas }}
+  maxReplicas: {{ $autoscaling.maxReplicas }}
+  metrics:
+    {{- toYaml $autoscaling.metrics | nindent 4 }}
+{{- end }}
