@@ -52,7 +52,7 @@ spec:
           image: {{ include "loki.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - -target=write
+            - -target={{ $write.target | join "," }}
             - -config.file=/etc/loki/config.yaml
             {{- with .Values.write.extraArgs }}
             {{- toYaml . | nindent 12 }}

@@ -181,6 +181,7 @@ commons:
     annotations: {}
 
 write:
+  target: [write]
   persistence:
     enabled: false
     storageClass: null
@@ -188,6 +189,7 @@ write:
     annotations: {}
 
 read:
+  target: [read]
   # consider using StatefulSet in those cases:
   # * boltdb-shipper w/o index-gateway
   # * ruler using local storage
