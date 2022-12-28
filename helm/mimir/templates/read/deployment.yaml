@@ -33,6 +33,11 @@ spec:
         {{- with $read.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if and .Values.metrics.enabled (not .Values.metrics.podMonitor.enabled) }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.config.server.http_listen_port | quote }}
+        prometheus.io/path: /metrics
+        {{- end }}
     spec:
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:

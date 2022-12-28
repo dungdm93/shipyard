@@ -240,3 +240,8 @@ ingress:  # TODO
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+metrics:
+  enabled: false
+  podMonitor:
+    enabled: false
