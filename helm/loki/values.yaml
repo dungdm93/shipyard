@@ -164,19 +164,40 @@ commons:
     enabled: false
     # minAvailable
     # maxUnavailable
+
+  service:
+    type: ClusterIP
+    clusterIP:
+    loadBalancerIP:
+    loadBalancerClass:
+    allocateLoadBalancerNodePorts: true
+    nodePorts:
+      http:
+      grpc:
+    sessionAffinity:
+    sessionAffinityConfig:
+    internalTrafficPolicy:
+    externalTrafficPolicy:
+    annotations: {}
+
+write:
   persistence:
     enabled: false
     storageClass: null
     size: 10Gi
     annotations: {}
 
-write: {}
-
 read:
   # consider using StatefulSet in those cases:
   # * boltdb-shipper w/o index-gateway
   # * ruler using local storage
   stateful: true  # true=StatefulSet | false=Deployment
+
+  persistence:
+    enabled: false
+    storageClass: null
+    size: 10Gi
+    annotations: {}
 
 serviceAccount:
   create: true
