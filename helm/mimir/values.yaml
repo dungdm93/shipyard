@@ -125,6 +125,14 @@ storage:
   # filesystem:
   #   dir:
 
+alertmanagerFallbackConfig:
+  route:
+    group_wait: 0s
+    receiver: void
+
+  receivers:
+    - name: void
+
 commons:
   replicas: null
   extraArgs: []
