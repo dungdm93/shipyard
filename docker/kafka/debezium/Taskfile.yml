@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/kafka/debezium:2.0.0-kafka-3.3.1
+  IMAGE: hub.teko.vn/dataops/kafka/debezium:2.1.1-kafka-3.3.1
 
 includes:
   docker: ../../
