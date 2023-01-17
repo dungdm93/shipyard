@@ -13,7 +13,7 @@ RUN set -eux; \
     DEBEZIUM_CONNECTOR=( \
         mysql postgres mongodb \
         sqlserver oracle db2 \
-        cassandra-3 cassandra-4 vitess \
+        # cassandra-3 cassandra-4 vitess spanner \
     ); \
     for connector in ${DEBEZIUM_CONNECTOR[@]}; do \
         curl -sSL "${MAVEN_REPO_CENTRAL}/io/debezium/debezium-connector-${connector}/${DEBEZIUM_VERSION}/debezium-connector-${connector}-${DEBEZIUM_VERSION}-plugin.tar.gz" \
