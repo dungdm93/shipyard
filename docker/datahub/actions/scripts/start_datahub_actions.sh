@@ -57,4 +57,6 @@ else
     echo "No user action configurations found. Not starting user actions."
 fi
 
-datahub-actions actions $config_files
+exec \
+    dockerize -wait ${DATAHUB_GMS_PROTOCOL:-http}://$DATAHUB_GMS_HOST:$DATAHUB_GMS_PORT/health -timeout 240s \
+        datahub-actions actions $config_files
