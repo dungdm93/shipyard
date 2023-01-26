@@ -1,0 +1,39 @@
+elasticsearch:
+  host: localhost
+
+ebean:
+  type: mysql
+  host: mysql.local
+  port: 3306
+  database: datahub
+  username: user
+  password: pass
+
+kafka:
+  bootstrapServers: [bootstrap.kafa:9092]
+  confluent:
+    url: http://localhost:1234
+
+##############################
+actions:
+  ingestionExecutor:
+    executorId: foobar
+  slackAction:
+    enabled: true
+    botToken: xxxxxxxxx
+    signingSecret: yyyyyyyyy
+    defaultChannel: datahub
+    suppressSystemActivity: true
+  teamsAction:
+    enabled: true
+    webhookUrl: https://foobar.abc
+    suppressSystemActivity: false
+  extraActions:
+    foobar.yaml: |
+      name: foobar
+      source:
+        type: kafka
+    abcxyz.yaml: |
+      name: abcxyz
+      source:
+        type: kafka

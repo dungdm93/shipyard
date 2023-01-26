@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  RELEASE: dh
+
+includes:
+  helm: ../

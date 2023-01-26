@@ -1,0 +1,60 @@
+{{- $gms := mergeOverwrite (deepCopy .Values.commons) .Values.gms -}}
+{{- $service := $gms.service -}}
+{{- $specifyNodePort := or (eq $service.type "NodePort") (and (eq $service.type "LoadBalancer") $service.allocateLoadBalancerNodePorts) -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "datahub.fullname" . }}-gms
+  labels:
+    {{- include "datahub.gms.labels" . | nindent 4 }}
+  {{- with $service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $service.type }}
+  {{- with $service.clusterIP }}
+  clusterIP: {{ . }}
+  {{- end }}
+  {{- if eq $service.type "LoadBalancer" }}
+  {{- with $service.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with $service.loadBalancerClass }}
+  loadBalancerClass: {{ . }}
+  {{- end }}
+  {{- if not $service.allocateLoadBalancerNodePorts }}
+  allocateLoadBalancerNodePorts: false
+  {{- end }}
+  {{- end }}
+  {{- with $service.internalTrafficPolicy }}
+  internalTrafficPolicy: {{ . }}
+  {{- end }}
+  {{- with $service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ . }}
+  {{- end }}
+  {{- with $service.sessionAffinity }}
+  sessionAffinity: {{ . }}
+  {{- end }}
+  {{- with $service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    {{- include "datahub.gms.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    protocol: TCP
+    appProtocol: http
+    {{- if and $specifyNodePort $service.nodePort }}
+    nodePort: {{ $service.nodePort }}
+    {{- end }}
+  {{- if .Values.metrics.enabled }}
+  - name: jmx
+    port: 4318
+    targetPort: jmx
+    protocol: TCP
+  {{- end }}

@@ -1,0 +1,21 @@
+ebean:
+  type: mysql
+  host: mysql.local
+  port: 3306
+  database: datahub
+  username: user
+  password: pass
+
+kafka:
+  bootstrapServers: [bootstrap.kafa:9092]
+  confluent:
+    url: http://localhost:1234
+
+elasticsearch:
+  host: elasticsearch.local
+##############################
+
+searchService:
+  resultBatchSize: 123
+  enableCache: true
+  cacheImplementation: caffeine
