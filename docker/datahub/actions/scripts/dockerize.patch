@@ -1,0 +1,24 @@
+From 5c87c6c6fc4eddb77c3b2110cf5c8e0385843fd0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90=E1=BA=B7ng=20Minh=20D=C5=A9ng?= <dungdm93@live.com>
+Date: Wed, 25 Jan 2023 00:16:35 +0700
+Subject: [PATCH] [docker/datahub/actions] dockerize start_datahub_actions.sh
+
+---
+ docker/datahub/actions/scripts/start_datahub_actions.sh | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/docker/datahub/actions/scripts/start_datahub_actions.sh b/docker/datahub/actions/scripts/start_datahub_actions.sh
+index 2845b8b..be2277e 100755
+--- a/docker/datahub/actions/scripts/start_datahub_actions.sh
++++ b/docker/datahub/actions/scripts/start_datahub_actions.sh
+@@ -57,4 +57,6 @@ else
+     echo "No user action configurations found. Not starting user actions."
+ fi
+
+-datahub-actions actions $config_files
++exec \
++    dockerize -wait ${DATAHUB_GMS_PROTOCOL:-http}://$DATAHUB_GMS_HOST:$DATAHUB_GMS_PORT/health -timeout 240s \
++        datahub-actions actions $config_files
+--
+2.25.1
+
