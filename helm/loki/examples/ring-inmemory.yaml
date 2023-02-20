@@ -1,0 +1,9 @@
+config:
+  common:
+    ring:
+      kvstore:
+        prefix: abc/
+      zone_awareness_enabled: true
+
+ringKVStore:
+  store: inmemory

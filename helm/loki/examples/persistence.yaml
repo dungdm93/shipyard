@@ -1,0 +1,16 @@
+write:
+  persistence:
+    enabled: true
+    storageClass: very-fast-disk
+    size: 10Gi
+    annotations:
+      abc: xyz
+
+read:
+  stateful: true
+  persistence:
+    enabled: true
+    storageClass: "-"
+    size: 10Gi
+    annotations:
+      abc: xyz

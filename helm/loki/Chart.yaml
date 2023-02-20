@@ -1,0 +1,10 @@
+apiVersion: v2
+name: loki
+description: Helm chart for Grafana Loki in simple scalable mode
+icon: https://grafana.com/static/img/logos/logo-loki.svg
+type: application
+version: 0.1.0
+appVersion: 2.7.1
+maintainers:
+- name: Teko's DataOps team
+  email: dataops@teko.vn

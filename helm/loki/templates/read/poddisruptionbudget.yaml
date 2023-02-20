@@ -1,0 +1,19 @@
+{{- $read := mergeOverwrite (deepCopy .Values.commons) .Values.read -}}
+{{- if and $read.podDisruptionBudget.enabled (gt (int $read.replicas | default 1) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "loki.fullname" . }}-read
+  labels:
+   {{- include "loki.read.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "loki.read.selectorLabels" . | nindent 4 }}
+  {{- if $read.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $read.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $read.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $read.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}
