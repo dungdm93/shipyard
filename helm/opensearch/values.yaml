@@ -1,0 +1,272 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: opensearchproject/opensearch
+  tag: 2.6.0
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+commons:
+  replicas: null
+  extraArgs: []
+
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  schedulerName: null
+  runtimeClassName: null
+  priorityClassName: null
+
+  affinity: {}
+  tolerations: []
+  nodeSelector: {}
+  topologySpreadConstraints: []
+
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  podSecurityContext:
+    fsGroup: 1000 # opensearch
+    fsGroupChangePolicy: OnRootMismatch
+
+  persistence:
+    enabled: false
+    storageClass: null
+    size: 10Gi
+    annotations: {}
+
+  podDisruptionBudget:
+    enabled: false
+    # minAvailable
+    # maxUnavailable
+
+nodeGroups:
+  - name: nodes
+    roles: [cluster_manager, ingest, data]
+
+initialClusterManagerNodeGroup: nodes
+
+# ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html
+# ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/important-settings.html
+# GET _cluster/settings?include_defaults=true&flat_settings=true
+config:
+  cluster.name: opensearch
+  network.host: 0.0.0.0
+  http.port: 9200
+  transport.port: 9300
+
+  plugins.security.allow_default_init_securityindex: true
+  plugins.security.restapi.roles_enabled:
+    - all_access
+    - security_rest_api_access
+  plugins.security.system_indices.enabled: true
+  plugins.security.system_indices.indices:
+    - .plugins-ml-model
+    - .plugins-ml-task
+    - .opendistro-alerting-config
+    - .opendistro-alerting-alert*
+    - .opendistro-anomaly-results*
+    - .opendistro-anomaly-detector*
+    - .opendistro-anomaly-checkpoints
+    - .opendistro-anomaly-detection-state
+    - .opendistro-reports-*
+    - .opensearch-notifications-*
+    - .opensearch-notebooks
+    - .opensearch-observability
+    - .opendistro-asynchronous-search-response*
+    - .replication-metadata-store
+
+jvmOptions: |
+  -XX:+UseZGC
+  -XX:+UseStringDeduplication
+  -XX:+ExitOnOutOfMemoryError
+  -XX:+UseContainerSupport
+
+  ## ElasticSearch/OpenSearch require -Xms=-Xmx
+  -Xms1G
+  -Xmx1G
+
+  ## Use those options when resources is setted
+  # -XX:InitialRAMPercentage=85.0
+  # -XX:MaxRAMPercentage=85.0
+
+security:
+  indexName:
+  ssl:
+    method: helm  # helm | certmanager
+    certManagerIssuerRef:
+      # group: cert-manager.io
+      # kind: ClusterIssuer
+      # name: ca-issuer
+    certValidityDuration: 1095
+    transport:
+      enforceHostnameVerification: false
+    http:
+      enabled: true
+  # https://opensearch.org/docs/latest/security/configuration/configuration/
+  http:
+    anonymous_auth_enabled: false
+    xff:
+      enabled: false
+  # https://opensearch.org/docs/latest/security/authentication-backends/authc-index/
+  authc:
+    basic_internal_auth_domain:
+      description: "Authenticate via HTTP Basic against internal users database"
+      http_enabled: true
+      transport_enabled: true
+      order: 4
+      http_authenticator:
+        type: basic
+        challenge: true
+      authentication_backend:
+        type: intern
+    # clientcert_auth_domain:
+    #   description: "Authenticate via SSL client certificates"
+    #   http_enabled: false
+    #   transport_enabled: false
+    #   order: 2
+    #   http_authenticator:
+    #     type: clientcert
+    #     challenge: false
+    #     config:
+    #       username_attribute: cn
+    #   authentication_backend:
+    #     type: noop
+    # openid_auth_domain:
+    #   http_enabled: true
+    #   transport_enabled: true
+    #   order: 0
+    #   http_authenticator:
+    #     type: openid
+    #     challenge: false
+    #     config:
+    #       subject_key: preferred_username
+    #       roles_key: roles
+    #       openid_connect_url: https://keycloak.example.com:8080/auth/realms/master/.well-known/openid-configuration
+    #   authentication_backend:
+    #     type: noop
+  authz: {}
+  # https://opensearch.org/docs/latest/security/audit-logs
+  audit:
+    enabled: true
+    general: {}
+    compliance: {}
+  # https://opensearch.org/docs/latest/security/access-control/api
+  accounts:
+    actionGroups:
+
+    # pre-defined roles: all_access, kibana_server, kibana_user, logstash, manage_snapshots, own_index, readall, readall_and_monitor
+    # example: https://github.com/opensearch-project/security/blob/main/config/roles.yml
+    roles:
+      # <role_name>:
+      #   reserved: <true|false>
+      #   cluster_permissions: [...]
+      #   index_permissions:
+      #     - index_patterns: [...]
+      #       allowed_actions: [...]
+
+    rolesMapping:
+      # <role_name>:
+      #   reserved: <true|false>
+      #   hidden: <true|false>
+      #   description: "string"
+      #   hosts: [...]
+      #   users: [...]
+      #   backend_roles: [...]
+      #   and_backend_roles: [...]
+      all_access:
+        reserved: false
+        description: "Allow admin full access"
+        backend_roles:
+          - admin
+      kibana_server:
+        reserved: true
+        users:
+          - kibanaserver
+
+    users:
+      # <username>:
+      #   hash: <= password hashed by bcrypt
+      #   reserved: <true|false>
+      #   description: "string"
+      #   backend_roles: <= assign backend_roles to the user
+      #   - ...
+      #   attributes:
+      #     key: value
+      admin:
+        hash: "$2a$12$VcCDgh2NDk07JGN0rjGbM.Ad41qVR/YFJcgHp0UGns5JDymv..TOG" # admin:admin
+        description: "Administrator user"
+        reserved: true
+        backend_roles:
+          - admin
+      kibanaserver:
+        hash: "$2a$12$4AcgAt3xwOWadA5s5blL6ev39OXDNhmOesEoo33eZtrq2N0YrU3H." # kibanaserver:kibanaserver
+        description: "OpenSearch Dashboards user"
+        reserved: true
+
+    tenants:
+      # <tenant_name>:
+      #   reserved: <true|false>
+      #   description: "string"
+
+sysctlInit:
+  enabled: true
+  config:
+    vm.max_map_count: 262144
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  clusterIP:
+  loadBalancerIP:
+  loadBalancerClass:
+  allocateLoadBalancerNodePorts: true
+  nodePorts:
+    http:
+    transport:
+  sessionAffinity:
+  sessionAffinityConfig:
+  internalTrafficPolicy:
+  externalTrafficPolicy:
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: opensearch.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: opensearch-tls
+  #    hosts:
+  #      - opensearch.local

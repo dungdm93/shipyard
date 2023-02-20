@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "opensearch.fullname" . }}-config-security
+  labels:
+    {{- include "opensearch.labels" . | nindent 4 }}
+data:
+  config.yml: |
+    {{- tpl (.Files.Get "files/security/config.yml") . | trim | nindent 4 }}
+
+  audit.yml: |
+    {{- tpl (.Files.Get "files/security/audit.yml") . | trim | nindent 4 }}
+
+  action_groups.yml: |
+    {{- tpl (.Files.Get "files/security/action_groups.yml") . | trim | nindent 4 }}
+
+  roles.yml: |
+    {{- tpl (.Files.Get "files/security/roles.yml") . | trim | nindent 4 }}
+
+  roles_mapping.yml: |
+    {{- tpl (.Files.Get "files/security/roles_mapping.yml") . | trim | nindent 4 }}
+
+  internal_users.yml: |
+    {{- tpl (.Files.Get "files/security/internal_users.yml") . | trim | nindent 4 }}
+
+  tenants.yml: |
+    {{- tpl (.Files.Get "files/security/tenants.yml") . | trim | nindent 4 }}

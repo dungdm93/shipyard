@@ -1,0 +1,20 @@
+{{- if and .Values.security.ssl.http.enabled (eq .Values.security.ssl.method "helm") }}
+{{- $_ := include "opensearch.helm.setup-ca" . -}}
+{{- $adminCN := printf "%s-admin" (include "opensearch.fullname" .) }}
+{{- $adminSSL := genSignedCert $adminCN nil nil (.Values.security.ssl.certValidityDuration | int) .ca -}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "opensearch.fullname" . }}-ssl-admin
+  labels:
+    {{- include "opensearch.labels" . | nindent 4 }}
+type: kubernetes.io/tls
+stringData:
+  ca.crt: |
+    {{- .ca.Cert | nindent 4 }}
+  tls.crt: |
+    {{- $adminSSL.Cert | nindent 4 }}
+  tls.key: |
+    {{- $adminSSL.Key  | nindent 4 }}
+{{- end }}

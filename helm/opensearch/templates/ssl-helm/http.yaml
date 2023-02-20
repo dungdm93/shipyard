@@ -1,0 +1,25 @@
+{{- if and .Values.security.ssl.http.enabled (eq .Values.security.ssl.method "helm") }}
+{{- $_ := include "opensearch.helm.setup-ca" . -}}
+{{- $httpCN := include "opensearch.fullname" . }}
+{{- $httpIP := list "127.0.0.1" "::1" }}
+{{- $httpDNS := list "localhost" $httpCN }}
+{{- $httpDNS := printf "%s.%s" $httpCN .Release.Namespace | append $httpDNS }}
+{{- $httpDNS := printf "%s.%s.svc" $httpCN .Release.Namespace | append $httpDNS }}
+{{- $httpDNS := printf "%s.%s.svc.cluster.local" $httpCN .Release.Namespace | append $httpDNS }}
+{{- $httpSSL := genSignedCert $httpCN $httpIP $httpDNS (.Values.security.ssl.certValidityDuration | int) .ca -}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "opensearch.fullname" . }}-ssl-http
+  labels:
+    {{- include "opensearch.labels" . | nindent 4 }}
+type: kubernetes.io/tls
+stringData:
+  ca.crt: |
+    {{- .ca.Cert | nindent 4 }}
+  tls.crt: |
+    {{- $httpSSL.Cert | nindent 4 }}
+  tls.key: |
+    {{- $httpSSL.Key  | nindent 4 }}
+{{- end }}

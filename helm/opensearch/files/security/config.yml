@@ -1,0 +1,14 @@
+_meta:
+  type: config
+  config_version: 2
+
+config:
+  dynamic:
+    http:
+      {{- toYaml .Values.security.http | nindent 6 }}
+
+    authc:
+      {{- toYaml .Values.security.authc | nindent 6 }}
+
+    authz:
+      {{- toYaml .Values.security.authz | nindent 6 }}

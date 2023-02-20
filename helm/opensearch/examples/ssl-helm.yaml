@@ -1,0 +1,4 @@
+security:
+  ssl:
+    method: helm
+    certValidityDuration: 1095

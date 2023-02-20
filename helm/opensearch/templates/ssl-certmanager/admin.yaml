@@ -1,0 +1,15 @@
+{{- if and .Values.security.ssl.http.enabled (eq .Values.security.ssl.method "certmanager") }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "opensearch.fullname" . }}-ssl-admin
+  labels:
+    {{- include "opensearch.labels" . | nindent 4 }}
+spec:
+  issuerRef:
+    {{- toYaml .Values.security.ssl.certManagerIssuerRef | nindent 4 }}
+  secretName: {{ include "opensearch.fullname" . }}-ssl-admin
+  commonName: {{ include "opensearch.fullname" . }}-admin
+  duration: {{ printf "%dh" (mul .Values.security.ssl.certValidityDuration 24) }}
+{{- end }}

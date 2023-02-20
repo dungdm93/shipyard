@@ -1,0 +1,24 @@
+{{- if and .Values.security.ssl.http.enabled (eq .Values.security.ssl.method "certmanager") }}
+{{- $httpCN := include "opensearch.fullname" . }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "opensearch.fullname" . }}-ssl-http
+  labels:
+    {{- include "opensearch.labels" . | nindent 4 }}
+spec:
+  issuerRef:
+    {{- toYaml .Values.security.ssl.certManagerIssuerRef | nindent 4 }}
+  secretName: {{ include "opensearch.fullname" . }}-ssl-http
+  commonName: {{ $httpCN }}
+  ipAddresses:
+  - 127.0.0.1
+  - ::1
+  dnsNames:
+  - localhost
+  - {{ $httpCN }}.{{ .Release.Namespace }}
+  - {{ $httpCN }}.{{ .Release.Namespace }}.svc
+  - {{ $httpCN }}.{{ .Release.Namespace }}.svc.cluster.local
+  duration: {{ printf "%dh" (mul .Values.security.ssl.certValidityDuration 24) }}
+{{- end }}

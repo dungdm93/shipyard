@@ -1,0 +1,25 @@
+{{- if eq .Values.security.ssl.method "certmanager" }}
+{{- $transportCN := printf "%s-discovery" (include "opensearch.fullname" .) }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "opensearch.fullname" . }}-ssl-transport
+  labels:
+    {{- include "opensearch.labels" . | nindent 4 }}
+spec:
+  issuerRef:
+    {{- toYaml .Values.security.ssl.certManagerIssuerRef | nindent 4 }}
+  secretName: {{ include "opensearch.fullname" . }}-ssl-transport
+  commonName: {{ $transportCN }}
+  ipAddresses:
+  - 127.0.0.1
+  - ::1
+  dnsNames:
+  - localhost
+  - {{ $transportCN }}
+  - {{ $transportCN }}.{{ .Release.Namespace }}
+  - {{ $transportCN }}.{{ .Release.Namespace }}.svc
+  - {{ $transportCN }}.{{ .Release.Namespace }}.svc.cluster.local
+  duration: {{ printf "%dh" (mul .Values.security.ssl.certValidityDuration 24) }}
+{{- end }}
