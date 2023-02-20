@@ -1,0 +1,11 @@
+read:
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 100
+    metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          averageUtilization: 80

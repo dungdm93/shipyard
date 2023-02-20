@@ -1,0 +1,37 @@
+{{- $config := deepCopy .Values.config }}
+{{- $common := (dict "common" dict | mergeOverwrite $config).common }}
+
+{{- $ringKVStore := deepCopy .Values.ringKVStore }}
+{{- if eq $ringKVStore.store "memberlist" }}
+  {{- $memberlist := $ringKVStore.memberlist }}
+  {{- $members := list (printf "dnssrv+%s-memberlist:%d" (include "mimir.fullname" .) (int $memberlist.bind_port)) }}
+  {{- $_ := set $memberlist "join_members" $members }}
+
+  {{- $_ := dict "memberlist" $memberlist | mergeOverwrite $config -}}
+{{- end }}
+{{- $_ := unset $ringKVStore "memberlist" }}
+{{- $_ := dict "distributor"     (dict "ring"          (dict "kvstore" $ringKVStore)) | mergeOverwrite $config -}}
+{{- $_ := dict "ingester"        (dict "ring"          (dict "kvstore" $ringKVStore)) | mergeOverwrite $config -}}
+{{- $_ := dict "query_scheduler" (dict "ring"          (dict "kvstore" $ringKVStore)) | mergeOverwrite $config -}}
+{{- $_ := dict "store_gateway"   (dict "sharding_ring" (dict "kvstore" $ringKVStore)) | mergeOverwrite $config -}}
+{{- $_ := dict "compactor"       (dict "sharding_ring" (dict "kvstore" $ringKVStore)) | mergeOverwrite $config -}}
+{{- $_ := dict "ruler"           (dict "ring"          (dict "kvstore" $ringKVStore)) | mergeOverwrite $config -}}
+{{- $_ := dict "alertmanager"    (dict "sharding_ring" (dict "kvstore" $ringKVStore)) | mergeOverwrite $config -}}
+
+{{- $_ := dict "storage" .Values.storage | mergeOverwrite $common -}}
+{{- $alertmanager_url := printf "http://%s-backend:%d/%s" (include "mimir.fullname" .) (int $config.server.http_listen_port) ($config.api.alertmanager_http_prefix | trimPrefix "/") -}}
+{{- $_ := set $config.ruler "alertmanager_url" $alertmanager_url -}}
+{{- $_ := set $config.alertmanager "fallback_config_file" "/etc/mimir/alertmanager-fallback-config.yaml" -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mimir.fullname" . }}-config
+  labels:
+    {{- include "mimir.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    {{- toYaml $config | nindent 4 }}
+
+  alertmanager-fallback-config.yaml: |
+    {{- toYaml .Values.alertmanagerFallbackConfig | nindent 4 }}

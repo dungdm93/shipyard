@@ -1,0 +1,19 @@
+{{- $backend := mergeOverwrite (deepCopy .Values.commons) .Values.backend -}}
+{{- if and $backend.podDisruptionBudget.enabled (gt (int $backend.replicas | default 1) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "mimir.fullname" . }}-backend
+  labels:
+   {{- include "mimir.backend.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "mimir.backend.selectorLabels" . | nindent 4 }}
+  {{- if $backend.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $backend.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $backend.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $backend.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}

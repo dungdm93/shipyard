@@ -1,0 +1,29 @@
+read:
+  service:
+    type: ClusterIP
+    clusterIP: 1.2.3.4
+    internalTrafficPolicy: Local
+
+write:
+  service:
+    type: LoadBalancer
+    clusterIP: 4.3.2.1
+    loadBalancerIP: 10.10.10.10
+    loadBalancerClass: internal
+    allocateLoadBalancerNodePorts: false
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 1234
+    internalTrafficPolicy: Local
+    externalTrafficPolicy: Local
+    annotations:
+      foo: bar
+      abc: xyz
+
+backend:
+  service:
+    type: NodePort
+    nodePorts:
+      http: 1234
+      grpc: 12345

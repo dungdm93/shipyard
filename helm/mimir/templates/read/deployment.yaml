@@ -1,0 +1,127 @@
+{{- $read := mergeOverwrite (deepCopy .Values.commons) .Values.read -}}
+{{- $persistence := $read.persistence -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mimir.fullname" . }}-read
+  labels:
+    {{- include "mimir.read.labels" . | nindent 4 }}
+    app.kubernetes.io/part-of: memberlist
+    {{- with $read.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $read.annotations | nindent 4 }}
+spec:
+  replicas: {{ $read.replicas }}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "mimir.read.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mimir.read.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/part-of: memberlist
+        {{- with $read.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "mimir.checksum" . | nindent 8 }}
+        {{- with $read.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if and .Values.metrics.enabled (not .Values.metrics.podMonitor.enabled) }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.config.server.http_listen_port | quote }}
+        prometheus.io/path: /metrics
+        {{- end }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: {{ $read.terminationPeriod }}
+      containers:
+        - name: mimir-read
+          image: {{ include "mimir.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - -target={{ $read.target | join "," }}
+            - -config.file=/etc/mimir/config.yaml
+            {{- with .Values.read.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with $read.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $read.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.config.server.http_listen_port }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.config.server.grpc_listen_port }}
+              protocol: TCP
+            - name: memberlist
+              containerPort: {{ .Values.ringKVStore.memberlist.bind_port }}
+              protocol: TCP
+          volumeMounts:
+            {{- include "mimir.volumeMounts" . | nindent 12 }}
+            - name: data
+              mountPath: /mimir/
+            {{- with $read.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /api/v1/status/buildinfo
+              port: http
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 30
+          {{- with $read.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $read.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      serviceAccountName: {{ include "mimir.serviceAccountName" . }}
+      priorityClassName:  {{ $read.priorityClassName }}
+      runtimeClassName:   {{ $read.runtimeClassName }}
+      schedulerName:      {{ $read.schedulerName }}
+      {{- with $read.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- include "mimir.volumes" . | nindent 8 }}
+        - name: data
+          emptyDir: {}
+        {{- with $read.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $read.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $read.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $read.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
