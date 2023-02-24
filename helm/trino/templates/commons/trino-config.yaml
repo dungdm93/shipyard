@@ -2,6 +2,7 @@
 {{- $config := index $trino "config.properties" | default dict }}
 {{- $authen := .Values.authen }}
 {{- $faultTolerant := .Values.faultTolerant }}
+{{- $eventsListener := .Values.eventsListener }}
 
 {{- $_ := unset $config "coordinator" }}
 {{- $_ := unset $config "node-scheduler.include-coordinator" }}
@@ -111,5 +112,18 @@ data:
   exchange-manager.properties: |
     {{- range $key, $value := $exchangeConfig }}
     {{ $key }}={{ $value }}
+    {{- end }}
+  {{- end }}
+
+  {{- if $eventsListener.enabled }}
+  http-event-listener.properties: |
+    event-listener.name=http
+    http-event-listener.log-created={{ $eventsListener.logs.created }}
+    http-event-listener.log-completed={{ $eventsListener.logs.completed }}
+    http-event-listener.log-split={{ $eventsListener.logs.split }}
+    http-event-listener.connect-retry-count={{ $eventsListener.retriesOnFailed }}
+    http-event-listener.connect-ingest-uri={{ $eventsListener.endpoint }}
+    {{- if $eventsListener.header}}
+    http-event-listener.connect-http-headers={{ $eventsListener.headers }}
     {{- end }}
   {{- end }}

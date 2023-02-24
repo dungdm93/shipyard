@@ -170,6 +170,17 @@ faultTolerant:
     gcs: {}
       # json-key-file-path: /path/to/gcs_keyfile.json
 
+eventsListener:
+  enabled: false
+  logs:
+    created: true
+    completed: true
+    split: false
+  retriesOnFailed: 3
+  # Providing headers follows the pattern of key:value pairs separated by commas
+  headers: ""
+  endpoint: ""
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
