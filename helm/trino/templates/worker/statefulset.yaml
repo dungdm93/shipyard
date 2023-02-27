@@ -80,6 +80,10 @@ spec:
             - name: cache
               mountPath: /opt/trino/cache
             {{- end }}
+            {{- if .Values.spill.enabled }}
+            - name: spill
+              mountPath: /opt/trino/spill
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /v1/info
@@ -116,26 +120,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-  {{- if and .Values.cache.enabled .Values.cache.persistence.enabled }}
+  {{- if or (and .Values.cache.enabled .Values.cache.persistence.enabled) .Values.spill.enabled }}
   volumeClaimTemplates:
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      creationTimestamp: null
-      name: cache
-    spec:
-      {{- with .Values.cache.persistence.accessModes }}
-      accessModes:
-        {{- toYaml . | nindent 6 }}
-      {{- end }}
-      {{- if .Values.cache.persistence.storageClass }}
-      {{- if eq "-" .Values.cache.persistence.storageClass }}
-      storageClassName: ""
-      {{- else }}
-      storageClassName: {{ .Values.cache.persistence.storageClass | quote }}
-      {{- end }}
-      {{- end }}
-      resources:
-        requests:
-          storage: {{ .Values.cache.persistence.size | quote }}
+    {{- include "trino.worker.volumeClaimTemplates" . | nindent 4 }}
   {{- end }}
