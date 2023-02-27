@@ -216,3 +216,10 @@ ingress:
   #  - secretName: trino.local-tls
   #    hosts:
   #      - trino.local
+
+spill:
+  enabled: false
+  # accessModes:
+  #   - ReadWriteMany
+  # storageClassName: className
+  # size: 100

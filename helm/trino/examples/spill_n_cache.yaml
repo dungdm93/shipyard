@@ -1,0 +1,15 @@
+cache:
+  enabled: true
+
+  persistence:
+    enabled: true
+    accessModes:
+    - ReadWriteOnce
+    size: 20Gi
+
+spill:
+  enabled: true
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ceph-rbd-hdd
+  size: 200

@@ -69,3 +69,45 @@ Coordinator volumeMounts
 {{ toYaml . }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Worker volumeClaimTemplates
+*/}}
+{{- define "trino.worker.volumeClaimTemplates" -}}
+{{- if and .Values.cache.enabled .Values.cache.persistence.enabled }}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: cache
+  spec:
+    {{- with .Values.cache.persistence.accessModes }}
+    accessModes:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- if .Values.cache.persistence.storageClass }}
+    {{- if eq "-" .Values.cache.persistence.storageClass }}
+    storageClassName: ""
+    {{- else }}
+    storageClassName: {{ .Values.cache.persistence.storageClass | quote }}
+    {{- end }}
+    {{- end }}
+    resources:
+      requests:
+        storage: {{ .Values.cache.persistence.size | quote }}
+{{- end }}
+{{- if .Values.spill.enabled }}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: spill
+  spec:
+    {{- with .Values.spill.accessModes }}
+    accessModes:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    storageClassName: {{ .Values.spill.storageClass | quote }}
+    resources:
+      requests:
+        storage: {{ .Values.spill.size | quote }}
+{{- end }}
+{{- end -}}
