@@ -219,6 +219,7 @@ ingress:
 
 spill:
   enabled: false
+  path: /opt/trino/spill
   # accessModes:
   #   - ReadWriteMany
   # storageClassName: className

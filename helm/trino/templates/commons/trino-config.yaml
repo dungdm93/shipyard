@@ -3,6 +3,7 @@
 {{- $authen := .Values.authen }}
 {{- $faultTolerant := .Values.faultTolerant }}
 {{- $eventsListener := .Values.eventsListener }}
+{{- $spill := .Values.spill }}
 
 {{- $_ := unset $config "coordinator" }}
 {{- $_ := unset $config "node-scheduler.include-coordinator" }}
@@ -19,6 +20,11 @@
   {{- $_ := set $config "http-server.https.keystore.key"    $httpServer.keystore.key  }}
   {{- $_ := set $config "http-server.https.truststore.path" $httpServer.truststore.path }}
   {{- $_ := set $config "http-server.https.truststore.key"  $httpServer.truststore.key  }}
+{{- end }}
+
+{{- if $spill.enabled }}
+  {{- $_ := set $config "spill-enabled" "true" }}
+  {{- $_ := set $config "spiller-spill-path" $spill.path }}
 {{- end }}
 
 {{- $exchangeManager := $faultTolerant.exchangeManager }}

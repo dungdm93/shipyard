@@ -1,6 +1,6 @@
 spill:
   enabled: true
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   storageClassName: ceph-rbd-hdd
-  size: 200
+  size: 200Gi
