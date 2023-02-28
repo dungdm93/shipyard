@@ -43,6 +43,10 @@ Coordinator volumes
   configMap:
     name: {{ include "trino.fullname" . }}-metrics
 {{- end }}
+{{- if .Values.spill.enabled }}
+- name: trino-spill
+  emptyDir: {}
+{{- end }}
 {{- with $coordinator.extraVolumes }}
 {{ toYaml . }}
 {{- end }}
@@ -60,6 +64,10 @@ Coordinator volumeMounts
   mountPath: /etc/trino/catalog
 {{- if .Values.metrics.enabled }}
 {{ include "trino.jmxMounts" . }}
+{{- end }}
+{{- if .Values.spill.enabled }}
+- name: trino-spill
+  mountPath: {{ .Values.spill.path }}
 {{- end }}
 {{- with $coordinator.extraVolumeMounts }}
 {{ toYaml . }}

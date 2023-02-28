@@ -80,10 +80,6 @@ spec:
             - name: cache
               mountPath: /opt/trino/cache
             {{- end }}
-            {{- if .Values.spill.enabled }}
-            - name: spill
-              mountPath: /opt/trino/spill
-            {{- end }}
           livenessProbe:
             httpGet:
               path: /v1/info

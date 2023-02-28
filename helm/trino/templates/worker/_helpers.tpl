@@ -65,6 +65,10 @@ Coordinator volumeMounts
 {{- if .Values.metrics.enabled }}
 {{ include "trino.jmxMounts" . }}
 {{- end }}
+{{- if .Values.spill.enabled }}
+- name: trino-spill
+  mountPath: {{ .Values.spill.path }}
+{{- end }}
 {{- with $worker.extraVolumeMounts }}
 {{ toYaml . }}
 {{- end }}
@@ -99,7 +103,7 @@ Worker volumeClaimTemplates
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    name: spill
+    name: trino-spill
   spec:
     {{- with .Values.spill.accessModes }}
     accessModes:
