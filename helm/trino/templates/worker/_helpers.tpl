@@ -109,7 +109,7 @@ Worker volumeClaimTemplates
     accessModes:
       {{- toYaml . | nindent 6 }}
     {{- end }}
-    storageClassName: {{ .Values.spill.storageClass | quote }}
+    storageClassName: {{ .Values.spill.storageClassName | quote }}
     resources:
       requests:
         storage: {{ .Values.spill.size | quote }}

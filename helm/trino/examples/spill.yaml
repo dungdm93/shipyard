@@ -2,5 +2,5 @@ spill:
   enabled: true
   accessModes:
   - ReadWriteOnce
-  storageClassName: ceph-rbd-hdd
+  storageClassName: topolvm-ssd
   size: 200Gi
