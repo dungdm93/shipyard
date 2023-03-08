@@ -6,10 +6,11 @@ cache:
     accessModes:
     - ReadWriteOnce
     size: 20Gi
+    storageClass: topolvm-cache
 
 spill:
   enabled: true
   accessModes:
     - ReadWriteOnce
-  storageClassName: ceph-rbd-hdd
+  storageClassName: topolvm-nvme
   size: 200Gi
