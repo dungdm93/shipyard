@@ -170,7 +170,7 @@ faultTolerant:
     gcs: {}
       # json-key-file-path: /path/to/gcs_keyfile.json
 
-eventsListener:
+eventListener:
   enabled: false
   logs:
     created: true

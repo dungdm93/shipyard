@@ -2,7 +2,7 @@
 {{- $config := index $trino "config.properties" | default dict }}
 {{- $authen := .Values.authen }}
 {{- $faultTolerant := .Values.faultTolerant }}
-{{- $eventsListener := .Values.eventsListener }}
+{{- $eventListener := .Values.eventListener }}
 {{- $spill := .Values.spill }}
 
 {{- $_ := unset $config "coordinator" }}
@@ -103,6 +103,9 @@ data:
     coordinator=true
     node-scheduler.include-coordinator=false
     discovery.uri={{ printf "http://%s-discovery:8080" (include "trino.fullname" .) }}
+    {{- if $eventListener.enabled }}
+    event-listener.config-files=/etc/trino/http-event-listener.properties
+    {{- end }}
     {{- range $key, $value := $coordinatorConfig }}
     {{ $key }}={{ $value }}
     {{- end }}
@@ -121,15 +124,15 @@ data:
     {{- end }}
   {{- end }}
 
-  {{- if $eventsListener.enabled }}
+  {{- if $eventListener.enabled }}
   http-event-listener.properties: |
     event-listener.name=http
-    http-event-listener.log-created={{ $eventsListener.logs.created }}
-    http-event-listener.log-completed={{ $eventsListener.logs.completed }}
-    http-event-listener.log-split={{ $eventsListener.logs.split }}
-    http-event-listener.connect-retry-count={{ $eventsListener.retriesOnFailed }}
-    http-event-listener.connect-ingest-uri={{ $eventsListener.endpoint }}
-    {{- if $eventsListener.header}}
-    http-event-listener.connect-http-headers={{ $eventsListener.headers }}
+    http-event-listener.log-created={{ $eventListener.logs.created }}
+    http-event-listener.log-completed={{ $eventListener.logs.completed }}
+    http-event-listener.log-split={{ $eventListener.logs.split }}
+    http-event-listener.connect-retry-count={{ $eventListener.retriesOnFailed }}
+    http-event-listener.connect-ingest-uri={{ $eventListener.endpoint }}
+    {{- if $eventListener.header}}
+    http-event-listener.connect-http-headers={{ $eventListener.headers }}
     {{- end }}
   {{- end }}

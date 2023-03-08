@@ -29,6 +29,10 @@ Coordinator volumes
         items:
         - key:  coordinator-config.properties
           path: config.properties
+        {{- if .Values.eventListener.enabled }}
+        - key:  http-event-listener.properties
+          path: http-event-listener.properties
+        {{- end }}
         {{- if (and .Values.faultTolerant.policy .Values.faultTolerant.exchangeManager.type ) }}
         - key:  exchange-manager.properties
           path: exchange-manager.properties
