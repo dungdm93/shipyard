@@ -1,0 +1,10 @@
+opensearch:
+  hosts: [ https://opensearch:9200 ]
+  username: kibana
+  password: SuperSecr3t
+  ssl:
+    enabled: true
+    certificate: /path/to/your/server.crt
+    key: /path/to/your/server.key
+    certificateAuthorities: [ "/path/to/your/CA.pem" ]
+    verificationMode: full  # full | none

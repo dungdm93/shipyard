@@ -1,0 +1,130 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: opensearchproject/opensearch-dashboards
+  tag: 2.6.0
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+replicas: null
+extraArgs: []
+
+labels: {}
+podLabels: {}
+annotations: {}
+podAnnotations: {}
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+schedulerName: null
+runtimeClassName: null
+priorityClassName: null
+
+affinity: {}
+tolerations: []
+nodeSelector: {}
+topologySpreadConstraints: []
+
+extraEnv: []
+extraEnvFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+podSecurityContext: {}
+  # fsGroup: 1000 # opensearch
+  # fsGroupChangePolicy: OnRootMismatch
+
+podDisruptionBudget:
+  enabled: false
+  # minAvailable
+  # maxUnavailable
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  clusterIP:
+  loadBalancerIP:
+  loadBalancerClass:
+  allocateLoadBalancerNodePorts: true
+  nodePort:
+  sessionAffinity:
+  sessionAffinityConfig:
+  internalTrafficPolicy:
+  externalTrafficPolicy:
+  annotations: {}
+
+ingress:
+  enabled: false
+  ingressClassName: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: opensearch-dashboards.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: opensearch-dashboards-tls
+  #    hosts:
+  #      - opensearch-dashboards.local
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+config:
+  server.port: 5601
+  server.host: 0.0.0.0
+  server.name: opensearch-dashboards
+
+## Node command line options
+## See `node --help` and `node --v8-options` for available options
+## Please note you should specify one option per line
+nodeOptions:
+
+opensearch:
+  hosts: [ https://opensearch:9200 ]
+  # username: kibanaserver
+  # password: kibanaserver
+  # ssl:
+  #   enabled: false
+  #   certificate: /path/to/your/server.crt
+  #   key: /path/to/your/server.key
+  #   certificateAuthorities: [ "/path/to/your/CA.pem" ]
+  #   verificationMode: full  # full | none
+
+# https://github.com/opensearch-project/security-dashboards-plugin/blob/main/server/index.ts
+security:
+  basicauth:
+    enabled: true
+  openid:
+    enabled: false
+    connectUrl:
+    clientId:
+    clientSecret:
+    baseRedirectUrl:
+  saml:
+    enabled: false
