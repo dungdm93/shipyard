@@ -1,5 +1,6 @@
 {{- $coreSite := index .Values.hdfsConfig "core-site.xml" }}
 {{- $hdfsSite := index .Values.hdfsConfig "hdfs-site.xml" }}
+{{- $hadoopEnv := index .Values.hdfsConfig "hadoop-env.sh" }}
 
 {{- if .Values.serviceMonitor.enabled }}
   {{- $_ := set $coreSite "hadoop.prometheus.endpoint.enabled" true }}
@@ -43,3 +44,8 @@ data:
       </property>
     {{ end }}
     </configuration>
+
+  hadoop-env.sh: |
+    {{- range $name, $value := $hadoopEnv }}
+      export {{ $name }}="{{ $value }}"
+    {{ end }}

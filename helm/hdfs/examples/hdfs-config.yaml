@@ -13,3 +13,10 @@ hdfsConfig:
     dfs.namenode.servicerpc-bind-host: 0.0.0.0
     dfs.webhdfs.enabled: true
     dfs.permissions: false
+
+  hadoop-env.sh:
+    HADOOP_OS_TYPE: ${HADOOP_OS_TYPE:-$(uname -s)}
+    HADOOP_NAMENODE_OPTS: -XX:PermSize=128m -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError ${HADOOP_NAMENODE_OPTS}
+
+serviceMonitor:
+  enabled: false
