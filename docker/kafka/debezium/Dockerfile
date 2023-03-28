@@ -7,7 +7,7 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y curl tar;
 
-ENV DEBEZIUM_VERSION=2.1.1.Final \
+ENV DEBEZIUM_VERSION=2.1.3.Final \
     MAVEN_REPO_CENTRAL=https://repo1.maven.org/maven2
 RUN set -eux; \
     DEBEZIUM_CONNECTOR=( \
@@ -20,6 +20,6 @@ RUN set -eux; \
             | tar -xzvf - -C plugins --no-same-owner; \
     done
 
-FROM hub.teko.vn/dataops/kafka/connect:3.3.1
+FROM hub.teko.vn/dataops/kafka/connect:3.4.0
 
 COPY --from=downloader /build/plugins /opt/kafka/plugins
