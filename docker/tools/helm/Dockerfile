@@ -1,7 +1,7 @@
 FROM hub.teko.vn/tools/kubectl:1.25
 
 # Install helm
-ENV HELM_VERSION=v3.10.3
+ENV HELM_VERSION=v3.11.2
 RUN set -eux; \
     curl -sSL "https://github.com/helm/helm/raw/main/scripts/get-helm-3" | bash -s -- --version "${HELM_VERSION}"; \
     helm completion bash > /etc/bash_completion.d/helm;
@@ -31,7 +31,7 @@ RUN set -eux; \
     mv diff helm-diff;
 
 # Install helmfile
-ENV HELMFILE_VERSION=v0.149.0
+ENV HELMFILE_VERSION=v0.152.0
 RUN set -eux; \
     curl -sSL "https://github.com/helmfile/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION#v}_linux_amd64.tar.gz" \
           | tar -C /usr/local/bin/ -xzvf - helmfile;
