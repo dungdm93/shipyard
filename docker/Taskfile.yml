@@ -4,7 +4,7 @@ tasks:
   build:
     cmds:
     - pwd
-    - docker build --pull {{.BUILD_ARGS}} --tag {{.IMAGE}} .
+    - docker build --pull {{.BUILD_ARGS}} --progress=plain --tag {{.IMAGE}} .
 
   push:
     cmds:
