@@ -2,17 +2,16 @@ FROM python:3.10-slim AS base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libev4 libssl1.1 libisal2 libnss3 libsasl2-modules \
         libpq5 libmariadb3 libodbc1 \
         libldap-2.4-2 libkrb5-3 \
-        curl locales; \
-    \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/*
+        curl locales;
 
 RUN set -eux; \
     sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen; \
@@ -30,7 +29,9 @@ WORKDIR ${AIRFLOW_HOME}
 
 FROM base AS builder
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y \
         build-essential \
@@ -52,7 +53,8 @@ RUN set -eux; \
 
 ARG AIRFLOW_VERSION=2.4.2
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    set -eux; \
     PYTHON_VERSION_SHORT="${PYTHON_VERSION%.*}"; \
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION_SHORT}.txt"; \
     function join { local IFS="$1"; echo "${*:2}"; }; \
@@ -82,13 +84,15 @@ RUN set -eux; \
     pip install --constraint "${CONSTRAINT_URL}" \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
 
-RUN pip install "lz4" "python-snappy"
-RUN rm -rf /usr/local/bin/__pycache__
+RUN --mount=type=cache,target=/root/.cache/pip \
+    set -eux; \
+    pip install "lz4" "python-snappy"; \
+    rm -rf /usr/local/bin/__pycache__
 
 FROM base
 
 COPY --from=builder /usr/local /usr/local
-COPY ./scripts/ /usr/local/bin/
+COPY --link ./scripts/ /usr/local/bin/
 
 USER airflow
 EXPOSE 8080 8793 5555
