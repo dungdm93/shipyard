@@ -19,7 +19,14 @@
 {{- $_ := dict "alertmanager"    (dict "sharding_ring" (dict "kvstore" $ringKVStore)) | mergeOverwrite $config -}}
 
 {{- $_ := dict "storage" .Values.storage | mergeOverwrite $common -}}
-{{- $alertmanager_url := printf "http://%s-backend:%d/%s" (include "mimir.fullname" .) (int $config.server.http_listen_port) ($config.api.alertmanager_http_prefix | trimPrefix "/") -}}
+{{- $alertmanager_url := "" }}
+{{- if eq (lower .Values.deploymentMode) "aio" }}
+  {{- $alertmanager_url = printf "http://%s:%d/%s" (include "mimir.fullname" .) (int $config.server.http_listen_port) ($config.api.alertmanager_http_prefix | trimPrefix "/") -}}
+{{- else if eq (lower .Values.deploymentMode) "simplescalable" }}
+  {{- $alertmanager_url = printf "http://%s-backend:%d/%s" (include "mimir.fullname" .) (int $config.server.http_listen_port) ($config.api.alertmanager_http_prefix | trimPrefix "/") -}}
+{{- else }}
+  {{- fail (printf "Unknown deploymentMode %s" .Values.deploymentMode) }}
+{{- end }}
 {{- $_ := set $config.ruler "alertmanager_url" $alertmanager_url -}}
 {{- $_ := set $config.alertmanager "fallback_config_file" "/etc/mimir/alertmanager-fallback-config.yaml" -}}
 ---

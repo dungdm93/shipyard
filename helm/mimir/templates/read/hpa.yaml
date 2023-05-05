@@ -1,3 +1,4 @@
+{{- if eq (lower .Values.deploymentMode) "simplescalable" }}
 {{- $autoscaling := .Values.read.autoscaling -}}
 {{- if $autoscaling.enabled }}
 apiVersion: autoscaling/v2
@@ -15,4 +16,5 @@ spec:
   maxReplicas: {{ $autoscaling.maxReplicas }}
   metrics:
     {{- toYaml $autoscaling.metrics | nindent 4 }}
+{{- end }}
 {{- end }}

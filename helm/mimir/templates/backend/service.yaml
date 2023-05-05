@@ -1,3 +1,4 @@
+{{- if eq (lower .Values.deploymentMode) "simplescalable" }}
 {{- $backend := mergeOverwrite (deepCopy .Values.commons) .Values.backend -}}
 {{- $service := $backend.service -}}
 {{- $specifyNodePort := or (eq $service.type "NodePort") (and (eq $service.type "LoadBalancer") $service.allocateLoadBalancerNodePorts) -}}
@@ -83,3 +84,4 @@ spec:
     targetPort: grpc
     protocol: TCP
     appProtocol: gRPC
+{{- end }}

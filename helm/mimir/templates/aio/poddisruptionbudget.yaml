@@ -1,0 +1,21 @@
+{{- if eq (lower .Values.deploymentMode) "aio" }}
+{{- $aio := deepCopy .Values.commons -}}
+{{- if and $aio.podDisruptionBudget.enabled (gt (int $aio.replicas | default 1) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "mimir.fullname" . }}
+  labels:
+   {{- include "mimir.aio.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "mimir.aio.selectorLabels" . | nindent 4 }}
+  {{- if $aio.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $aio.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $aio.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $aio.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}
+{{- end }}
