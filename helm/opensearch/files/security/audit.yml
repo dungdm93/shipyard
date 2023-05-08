@@ -1,0 +1,12 @@
+_meta:
+  type: audit
+  config_version: 2
+
+config:
+  enabled: {{ .Values.security.audit.enabled }}
+
+  audit:
+    {{- toYaml .Values.security.audit.general | nindent 4 }}
+
+  compliance:
+    {{- toYaml .Values.security.audit.compliance | nindent 4 }}

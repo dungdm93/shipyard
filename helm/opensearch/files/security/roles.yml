@@ -1,0 +1,7 @@
+_meta:
+  type: roles
+  config_version: 2
+
+{{ with .Values.security.accounts.roles }}
+  {{- toYaml . }}
+{{ end }}

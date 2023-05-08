@@ -1,0 +1,17 @@
+initialClusterManagerNodeGroup: master
+
+nodeGroups:
+  - name: master
+    roles: [cluster_manager]
+
+  - name: ingest
+    roles: [ingest]
+
+  - name: data
+    roles: [data]
+
+  - name: coordinating
+    roles: []
+
+  - name: rcc
+    roles: [remote_cluster_client]

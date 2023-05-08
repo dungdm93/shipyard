@@ -1,0 +1,7 @@
+config:
+  server.name: dashboards
+
+nodeOptions: |
+  --max-old-space-size=4096
+  --trace-exit
+  --heap-prof

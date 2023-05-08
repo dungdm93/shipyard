@@ -1,0 +1,22 @@
+initialClusterManagerNodeGroup: master
+
+nodeGroups:
+  - name: master
+    replicas: 3
+    roles: [cluster_manager]
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+
+  - name: ingest
+    replicas: 2
+    roles: [ingest]
+    podDisruptionBudget:
+      enabled: true
+      maxUnavailable: 1
+
+  - name: data
+    replicas: 4
+    roles: [data]
+    podDisruptionBudget:
+      enabled: false

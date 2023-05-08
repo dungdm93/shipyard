@@ -1,0 +1,10 @@
+apiVersion: v2
+name: opensearch-dashboards
+description: OpenSearch Dashboards helm chart
+icon: https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg
+type: application
+version: 0.1.0
+appVersion: 2.6.0
+maintainers:
+- name: Teko's DataOps team
+  email: dataops@teko.vn

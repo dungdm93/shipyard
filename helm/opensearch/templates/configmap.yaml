@@ -1,0 +1,55 @@
+{{- $config := .Values.config }}
+{{- $_ := set $config "discovery.type" "zen" }}
+{{- $_ := set $config "discovery.seed_hosts" (printf "%s-discovery" (include "opensearch.fullname" .)) }}
+
+{{- $icmCount := 0 }}
+{{ range $ng := .Values.nodeGroups }}
+  {{- if eq $ng.name $.Values.initialClusterManagerNodeGroup }}
+    {{- if not ($ng.roles | has "cluster_manager") }}
+      {{- fail (printf "NodeGroup '%s' is not cluster_manager" $.Values.initialClusterManagerNodeGroup) }}
+    {{- end }}
+    {{- $icmCount = $ng.replicas | default $.Values.commons.replicas | default 1 | int }}
+  {{- end }}
+{{- end }}
+{{- if not $icmCount }}
+  {{- fail (printf "NodeGroup '%s' not found" .Values.initialClusterManagerNodeGroup) }}
+{{- end }}
+
+{{- $icmn := list }}
+{{- range $i, $e := until $icmCount }}
+  {{- $node := printf "%s-%s-%s" (include "opensearch.fullname" $) $.Values.initialClusterManagerNodeGroup (toString $e) }}
+  {{- $icmn = append $icmn $node }}
+{{- end }}
+{{- $_ := set $config "cluster.initial_cluster_manager_nodes" ($icmn | join ",") }}
+
+{{- $security := .Values.security }}
+{{- if $security.indexName }}
+  {{- $_ := set $config "plugins.security.config_index_name" $security.indexName }}
+{{- end }}
+
+{{- $_ := set $config "plugins.security.ssl.transport.pemkey_filepath"        "ssl-transport/tls.key" }}
+{{- $_ := set $config "plugins.security.ssl.transport.pemcert_filepath"       "ssl-transport/tls.crt" }}
+{{- $_ := set $config "plugins.security.ssl.transport.pemtrustedcas_filepath" "ssl-transport/ca.crt"  }}
+{{- $_ := set $config "plugins.security.ssl.transport.enforce_hostname_verification" $security.ssl.transport.enforceHostnameVerification }}
+{{- $_ := set $config "plugins.security.nodes_dn" (list (printf "CN=%s-discovery" (include "opensearch.fullname" .))) }}
+
+{{- $_ := set $config "plugins.security.ssl.http.enabled" $security.ssl.http.enabled }}
+{{- if $security.ssl.http.enabled }}
+  {{- $_ := set $config "plugins.security.ssl.http.pemkey_filepath"        "ssl-http/tls.key" }}
+  {{- $_ := set $config "plugins.security.ssl.http.pemcert_filepath"       "ssl-http/tls.crt" }}
+  {{- $_ := set $config "plugins.security.ssl.http.pemtrustedcas_filepath" "ssl-http/ca.crt"  }}
+  {{- $_ := set $config "plugins.security.authcz.admin_dn" (list (printf "CN=%s-admin" (include "opensearch.fullname" .))) }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "opensearch.fullname" . }}-config
+  labels:
+    {{- include "opensearch.labels" . | nindent 4 }}
+data:
+  opensearch.yml: |
+    {{- toYaml $config | nindent 4 }}
+
+  jvm.options: |
+    {{- .Values.jvmOptions | nindent 4 }}

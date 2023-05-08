@@ -1,0 +1,8 @@
+security:
+  ssl:
+    method: certmanager
+    certManagerIssuerRef:
+      group: cert-manager.io
+      kind: ClusterIssuer
+      name: ca-issuer
+    certValidityDuration: 1095

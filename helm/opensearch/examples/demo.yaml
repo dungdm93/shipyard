@@ -1,0 +1,51 @@
+commons:
+  replicas: 3
+  persistence:
+    enabled: true
+    size: 30Gi
+
+security:
+  ssl:
+    method: helm
+    certValidityDuration: 1095
+    # http:
+    #   enabled: false
+  accounts:
+    roles:
+      kibana_read_only:
+        reserved: true
+
+      asynchronous_search_full_access:
+        reserved: true
+        cluster_permissions:
+          - 'cluster:admin/opendistro/asynchronous_search/*'
+        index_permissions:
+          - index_patterns:
+              - '*'
+            allowed_actions:
+              - 'indices:data/read/search*'
+
+    rolesMapping:
+      kibana_user:
+        reserved: false
+        description: "Maps kibanauser to kibana_user"
+        backend_roles:
+        - kibanauser
+
+    users:
+      kibanaro:
+        hash: "$2a$12$JJSXNfTowz7Uu5ttXfeYpeYE0arACvcwlPBStB1F.MI7f0U9Z4DGC"
+        reserved: false
+        description: "Demo OpenSearch Dashboards read only user, using external role mapping"
+        backend_roles:
+        - kibanauser
+        - readall
+        attributes:
+          attribute1: value1
+          attribute2: value2
+          attribute3: value3
+
+    tenants:
+      admin_tenant:
+        reserved: false
+        description: "Demo tenant for admin user"

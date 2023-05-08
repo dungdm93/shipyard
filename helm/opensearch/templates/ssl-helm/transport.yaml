@@ -1,0 +1,25 @@
+{{- if eq .Values.security.ssl.method "helm" }}
+{{- $_ := include "opensearch.helm.setup-ca" . -}}
+{{- $transportCN := printf "%s-discovery" (include "opensearch.fullname" .) }}
+{{- $transportIP := list "127.0.0.1" "::1" }}
+{{- $transportDNS := list "localhost" $transportCN }}
+{{- $transportDNS := printf "%s.%s" $transportCN .Release.Namespace | append $transportDNS }}
+{{- $transportDNS := printf "%s.%s.svc" $transportCN .Release.Namespace | append $transportDNS }}
+{{- $transportDNS := printf "%s.%s.svc.cluster.local" $transportCN .Release.Namespace | append $transportDNS }}
+{{- $transportSSL := genSignedCert $transportCN $transportIP $transportDNS (.Values.security.ssl.certValidityDuration | int) .ca -}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "opensearch.fullname" . }}-ssl-transport
+  labels:
+    {{- include "opensearch.labels" . | nindent 4 }}
+type: kubernetes.io/tls
+stringData:
+  ca.crt: |
+    {{- .ca.Cert | nindent 4 }}
+  tls.crt: |
+    {{- $transportSSL.Cert | nindent 4 }}
+  tls.key: |
+    {{- $transportSSL.Key  | nindent 4 }}
+{{- end }}

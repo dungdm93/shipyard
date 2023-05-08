@@ -1,0 +1,175 @@
+{{- range .Values.nodeGroups }}
+{{- $nodeGroup := mergeOverwrite (deepCopy $.Values.commons) . -}}
+{{- $persistence := $nodeGroup.persistence -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "opensearch.fullname" $ }}-{{ $nodeGroup.name }}
+  labels:
+    {{- include "opensearch.labels" $ | nindent 4 }}
+    opensearch.org/node-group: {{ $nodeGroup.name }}
+    {{- with $nodeGroup.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $nodeGroup.annotations | nindent 4 }}
+spec:
+  {{- with $nodeGroup.replicas }}
+  replicas: {{ . }}
+  {{- end }}
+  serviceName: {{ include "opensearch.fullname" $ }}-{{ $nodeGroup.name }}-headless
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "opensearch.selectorLabels" $ | nindent 6 }}
+      opensearch.org/node-group: {{ $nodeGroup.name }}
+  template:
+    metadata:
+      labels:
+        {{- include "opensearch.selectorLabels" $ | nindent 8 }}
+        opensearch.org/node-group: {{ $nodeGroup.name }}
+        {{- with $nodeGroup.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "opensearch.checksum" $ | nindent 8 }}
+        {{- with $nodeGroup.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with $.Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      {{- with $nodeGroup.terminationPeriod }}
+      terminationGracePeriodSeconds: {{ . }}
+      {{- end }}
+      {{- if $.Values.sysctlInit.enabled }}
+      initContainers:
+        - name: sysctl
+          image: alpine:3.17
+          imagePullPolicy: IfNotPresent
+          command:
+            - sysctl
+            - -w
+            {{- range $k, $v := $.Values.sysctlInit.config }}
+            - {{ $k }}={{ $v }}
+            {{- end }}
+          securityContext:
+            runAsUser: 0
+            privileged: true
+      {{- end }}
+      containers:
+        - name: opensearch
+          image: {{ include "opensearch.image" $ | quote }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          {{- with $nodeGroup.extraArgs }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: node.roles
+              value: {{ $nodeGroup.roles | join "," }}
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: DISABLE_INSTALL_DEMO_CONFIG
+              value: "true"
+            {{- with $nodeGroup.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with $nodeGroup.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ get $.Values.config "http.port" }}
+              protocol: TCP
+            - name: transport
+              containerPort: {{ get $.Values.config "transport.port" }}
+              protocol: TCP
+          volumeMounts:
+            {{- include "opensearch.volumeMounts" (list $nodeGroup $) | nindent 12 }}
+            {{- with $nodeGroup.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30  # 5min
+          livenessProbe:
+            tcpSocket:
+              port: http
+          readinessProbe:
+            tcpSocket:
+              port: http
+          {{- with $nodeGroup.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $nodeGroup.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+      serviceAccountName: {{ include "opensearch.serviceAccountName" $ }}
+      priorityClassName:  {{ $nodeGroup.priorityClassName }}
+      runtimeClassName:   {{ $nodeGroup.runtimeClassName }}
+      schedulerName:      {{ $nodeGroup.schedulerName }}
+      {{- with $nodeGroup.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- include "opensearch.volumes" (list $nodeGroup $) | nindent 8 }}
+        {{- with $nodeGroup.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $nodeGroup.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $nodeGroup.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $nodeGroup.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $nodeGroup.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if $persistence.enabled }}
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        creationTimestamp: null
+        name: data
+        {{- with $persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        volumeMode: Filesystem
+        accessModes: [ReadWriteOnce]
+        {{- with $persistence.storageClass }}
+        storageClassName: {{ eq "-" . | ternary "" . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $persistence.size | quote }}
+        {{- with $persistence.selector }}
+        selector:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+  {{- end }}
+{{ end }}

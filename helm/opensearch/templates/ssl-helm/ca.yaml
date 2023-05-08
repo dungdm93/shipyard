@@ -1,0 +1,15 @@
+{{- if eq .Values.security.ssl.method "helm" }}
+{{- $_ := include "opensearch.helm.setup-ca" . -}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "opensearch.fullname" . }}-ca
+  labels:
+    {{- include "opensearch.labels" . | nindent 4 }}
+stringData:
+  ca.crt: |
+    {{- .ca.Cert | nindent 4 }}
+  ca.key: |
+    {{- .ca.Key  | nindent 4 }}
+{{- end }}

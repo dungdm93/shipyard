@@ -1,0 +1,26 @@
+{{- range .Values.nodeGroups }}
+{{- $nodeGroup := mergeOverwrite (deepCopy $.Values.commons) . -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "opensearch.fullname" $ }}-{{ $nodeGroup.name }}-headless
+  labels:
+    {{- include "opensearch.labels" $ | nindent 4 }}
+    opensearch.org/node-group: {{ $nodeGroup.name }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "opensearch.selectorLabels" $ | nindent 4 }}
+    opensearch.org/node-group: {{ $nodeGroup.name }}
+  ports:
+    - name: http
+      port: 9200
+      targetPort: http
+      protocol: TCP
+    - name: transport
+      port: 9300
+      targetPort: transport
+      protocol: TCP
+{{ end }}

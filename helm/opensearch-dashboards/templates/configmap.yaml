@@ -1,0 +1,54 @@
+{{- $config := deepCopy .Values.config }}
+{{- range $k, $v := $config }}
+  {{- if hasPrefix "opensearch." $k }}
+    {{- fail "'opensearch' config MUST be defined in .Values.opensearch" }}
+  {{- end }}
+{{- end }}
+{{- include "opensearch-dashboards.flattenConfig" (list $config "opensearch" .Values.opensearch) }}
+
+{{- $security := .Values.security }}
+{{- $auth := list }}
+
+{{- if $security.basicauth.enabled }}
+  {{- $auth = append $auth "basicauth" }}
+  {{- range $key, $value := $security.basicauth.loginUI }}
+    {{- $_ := set $config (printf "opensearch_security.ui.basicauth.login.%s" $key) $value }}
+  {{- end }}
+{{- end }}
+
+{{- if $security.openid.enabled }}
+  {{- $auth = append $auth "openid" }}
+  {{- $openid := $security.openid }}
+
+  {{- range $key, $value := $openid.loginUI }}
+    {{- $_ := set $config (printf "opensearch_security.ui.openid.login.%s" $key) $value }}
+  {{- end }}
+
+  {{- $_ := set $config "opensearch_security.openid.connect_url"       ($openid.connectUrl      | required "Missing security.openid.connectUrl") }}
+  {{- $_ := set $config "opensearch_security.openid.client_id"         ($openid.clientId        | required "Missing security.openid.clientId") }}
+  {{- $_ := set $config "opensearch_security.openid.client_secret"     ($openid.clientSecret    | required "Missing security.openid.clientSecret") }}
+  {{- $_ := set $config "opensearch_security.openid.base_redirect_url" ($openid.baseRedirectUrl | required "Missing security.openid.baseRedirectUrl") }}
+{{- end }}
+
+{{- if $security.saml.enabled }}
+  {{- $auth = append $auth "saml" }}
+{{- end }}
+{{- $_ := set $config "opensearch_security.auth.type" $auth }}
+{{- if gt (len $auth) 1 }}
+  {{- $_ := set $config "opensearch_security.auth.multiple_auth_enabled" true }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "opensearch-dashboards.fullname" . }}-config
+  labels:
+    {{- include "opensearch-dashboards.labels" . | nindent 4 }}
+data:
+  opensearch_dashboards.yml: |
+    {{- toYaml $config | nindent 4 }}
+
+  {{- with .Values.nodeOptions }}
+  node.options: |
+    {{- . | nindent 4 }}
+  {{- end }}

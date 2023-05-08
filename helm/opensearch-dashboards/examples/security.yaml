@@ -1,0 +1,11 @@
+security:
+  basicauth:
+    enabled: true
+  openid:
+    enabled: true
+    connectUrl: http://keycloak.example.com:8080/auth/realms/master/.well-known/openid-configuration
+    clientId: opensearch-dashboards-sso
+    clientSecret: a59c51f5-f052-4740-a3b0-e14ba355b520
+    baseRedirectUrl: https://opensearch-dashboard.local
+  saml:
+    enabled: true
