@@ -3,7 +3,7 @@ fullnameOverride: ""
 
 image:
   repository: grafana/mimir
-  tag: 2.5.0
+  tag: 2.8.0
   pullPolicy: IfNotPresent
   pullSecrets: []
 
@@ -132,6 +132,8 @@ alertmanagerFallbackConfig:
 
   receivers:
     - name: void
+
+deploymentMode: SimpleScalable  # AIO | SimpleScalable
 
 commons:
   replicas: null

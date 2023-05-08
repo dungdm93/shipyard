@@ -1,14 +1,14 @@
-{{- if eq (lower .Values.deploymentMode) "simplescalable" }}
-{{- $read := mergeOverwrite (deepCopy .Values.commons) .Values.read -}}
-{{- $service := $read.service -}}
+{{- if eq (lower .Values.deploymentMode) "aio" }}
+{{- $aio := deepCopy .Values.commons -}}
+{{- $service := $aio.service -}}
 {{- $specifyNodePort := or (eq $service.type "NodePort") (and (eq $service.type "LoadBalancer") $service.allocateLoadBalancerNodePorts) -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "mimir.fullname" . }}-read
+  name: {{ include "mimir.fullname" . }}
   labels:
-    {{- include "mimir.read.labels" . | nindent 4 }}
+    {{- include "mimir.aio.labels" . | nindent 4 }}
   {{- with $service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -43,7 +43,7 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   selector:
-    {{- include "mimir.read.selectorLabels" . | nindent 4 }}
+    {{- include "mimir.aio.selectorLabels" . | nindent 4 }}
   ports:
   - name: http
     port: 9009
@@ -61,4 +61,27 @@ spec:
     {{- if and $specifyNodePort $service.nodePorts.grpc }}
     nodePort: {{ $service.nodePorts.grpc }}
     {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mimir.fullname" . }}-headless
+  labels:
+    {{- include "mimir.aio.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "mimir.aio.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: http
+    port: 9009
+    targetPort: http
+    protocol: TCP
+    appProtocol: http
+  - name: grpc
+    port: 9095
+    targetPort: grpc
+    protocol: TCP
+    appProtocol: gRPC
 {{- end }}

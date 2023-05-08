@@ -1,39 +1,39 @@
-{{- if eq (lower .Values.deploymentMode) "simplescalable" }}
-{{- $write := mergeOverwrite (deepCopy .Values.commons) .Values.write -}}
-{{- $persistence := $write.persistence -}}
+{{- if eq (lower .Values.deploymentMode) "aio" }}
+{{- $aio := deepCopy .Values.commons -}}
+{{- $persistence := $aio.persistence -}}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "mimir.fullname" . }}-write
+  name: {{ include "mimir.fullname" . }}
   labels:
-    {{- include "mimir.write.labels" . | nindent 4 }}
+    {{- include "mimir.aio.labels" . | nindent 4 }}
     app.kubernetes.io/part-of: memberlist
-    {{- with $write.labels }}
+    {{- with $aio.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    {{- toYaml $write.annotations | nindent 4 }}
+    {{- toYaml $aio.annotations | nindent 4 }}
 spec:
-  replicas: {{ $write.replicas }}
-  serviceName: "{{ include "mimir.fullname" . }}-write-headless"
+  replicas: {{ $aio.replicas }}
+  serviceName: "{{ include "mimir.fullname" . }}-headless"
   podManagementPolicy: Parallel
   updateStrategy:
     type: RollingUpdate
   selector:
     matchLabels:
-      {{- include "mimir.write.selectorLabels" . | nindent 6 }}
+      {{- include "mimir.aio.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "mimir.write.selectorLabels" . | nindent 8 }}
+        {{- include "mimir.aio.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/part-of: memberlist
-        {{- with $write.podLabels }}
+        {{- with $aio.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
         {{- include "mimir.checksum" . | nindent 8 }}
-        {{- with $write.podAnnotations }}
+        {{- with $aio.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- if and .Values.metrics.enabled (not .Values.metrics.podMonitor.enabled) }}
@@ -47,22 +47,22 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       enableServiceLinks: false
-      terminationGracePeriodSeconds: {{ $write.terminationPeriod }}
+      terminationGracePeriodSeconds: {{ $aio.terminationPeriod }}
       containers:
-        - name: mimir-write
+        - name: mimir
           image: {{ include "mimir.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - -target={{ $write.target | join "," }}
+            - -target=all
             - -config.file=/etc/mimir/config.yaml
-            {{- with .Values.write.extraArgs }}
+            {{- with $aio.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with $write.extraEnv }}
+          {{- with $aio.extraEnv }}
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $write.extraEnvFrom }}
+          {{- with $aio.extraEnvFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -80,7 +80,7 @@ spec:
             {{- include "mimir.volumeMounts" . | nindent 12 }}
             - name: data
               mountPath: /mimir/
-            {{- with $write.extraVolumeMounts }}
+            {{- with $aio.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           livenessProbe:
@@ -93,19 +93,19 @@ spec:
               path: /ready
               port: http
             periodSeconds: 30
-          {{- with $write.resources }}
+          {{- with $aio.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $write.securityContext }}
+          {{- with $aio.securityContext }}
           securityContext:
             {{- toYaml . | nindent 8 }}
           {{- end }}
       serviceAccountName: {{ include "mimir.serviceAccountName" . }}
-      priorityClassName:  {{ $write.priorityClassName }}
-      runtimeClassName:   {{ $write.runtimeClassName }}
-      schedulerName:      {{ $write.schedulerName }}
-      {{- with $write.podSecurityContext }}
+      priorityClassName:  {{ $aio.priorityClassName }}
+      runtimeClassName:   {{ $aio.runtimeClassName }}
+      schedulerName:      {{ $aio.schedulerName }}
+      {{- with $aio.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -115,18 +115,18 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
-        {{- with $write.extraVolumes }}
+        {{- with $aio.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with $write.nodeSelector }}
+      {{- with $aio.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $write.affinity }}
+      {{- with $aio.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $write.tolerations }}
+      {{- with $aio.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

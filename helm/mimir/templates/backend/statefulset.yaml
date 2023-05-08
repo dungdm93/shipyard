@@ -1,3 +1,4 @@
+{{- if eq (lower .Values.deploymentMode) "simplescalable" }}
 {{- $backend := mergeOverwrite (deepCopy .Values.commons) .Values.backend -}}
 {{- $persistence := $backend.persistence -}}
 ---
@@ -154,3 +155,4 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
   {{- end }}
+{{- end }}
