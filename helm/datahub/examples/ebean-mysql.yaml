@@ -1,0 +1,19 @@
+elasticsearch:
+  host: localhost
+
+kafka:
+  bootstrapServers: [bootstrap.kafa:9092]
+  confluent:
+    url: http://localhost:1234
+
+##############################
+entityService:
+  impl: ebean
+
+ebean:
+  type: mysql
+  host: mysql.local
+  port: 3306
+  database: datahub
+  username: user
+  password: pass

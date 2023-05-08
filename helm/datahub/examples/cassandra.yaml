@@ -1,0 +1,20 @@
+elasticsearch:
+  host: localhost
+
+kafka:
+  bootstrapServers: [bootstrap.kafa:9092]
+  confluent:
+    url: http://localhost:1234
+
+##############################
+entityService:
+  impl: cassandra
+
+cassandra:
+  host: cassandra.local
+  port: 9200
+  datacenter: dc1
+  keyspace: ks1
+  username: user
+  password: pass
+  useSSL: false

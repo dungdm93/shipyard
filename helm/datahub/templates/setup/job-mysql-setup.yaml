@@ -1,0 +1,82 @@
+{{- if and (eq .Values.entityService.impl "ebean") (eq .Values.ebean.type "mysql") }}
+{{- $gms := mergeOverwrite (deepCopy .Values.commons) .Values.gms -}}
+{{- $ebean := .Values.ebean }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "datahub.fullname" . }}-mysql-setup
+  labels:
+    {{- include "datahub.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mysql-setup
+    {{- with $gms.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "datahub.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mysql-setup
+        {{- with $gms.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $gms.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with $gms.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      restartPolicy: Never
+      containers:
+        - name: datahub-mysql-setup
+          image: "{{ .Values.setup.mysql.image.repository }}:{{ .Values.setup.mysql.image.tag }}"
+          imagePullPolicy: {{ $gms.image.pullPolicy }}
+          env:
+          - name: MYSQL_HOST
+            value: {{ $ebean.host | quote }}
+          - name: MYSQL_PORT
+            value: {{ $ebean.port | quote }}
+          - name: DATAHUB_DB_NAME
+            value: {{ $ebean.database | quote }}
+          - name: MYSQL_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "datahub.fullname" . }}-hooks
+                key:  EBEAN_DATASOURCE_USERNAME
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "datahub.fullname" . }}-hooks
+                key:  EBEAN_DATASOURCE_PASSWORD
+          securityContext:
+            {{- toYaml $gms.securityContext | nindent 12 }}
+      priorityClassName:  {{ $gms.priorityClassName }}
+      runtimeClassName:   {{ $gms.runtimeClassName }}
+      schedulerName:      {{ $gms.schedulerName }}
+      securityContext:
+        {{- toYaml $gms.podSecurityContext | nindent 8 }}
+      {{- with $gms.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gms.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gms.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gms.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

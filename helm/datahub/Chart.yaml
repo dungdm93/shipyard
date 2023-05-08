@@ -1,0 +1,7 @@
+apiVersion: v2
+name: datahub
+description: A Helm chart for LinkedIn DataHub
+icon: https://datahubproject.io/img/datahub-logo-color-mark.svg
+type: application
+version: 0.1.0
+appVersion: 0.10.0

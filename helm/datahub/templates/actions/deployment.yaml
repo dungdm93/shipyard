@@ -1,0 +1,95 @@
+{{- $actions := mergeOverwrite (deepCopy .Values.commons) .Values.actions -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datahub.fullname" . }}-actions
+  labels:
+    {{- include "datahub.actions.labels" . | nindent 4 }}
+    {{- with $actions.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $actions.annotations | nindent 4 }}
+spec:
+  {{- with $actions.replicas }}
+  replicas: {{ . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "datahub.actions.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "datahub.actions.selectorLabels" . | nindent 8 }}
+        {{- with $actions.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "datahub.actions.checksum" . | nindent 8 }}
+        {{- with $actions.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with $actions.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: datahub-actions
+          image: "{{ $actions.image.repository }}:{{ $actions.image.tag }}"
+          imagePullPolicy: {{ $actions.image.pullPolicy }}
+          {{- with $actions.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $actions.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+          - secretRef:
+              name: {{ include "datahub.fullname" . }}
+          - secretRef:
+              name: {{ include "datahub.fullname" . }}-actions
+          {{- with $actions.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: actions
+              mountPath: /etc/datahub/actions/conf/
+          {{- with $actions.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml $actions.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $actions.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "datahub.serviceAccountName" . }}
+      priorityClassName:  {{ $actions.priorityClassName }}
+      runtimeClassName:   {{ $actions.runtimeClassName }}
+      schedulerName:      {{ $actions.schedulerName }}
+      securityContext:
+        {{- toYaml $actions.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: actions
+          secret:
+            secretName: {{ include "datahub.fullname" . }}-actions-extra
+            optional: true
+      {{- with $actions.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $actions.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $actions.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $actions.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

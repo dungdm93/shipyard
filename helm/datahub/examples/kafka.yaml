@@ -1,0 +1,33 @@
+elasticsearch:
+  host: localhost
+
+ebean:
+  type: mysql
+  host: mysql.local
+  port: 3306
+  database: datahub
+  username: user
+  password: pass
+
+##############################
+kafka:
+  bootstrapServers: [bootstrap.kafa:9092]
+  confluent:
+    url: http://localhost:1234
+  topics:
+    metadataChangeLogVersioned:  datahub.metadata.change_log.versioned.v1
+    metadataChangeLogTimeseries: datahub.metadata.change_log.timeseries.v1
+    metadataChangeProposal: datahub.metadata.change_proposal.v1
+    failedMetadataChangeProposal: datahub.metadata.change_proposal.failed.v1
+    platformEvent: datahub.platform_event.v1
+    metadataAuditEvent: datahub.metadata.audit_event.v4
+    metadataChangeEvent: datahub.metadata.change_event.v4
+    failedMetadataChangeEvent: datahub.metadata.change_event.failed.v4
+    usageEvent: datahub.usage_event.v1
+  consumerGroups:
+    metadataChangeLog: datahub.mcl
+    metadataChangeProposal: datahub.mcp
+    platformEvent: datahub.pe
+    metadataAuditEvent: datahub.mae
+    metadataChangeEvent: datahub.mce
+    usageEvent: datahub.ue

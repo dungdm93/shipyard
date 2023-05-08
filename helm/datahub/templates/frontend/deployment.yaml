@@ -1,0 +1,129 @@
+{{- $frontend := mergeOverwrite (deepCopy .Values.commons) .Values.frontend -}}
+{{- $jaas := .Values.authn.frontend.jaas }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datahub.fullname" . }}-frontend
+  labels:
+    {{- include "datahub.frontend.labels" . | nindent 4 }}
+    {{- with $frontend.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $frontend.annotations | nindent 4 }}
+spec:
+  {{- with $frontend.replicas }}
+  replicas: {{ . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "datahub.frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "datahub.frontend.selectorLabels" . | nindent 8 }}
+        {{- with $frontend.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "datahub.frontend.checksum" . | nindent 8 }}
+        {{- with $frontend.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with $frontend.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: datahub-frontend
+          image: "{{ $frontend.image.repository }}:{{ $frontend.image.tag }}"
+          imagePullPolicy: {{ $frontend.image.pullPolicy }}
+          {{- with $frontend.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $frontend.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+          - secretRef:
+              name: {{ include "datahub.fullname" . }}
+          - secretRef:
+              name: {{ include "datahub.fullname" . }}-frontend
+          {{- with $frontend.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+          - name: http
+            protocol: TCP
+            containerPort: 9002
+          {{- if .Values.metrics.enabled }}
+          - name: jmx
+            protocol: TCP
+            containerPort: 4318
+          {{- end }}
+          volumeMounts:
+          {{- if $jaas.enabled }}
+            {{- if index $jaas "jaas.conf" }}
+            - name: datahub-jaas
+              mountPath: /datahub-frontend/conf/jaas.conf
+              subPath: jaas.conf
+            {{- end }}
+            {{- if index $jaas "user.props" }}
+            - name: datahub-jaas
+              mountPath: /datahub-frontend/conf/user.props
+              subPath: user.props
+            {{- end }}
+          {{- end }}
+          {{- with $frontend.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /health
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+          resources:
+            {{- toYaml $frontend.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $frontend.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "datahub.serviceAccountName" . }}
+      priorityClassName:  {{ $frontend.priorityClassName }}
+      runtimeClassName:   {{ $frontend.runtimeClassName }}
+      schedulerName:      {{ $frontend.schedulerName }}
+      securityContext:
+        {{- toYaml $frontend.podSecurityContext | nindent 8 }}
+      volumes:
+      {{- if and $jaas.enabled (or (index $jaas "jaas.conf") (index $jaas "user.props"))}}
+        - name: datahub-jaas
+          secret:
+            secretName: {{ include "datahub.fullname" . }}-frontend-jaas
+      {{- end }}
+      {{- with $frontend.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $frontend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $frontend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $frontend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,52 @@
+elasticsearch:
+  host: localhost
+
+ebean:
+  type: mysql
+  host: mysql.local
+  port: 3306
+  database: datahub
+  username: user
+  password: pass
+
+kafka:
+  bootstrapServers: [bootstrap.kafa:9092]
+  confluent:
+    url: http://localhost:1234
+
+##############################
+frontend:
+  baseUrl: http://localhost:9002
+  secretKey: fr0ntEndSecr3tK3y
+
+authn:
+  frontend:
+    oidc:
+      enabled: true
+      clientId: datahubClientId
+      clientSecret: datahubClientSecret
+      discoveryUri: https://accounts.google.com/.well-known/openid-configuration
+      extractGroupsEnabled: true
+      groupsClaim: groups
+    jaas:
+      enabled: true
+      jaas.conf: |
+        WHZ-Authentication {
+          org.eclipse.jetty.jaas.spi.PropertyFileLoginModule sufficient debug="true" file="/datahub-frontend/conf/user.props";
+        };
+      user.props:
+      - username: datahub
+        password: foobar
+      - username: admin
+        password: SuperSecr3t
+        roles: [admin, superuser, foobar]
+      - username: normal_user
+        password: normal_password
+        roles: []
+  gms:
+    enabled: true
+    systemClientId: admin
+    systemClientSecret: SUperSecr3t
+    tokenService:
+      signingKey: verySafeSigningKey
+      salt: nacl

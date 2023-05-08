@@ -1,0 +1,111 @@
+{{- $gms := mergeOverwrite (deepCopy .Values.commons) .Values.gms -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datahub.fullname" . }}-gms
+  labels:
+    {{- include "datahub.gms.labels" . | nindent 4 }}
+    {{- with $gms.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $gms.annotations | nindent 4 }}
+spec:
+  {{- with $gms.replicas }}
+  replicas: {{ . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "datahub.gms.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "datahub.gms.selectorLabels" . | nindent 8 }}
+        {{- with $gms.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "datahub.gms.checksum" . | nindent 8 }}
+        {{- with $gms.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with $gms.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: datahub-gms
+          image: "{{ $gms.image.repository }}:{{ $gms.image.tag }}"
+          imagePullPolicy: {{ $gms.image.pullPolicy }}
+          {{- with $gms.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $gms.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+          - secretRef:
+              name: {{ include "datahub.fullname" . }}
+          - secretRef:
+              name: {{ include "datahub.fullname" . }}-gms
+          {{- with $gms.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+          - name: http
+            protocol: TCP
+            containerPort: 8080
+          {{- if .Values.metrics.enabled }}
+          - name: jmx
+            protocol: TCP
+            containerPort: 4318
+          {{- end }}
+          {{- with $gms.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /health
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+          resources:
+            {{- toYaml $gms.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml $gms.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "datahub.serviceAccountName" . }}
+      priorityClassName:  {{ $gms.priorityClassName }}
+      runtimeClassName:   {{ $gms.runtimeClassName }}
+      schedulerName:      {{ $gms.schedulerName }}
+      securityContext:
+        {{- toYaml $gms.podSecurityContext | nindent 8 }}
+      {{- with $gms.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gms.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gms.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gms.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

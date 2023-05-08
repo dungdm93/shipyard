@@ -1,0 +1,261 @@
+nameOverride: ""
+fullnameOverride: ""
+
+commons:
+  image:
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+  replicas: null
+  command: []
+  args: []
+  env: []
+
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+
+  resources: {}
+
+  schedulerName: null
+  runtimeClassName: null
+  priorityClassName: null
+
+  affinity: {}
+  tolerations: []
+  nodeSelector: {}
+
+  securityContext: {}
+  podSecurityContext: {}
+
+  extraVolumes: []
+  extraVolumeMounts: []
+
+gms:
+  image:
+    repository: linkedin/datahub-gms
+    tag: v0.9.6.1
+  service:
+    type: ClusterIP
+    clusterIP:
+    loadBalancerIP:
+    loadBalancerClass:
+    allocateLoadBalancerNodePorts: true
+    nodePort:
+    sessionAffinity:
+    sessionAffinityConfig:
+    internalTrafficPolicy:
+    externalTrafficPolicy:
+    annotations: {}
+
+frontend:
+  image:
+    repository: linkedin/datahub-frontend-react
+    tag: v0.9.6.1
+  baseUrl:
+  # SHOULD >= random 16 chars.
+  # See https://www.playframework.com/documentation/2.8.x/ApplicationSecret
+  secretKey:
+  service:
+    type: ClusterIP
+    clusterIP:
+    loadBalancerIP:
+    loadBalancerClass:
+    allocateLoadBalancerNodePorts: true
+    nodePort:
+    sessionAffinity:
+    sessionAffinityConfig:
+    internalTrafficPolicy:
+    externalTrafficPolicy:
+    annotations: {}
+
+actions:
+  image:
+    repository: hub.teko.vn/dataops/datahub/actions
+    tag: 0.0.10
+  ingestionExecutor:
+    executorId:
+  slackAction:
+    enabled: false
+    botToken:
+    signingSecret:
+    defaultChannel:
+    suppressSystemActivity:
+  teamsAction:
+    enabled: false
+    webhookUrl:
+    suppressSystemActivity:
+  extraActions:
+
+setup:
+  elasticsearch:
+    image:
+      repository: linkedin/datahub-elasticsearch-setup
+      tag: v0.9.6.1
+  kafka:
+    image:
+      repository: linkedin/datahub-kafka-setup
+      tag: v0.9.6.1
+  postgresql:
+    image:
+      repository: acryldata/datahub-postgres-setup
+      tag: v0.9.6.4
+  mysql:
+    image:
+      repository: acryldata/datahub-mysql-setup
+      tag: v0.9.6.4
+  systemUpdate:
+    image:
+      repository: acryldata/datahub-upgrade
+      tag: v0.9.6.4
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+ingress:
+  enabled: false
+  ingressClass: ""
+  annotations: {}
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: datahub.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: datahub-tls
+  #    hosts:
+  #      - datahub.local
+
+entityService:
+  impl: ebean # ebean | cassandra
+
+searchService:
+  resultBatchSize:
+  enableCache: true
+  cacheImplementation: caffeine # caffeine | hazelcast
+  cache:
+    hazelcast:
+      serviceName:
+
+graphService:
+  impl: elasticsearch # elasticsearch | neo4j
+
+ebean:
+  type:
+  host:
+  port:
+  database:
+  driver:
+  username:
+  password:
+  useAwsIamAuth:
+
+cassandra:
+  host:
+  port: 9042
+  datacenter:
+  keyspace:
+  username:
+  password:
+  useSSL: false
+
+elasticsearch:
+  variants: elasticsearch # elasticsearch | opensearch
+  host:
+  port: 9200
+  useSSL: false
+  username:
+  password:
+  useAwsIamAuth:
+  region:
+  index:
+    prefix:
+    numShards:
+    numReplicas:
+    numRetries:
+    refreshIntervalSeconds:
+
+neo4j:
+  uri:
+  username:
+  password:
+
+kafka:
+  bootstrapServers: []
+  partitions:
+  replicationFactor:
+  schemaRegistry:
+    type: CONFLUENT # CONFLUENT | AWS_GLUE
+  awsGlue:
+    region:
+    registryName:
+  confluent:
+    url:
+    securityProtocol: PLAINTEXT
+  topics:
+    metadataChangeLogVersioned:
+    metadataChangeLogTimeseries:
+    metadataChangeProposal:
+    failedMetadataChangeProposal:
+    platformEvent:
+    metadataAuditEvent:
+    metadataChangeEvent:
+    failedMetadataChangeEvent:
+    usageEvent:
+  consumerGroups:
+    metadataChangeLog:
+    metadataChangeProposal:
+    platformEvent:
+    metadataAuditEvent:
+    metadataChangeEvent:
+    upgradeHistory:
+    usageEvent:
+
+# https://blog.datahubproject.io/tech-deep-dive-introducing-datahub-metadata-service-authentication-661e3aabbad0
+authn:
+  frontend:
+    oidc:
+      enabled: false
+      clientId:     # required when oidc.enabled
+      clientSecret: # required when oidc.enabled
+      discoveryUri: # required when oidc.enabled
+      userNameClaim:
+      userNameClaimRegex:
+      scope:
+      clientAuthenticationMethod:
+      jitProvisioningEnabled:
+      preProvisioningRequired:
+      extractGroupsEnabled:
+      groupsClaim:
+      responseType:
+      responseMode:
+      useNonce:
+      readTimeout:
+      extractJwtAccessTokenClaims:
+    # https://wiki.eclipse.org/Jetty/Tutorial/JAAS
+    # https://datahubproject.io/docs/authentication/guides/jaas/
+    jaas:
+      enabled: true
+      jaas.conf:
+      user.props:
+      # - username:
+      #   password:
+      #   roles: []
+    native:
+      enabled: true
+  gms:
+    enabled: false
+    systemClientId:
+    systemClientSecret:
+    tokenService:
+      signingKey:
+      salt:
+
+analytics:
+  enabled: true
+
+metrics:
+  enabled: false

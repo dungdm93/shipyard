@@ -1,0 +1,18 @@
+elasticsearch:
+  host: localhost
+
+kafka:
+  bootstrapServers: [bootstrap.kafa:9092]
+  confluent:
+    url: http://localhost:1234
+
+##############################
+entityService:
+  impl: ebean
+
+ebean:
+  type: postgresql
+  host: postgresql.local
+  port: 2345
+  database: datahub
+  useAwsIamAuth: true

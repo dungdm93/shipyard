@@ -1,0 +1,98 @@
+{{- $gms := mergeOverwrite (deepCopy .Values.commons) .Values.gms -}}
+{{- $kafka := .Values.kafka }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "datahub.fullname" . }}-kafka-setup
+  labels:
+    {{- include "datahub.labels" . | nindent 4 }}
+    app.kubernetes.io/component: kafka-setup
+    {{- with $gms.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "datahub.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: kafka-setup
+        {{- with $gms.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $gms.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with $gms.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      restartPolicy: Never
+      containers:
+        - name: datahub-kafka-setup
+          image: "{{ .Values.setup.kafka.image.repository }}:{{ .Values.setup.kafka.image.tag }}"
+          imagePullPolicy: {{ $gms.image.pullPolicy }}
+          envFrom:
+          - secretRef:
+              name: {{ include "datahub.fullname" . }}-hooks
+          env:
+          # DataHub inconsistent env between components
+          - name: METADATA_CHANGE_LOG_VERSIONED_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "datahub.fullname" . }}-hooks
+                key: METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME
+                optional: true
+          - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "datahub.fullname" . }}-hooks
+                key: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
+                optional: true
+          - name: METADATA_CHANGE_PROPOSAL_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "datahub.fullname" . }}-hooks
+                key: METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+                optional: true
+          - name: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "datahub.fullname" . }}-hooks
+                key: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+                optional: true
+          - name: PLATFORM_EVENT_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "datahub.fullname" . }}-hooks
+                key: PLATFORM_EVENT_TOPIC_NAME
+                optional: true
+          securityContext:
+            {{- toYaml $gms.securityContext | nindent 12 }}
+      priorityClassName:  {{ $gms.priorityClassName }}
+      runtimeClassName:   {{ $gms.runtimeClassName }}
+      schedulerName:      {{ $gms.schedulerName }}
+      securityContext:
+        {{- toYaml $gms.podSecurityContext | nindent 8 }}
+      {{- with $gms.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gms.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gms.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gms.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,29 @@
+ebean:
+  type: mysql
+  host: mysql.local
+  port: 3306
+  database: datahub
+  username: user
+  password: pass
+
+kafka:
+  bootstrapServers: [bootstrap.kafa:9092]
+  confluent:
+    url: http://localhost:1234
+
+##############################
+graphService:
+  impl: elasticsearch
+
+elasticsearch:
+  host: elasticsearch.local
+  port: 9200
+  useSSL: false
+  username: es
+  password: es.secret
+  index:
+    prefix: datahub_
+    numShards: 3
+    numReplicas: 3
+    numRetries: 3
+    refreshIntervalSeconds: 30
