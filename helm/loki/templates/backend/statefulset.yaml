@@ -1,39 +1,39 @@
 {{- if eq (lower .Values.deploymentMode) "simplescalable" }}
-{{- $write := mergeOverwrite (deepCopy .Values.commons) .Values.write -}}
-{{- $persistence := $write.persistence -}}
+{{- $backend := mergeOverwrite (deepCopy .Values.commons) .Values.backend -}}
+{{- $persistence := $backend.persistence -}}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "loki.fullname" . }}-write
+  name: {{ include "loki.fullname" . }}-backend
   labels:
-    {{- include "loki.write.labels" . | nindent 4 }}
+    {{- include "loki.backend.labels" . | nindent 4 }}
     app.kubernetes.io/part-of: memberlist
-    {{- with $write.labels }}
+    {{- with $backend.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    {{- toYaml $write.annotations | nindent 4 }}
+    {{- toYaml $backend.annotations | nindent 4 }}
 spec:
-  replicas: {{ $write.replicas }}
-  serviceName: "{{ include "loki.fullname" . }}-write-headless"
+  replicas: {{ $backend.replicas }}
+  serviceName: "{{ include "loki.fullname" . }}-backend-headless"
   podManagementPolicy: Parallel
   updateStrategy:
     type: RollingUpdate
   selector:
     matchLabels:
-      {{- include "loki.write.selectorLabels" . | nindent 6 }}
+      {{- include "loki.backend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "loki.write.selectorLabels" . | nindent 8 }}
+        {{- include "loki.backend.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/part-of: memberlist
-        {{- with $write.podLabels }}
+        {{- with $backend.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
         {{- include "loki.checksum" . | nindent 8 }}
-        {{- with $write.podAnnotations }}
+        {{- with $backend.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- if and .Values.metrics.enabled (not .Values.metrics.podMonitor.enabled) }}
@@ -47,22 +47,23 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       enableServiceLinks: false
-      terminationGracePeriodSeconds: {{ $write.terminationPeriod }}
+      terminationGracePeriodSeconds: {{ $backend.terminationPeriod }}
       containers:
-        - name: loki-write
+        - name: loki-backend
           image: {{ include "loki.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - -target={{ $write.target | join "," }}
+            - -target={{ $backend.target | join "," }}
+            - -legacy-read-mode=false
             - -config.file=/etc/loki/config.yaml
-            {{- with .Values.write.extraArgs }}
+            {{- with .Values.backend.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with $write.extraEnv }}
+          {{- with $backend.extraEnv }}
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $write.extraEnvFrom }}
+          {{- with $backend.extraEnvFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -80,7 +81,7 @@ spec:
             {{- include "loki.volumeMounts" . | nindent 12 }}
             - name: data
               mountPath: /loki/
-            {{- with $write.extraVolumeMounts }}
+            {{- with $backend.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           livenessProbe:
@@ -93,19 +94,19 @@ spec:
               path: /ready
               port: http
             periodSeconds: 30
-          {{- with $write.resources }}
+          {{- with $backend.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $write.securityContext }}
+          {{- with $backend.securityContext }}
           securityContext:
             {{- toYaml . | nindent 8 }}
           {{- end }}
       serviceAccountName: {{ include "loki.serviceAccountName" . }}
-      priorityClassName:  {{ $write.priorityClassName }}
-      runtimeClassName:   {{ $write.runtimeClassName }}
-      schedulerName:      {{ $write.schedulerName }}
-      {{- with $write.podSecurityContext }}
+      priorityClassName:  {{ $backend.priorityClassName }}
+      runtimeClassName:   {{ $backend.runtimeClassName }}
+      schedulerName:      {{ $backend.schedulerName }}
+      {{- with $backend.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -115,18 +116,18 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
-        {{- with $write.extraVolumes }}
+        {{- with $backend.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with $write.nodeSelector }}
+      {{- with $backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $write.affinity }}
+      {{- with $backend.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $write.tolerations }}
+      {{- with $backend.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

@@ -1,0 +1,8 @@
+write:
+  target: [abcxyz]
+
+read:
+  target: [read, remember]
+
+backend:
+  target: [first, second, third]

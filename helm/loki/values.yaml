@@ -3,7 +3,7 @@ fullnameOverride: ""
 
 image:
   repository: grafana/loki
-  tag: 2.7.1
+  tag: 2.8.2
   pullPolicy: IfNotPresent
   pullSecrets: []
 
@@ -119,6 +119,8 @@ storage: {}
   #   [up_to: <int> | default = 2]
   #   [max_per_second: <int> | default = 5]
 
+deploymentMode: SimpleScalable  # AIO | SimpleScalable
+
 commons:
   replicas: null
   extraArgs: []
@@ -157,8 +159,8 @@ commons:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  podSecurityContext: {}
-    # fsGroup: 2000
+  podSecurityContext:
+    fsGroup: 10001
 
   podDisruptionBudget:
     enabled: false
@@ -180,6 +182,7 @@ commons:
     externalTrafficPolicy:
     annotations: {}
 
+# distributor + ingester
 write:
   target: [write]
   persistence:
@@ -188,19 +191,9 @@ write:
     size: 10Gi
     annotations: {}
 
+# querier + query-frontend
 read:
   target: [read]
-  # consider using StatefulSet in those cases:
-  # * boltdb-shipper w/o index-gateway
-  # * ruler using local storage
-  stateful: true  # true=StatefulSet | false=Deployment
-
-  persistence:
-    enabled: false
-    storageClass: null
-    size: 10Gi
-    annotations: {}
-
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -211,6 +204,15 @@ read:
     #     name: cpu
     #     target:
     #       averageUtilization: 80
+
+# compactor + ruler + index-gateway + query-scheduler + table-manager
+backend:
+  target: [backend]
+  persistence:
+    enabled: false
+    storageClass: null
+    size: 10Gi
+    annotations: {}
 
 serviceAccount:
   create: true

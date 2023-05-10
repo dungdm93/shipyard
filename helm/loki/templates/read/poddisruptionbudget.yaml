@@ -1,3 +1,4 @@
+{{- if eq (lower .Values.deploymentMode) "simplescalable" }}
 {{- $read := mergeOverwrite (deepCopy .Values.commons) .Values.read -}}
 {{- if and $read.podDisruptionBudget.enabled (gt (int $read.replicas | default 1) 1) }}
 apiVersion: policy/v1
@@ -16,4 +17,5 @@ spec:
   {{- if $read.podDisruptionBudget.maxUnavailable }}
   maxUnavailable: {{ $read.podDisruptionBudget.maxUnavailable }}
   {{- end }}
+{{- end }}
 {{- end }}

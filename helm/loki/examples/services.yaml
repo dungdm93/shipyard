@@ -23,3 +23,10 @@ read:
       grpc: 12345
     clusterIP: 1.2.3.4
     internalTrafficPolicy: Local
+
+backend:
+  service:
+    type: NodePort
+    nodePorts:
+      http: 1234
+      grpc: 12345
