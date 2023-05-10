@@ -1,14 +1,14 @@
 {{- if eq (lower .Values.deploymentMode) "simplescalable" }}
-{{- $write := mergeOverwrite (deepCopy .Values.commons) .Values.write -}}
-{{- $service := $write.service -}}
+{{- $backend := mergeOverwrite (deepCopy .Values.commons) .Values.backend -}}
+{{- $service := $backend.service -}}
 {{- $specifyNodePort := or (eq $service.type "NodePort") (and (eq $service.type "LoadBalancer") $service.allocateLoadBalancerNodePorts) -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "loki.fullname" . }}-write
+  name: {{ include "loki.fullname" . }}-backend
   labels:
-    {{- include "loki.write.labels" . | nindent 4 }}
+    {{- include "loki.backend.labels" . | nindent 4 }}
   {{- with $service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -43,7 +43,7 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   selector:
-    {{- include "loki.write.selectorLabels" . | nindent 4 }}
+    {{- include "loki.backend.selectorLabels" . | nindent 4 }}
   ports:
   - name: http
     port: 3100
@@ -65,14 +65,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "loki.fullname" . }}-write-headless
+  name: {{ include "loki.fullname" . }}-backend-headless
   labels:
-    {{- include "loki.write.labels" . | nindent 4 }}
+    {{- include "loki.backend.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   clusterIP: None
   selector:
-    {{- include "loki.write.selectorLabels" . | nindent 4 }}
+    {{- include "loki.backend.selectorLabels" . | nindent 4 }}
   ports:
   - name: http
     port: 3100

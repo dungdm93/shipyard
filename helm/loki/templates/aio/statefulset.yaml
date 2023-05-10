@@ -1,43 +1,39 @@
-{{- $read := mergeOverwrite (deepCopy .Values.commons) .Values.read -}}
-{{- $persistence := $read.persistence -}}
+{{- if eq (lower .Values.deploymentMode) "aio" }}
+{{- $aio := deepCopy .Values.commons -}}
+{{- $persistence := $aio.persistence -}}
 ---
 apiVersion: apps/v1
-kind: {{ $read.stateful | ternary "StatefulSet" "Deployment" }}
+kind: StatefulSet
 metadata:
-  name: {{ include "loki.fullname" . }}-read
+  name: {{ include "loki.fullname" . }}
   labels:
-    {{- include "loki.read.labels" . | nindent 4 }}
+    {{- include "loki.aio.labels" . | nindent 4 }}
     app.kubernetes.io/part-of: memberlist
-    {{- with $read.labels }}
+    {{- with $aio.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    {{- toYaml $read.annotations | nindent 4 }}
+    {{- toYaml $aio.annotations | nindent 4 }}
 spec:
-  replicas: {{ $read.replicas }}
-  {{- if $read.stateful }}
-  serviceName: "{{ include "loki.fullname" . }}-read-headless"
+  replicas: {{ $aio.replicas }}
+  serviceName: "{{ include "loki.fullname" . }}-headless"
   podManagementPolicy: Parallel
   updateStrategy:
     type: RollingUpdate
-  {{- else }}
-  strategy:
-    type: RollingUpdate
-  {{- end }}
   selector:
     matchLabels:
-      {{- include "loki.read.selectorLabels" . | nindent 6 }}
+      {{- include "loki.aio.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "loki.read.selectorLabels" . | nindent 8 }}
+        {{- include "loki.aio.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/part-of: memberlist
-        {{- with $read.podLabels }}
+        {{- with $aio.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
         {{- include "loki.checksum" . | nindent 8 }}
-        {{- with $read.podAnnotations }}
+        {{- with $aio.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- if and .Values.metrics.enabled (not .Values.metrics.podMonitor.enabled) }}
@@ -51,22 +47,22 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       enableServiceLinks: false
-      terminationGracePeriodSeconds: {{ $read.terminationPeriod }}
+      terminationGracePeriodSeconds: {{ $aio.terminationPeriod }}
       containers:
-        - name: loki-read
+        - name: loki
           image: {{ include "loki.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - -target={{ $read.target | join "," }}
+            - -target=all
             - -config.file=/etc/loki/config.yaml
-            {{- with .Values.read.extraArgs }}
+            {{- with $aio.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with $read.extraEnv }}
+          {{- with $aio.extraEnv }}
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $read.extraEnvFrom }}
+          {{- with $aio.extraEnvFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -84,7 +80,7 @@ spec:
             {{- include "loki.volumeMounts" . | nindent 12 }}
             - name: data
               mountPath: /loki/
-            {{- with $read.extraVolumeMounts }}
+            {{- with $aio.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           livenessProbe:
@@ -97,44 +93,44 @@ spec:
               path: /ready
               port: http
             periodSeconds: 30
-          {{- with $read.resources }}
+          {{- with $aio.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $read.securityContext }}
+          {{- with $aio.securityContext }}
           securityContext:
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml . | nindent 8 }}
           {{- end }}
       serviceAccountName: {{ include "loki.serviceAccountName" . }}
-      priorityClassName:  {{ $read.priorityClassName }}
-      runtimeClassName:   {{ $read.runtimeClassName }}
-      schedulerName:      {{ $read.schedulerName }}
-      {{- with $read.podSecurityContext }}
+      priorityClassName:  {{ $aio.priorityClassName }}
+      runtimeClassName:   {{ $aio.runtimeClassName }}
+      schedulerName:      {{ $aio.schedulerName }}
+      {{- with $aio.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
         {{- include "loki.volumes" . | nindent 8 }}
-        {{- if or (not $read.stateful) (not $persistence.enabled) }}
+        {{- if not $persistence.enabled }}
         - name: data
           emptyDir: {}
         {{- end }}
-        {{- with $read.extraVolumes }}
+        {{- with $aio.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with $read.nodeSelector }}
+      {{- with $aio.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $read.affinity }}
+      {{- with $aio.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $read.tolerations }}
+      {{- with $aio.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- if and $read.stateful $persistence.enabled }}
+  {{- if $persistence.enabled }}
   volumeClaimTemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
@@ -159,3 +155,4 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
   {{- end }}
+{{- end }}

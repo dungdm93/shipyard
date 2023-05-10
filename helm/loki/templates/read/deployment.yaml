@@ -1,39 +1,37 @@
 {{- if eq (lower .Values.deploymentMode) "simplescalable" }}
-{{- $write := mergeOverwrite (deepCopy .Values.commons) .Values.write -}}
-{{- $persistence := $write.persistence -}}
+{{- $read := mergeOverwrite (deepCopy .Values.commons) .Values.read -}}
+{{- $persistence := $read.persistence -}}
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: {{ include "loki.fullname" . }}-write
+  name: {{ include "loki.fullname" . }}-read
   labels:
-    {{- include "loki.write.labels" . | nindent 4 }}
+    {{- include "loki.read.labels" . | nindent 4 }}
     app.kubernetes.io/part-of: memberlist
-    {{- with $write.labels }}
+    {{- with $read.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    {{- toYaml $write.annotations | nindent 4 }}
+    {{- toYaml $read.annotations | nindent 4 }}
 spec:
-  replicas: {{ $write.replicas }}
-  serviceName: "{{ include "loki.fullname" . }}-write-headless"
-  podManagementPolicy: Parallel
-  updateStrategy:
+  replicas: {{ $read.replicas }}
+  strategy:
     type: RollingUpdate
   selector:
     matchLabels:
-      {{- include "loki.write.selectorLabels" . | nindent 6 }}
+      {{- include "loki.read.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "loki.write.selectorLabels" . | nindent 8 }}
+        {{- include "loki.read.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/part-of: memberlist
-        {{- with $write.podLabels }}
+        {{- with $read.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
         {{- include "loki.checksum" . | nindent 8 }}
-        {{- with $write.podAnnotations }}
+        {{- with $read.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- if and .Values.metrics.enabled (not .Values.metrics.podMonitor.enabled) }}
@@ -47,22 +45,23 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       enableServiceLinks: false
-      terminationGracePeriodSeconds: {{ $write.terminationPeriod }}
+      terminationGracePeriodSeconds: {{ $read.terminationPeriod }}
       containers:
-        - name: loki-write
+        - name: loki-read
           image: {{ include "loki.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - -target={{ $write.target | join "," }}
+            - -target={{ $read.target | join "," }}
+            - -legacy-read-mode=false
             - -config.file=/etc/loki/config.yaml
-            {{- with .Values.write.extraArgs }}
+            {{- with .Values.read.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with $write.extraEnv }}
+          {{- with $read.extraEnv }}
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $write.extraEnvFrom }}
+          {{- with $read.extraEnvFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -80,7 +79,7 @@ spec:
             {{- include "loki.volumeMounts" . | nindent 12 }}
             - name: data
               mountPath: /loki/
-            {{- with $write.extraVolumeMounts }}
+            {{- with $read.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           livenessProbe:
@@ -93,66 +92,39 @@ spec:
               path: /ready
               port: http
             periodSeconds: 30
-          {{- with $write.resources }}
+          {{- with $read.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $write.securityContext }}
+          {{- with $read.securityContext }}
           securityContext:
-            {{- toYaml . | nindent 8 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
       serviceAccountName: {{ include "loki.serviceAccountName" . }}
-      priorityClassName:  {{ $write.priorityClassName }}
-      runtimeClassName:   {{ $write.runtimeClassName }}
-      schedulerName:      {{ $write.schedulerName }}
-      {{- with $write.podSecurityContext }}
+      priorityClassName:  {{ $read.priorityClassName }}
+      runtimeClassName:   {{ $read.runtimeClassName }}
+      schedulerName:      {{ $read.schedulerName }}
+      {{- with $read.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
         {{- include "loki.volumes" . | nindent 8 }}
-        {{- if not $persistence.enabled }}
         - name: data
           emptyDir: {}
-        {{- end }}
-        {{- with $write.extraVolumes }}
+        {{- with $read.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with $write.nodeSelector }}
+      {{- with $read.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $write.affinity }}
+      {{- with $read.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $write.tolerations }}
+      {{- with $read.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- if $persistence.enabled }}
-  volumeClaimTemplates:
-    - apiVersion: v1
-      kind: PersistentVolumeClaim
-      metadata:
-        creationTimestamp: null
-        name: data
-        {{- with $persistence.annotations }}
-        annotations:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
-      spec:
-        volumeMode: Filesystem
-        accessModes: [ReadWriteOnce]
-        {{- with $persistence.storageClass }}
-        storageClassName: {{ eq "-" . | ternary "" . | quote }}
-        {{- end }}
-        resources:
-          requests:
-            storage: {{ $persistence.size | quote }}
-        {{- with $persistence.selector }}
-        selector:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
-  {{- end }}
 {{- end }}

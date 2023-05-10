@@ -6,8 +6,7 @@ write:
     annotations:
       abc: xyz
 
-read:
-  stateful: true
+backend:
   persistence:
     enabled: true
     storageClass: "-"

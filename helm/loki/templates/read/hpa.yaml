@@ -1,5 +1,6 @@
+{{- if eq (lower .Values.deploymentMode) "simplescalable" }}
 {{- $autoscaling := .Values.read.autoscaling -}}
-{{- if and $autoscaling.enabled (not .Values.read.stateful) }}
+{{- if $autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -15,4 +16,5 @@ spec:
   maxReplicas: {{ $autoscaling.maxReplicas }}
   metrics:
     {{- toYaml $autoscaling.metrics | nindent 4 }}
+{{- end }}
 {{- end }}

@@ -1,0 +1,21 @@
+{{- if eq (lower .Values.deploymentMode) "simplescalable" }}
+{{- $backend := mergeOverwrite (deepCopy .Values.commons) .Values.backend -}}
+{{- if and $backend.podDisruptionBudget.enabled (gt (int $backend.replicas | default 1) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "loki.fullname" . }}-backend
+  labels:
+   {{- include "loki.backend.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "loki.backend.selectorLabels" . | nindent 4 }}
+  {{- if $backend.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $backend.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $backend.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $backend.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}
+{{- end }}
