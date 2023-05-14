@@ -1,0 +1,21 @@
+{{- if eq (lower .Values.deploymentMode) "aio" }}
+{{- $aio := deepCopy .Values.commons -}}
+{{- if and $aio.podDisruptionBudget.enabled (gt (int $aio.replicas | default 1) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "tempo.fullname" . }}
+  labels:
+   {{- include "tempo.aio.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "tempo.aio.selectorLabels" . | nindent 4 }}
+  {{- if $aio.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $aio.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $aio.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $aio.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}
+{{- end }}

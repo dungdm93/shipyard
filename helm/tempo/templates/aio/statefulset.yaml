@@ -1,0 +1,182 @@
+{{- if eq (lower .Values.deploymentMode) "aio" }}
+{{- $aio := deepCopy .Values.commons -}}
+{{- $persistence := $aio.persistence -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "tempo.fullname" . }}
+  labels:
+    {{- include "tempo.aio.labels" . | nindent 4 }}
+    app.kubernetes.io/part-of: memberlist
+    {{- with $aio.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml $aio.annotations | nindent 4 }}
+spec:
+  replicas: {{ $aio.replicas }}
+  serviceName: "{{ include "tempo.fullname" . }}-headless"
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "tempo.aio.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tempo.aio.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/part-of: memberlist
+        {{- with $aio.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "tempo.checksum" . | nindent 8 }}
+        {{- with $aio.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if and .Values.metrics.enabled (not .Values.metrics.podMonitor.enabled) }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.config.server.http_listen_port | quote }}
+        prometheus.io/path: /metrics
+        {{- end }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: {{ $aio.terminationPeriod }}
+      containers:
+        - name: tempo
+          image: {{ include "tempo.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - -target=all
+            - -config.file=/etc/tempo/config.yaml
+            {{- with $aio.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with $aio.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $aio.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.config.server.http_listen_port }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.config.server.grpc_listen_port }}
+              protocol: TCP
+            - name: memberlist
+              containerPort: {{ .Values.ringKVStore.memberlist.bind_port }}
+              protocol: TCP
+            - name: otlp-grpc
+              containerPort: 4317
+              protocol: TCP
+            - name: otlp-http
+              containerPort: 4318
+              protocol: TCP
+            - name: jaeger-grpc
+              containerPort: 14250
+              protocol: TCP
+            - name: jaeger-thrift-h
+              containerPort: 14268
+              protocol: TCP
+            - name: jaeger-thrift-b
+              containerPort: 6832
+              protocol: UDP
+            - name: jaeger-thrift-c
+              containerPort: 6831
+              protocol: UDP
+            - name: zipkin
+              containerPort: 9411
+              protocol: TCP
+            - name: opencensus
+              containerPort: 55678
+              protocol: TCP
+          volumeMounts:
+            {{- include "tempo.volumeMounts" . | nindent 12 }}
+            - name: data
+              mountPath: /var/lib/tempo/
+            {{- with $aio.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /status/version
+              port: http
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 30
+          {{- with $aio.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $aio.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+      serviceAccountName: {{ include "tempo.serviceAccountName" . }}
+      priorityClassName:  {{ $aio.priorityClassName }}
+      runtimeClassName:   {{ $aio.runtimeClassName }}
+      schedulerName:      {{ $aio.schedulerName }}
+      {{- with $aio.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- include "tempo.volumes" . | nindent 8 }}
+        {{- if not $persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+        {{- with $aio.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $aio.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $aio.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $aio.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if $persistence.enabled }}
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        creationTimestamp: null
+        name: data
+        {{- with $persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        volumeMode: Filesystem
+        accessModes: [ReadWriteOnce]
+        {{- with $persistence.storageClass }}
+        storageClassName: {{ eq "-" . | ternary "" . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $persistence.size | quote }}
+        {{- with $persistence.selector }}
+        selector:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+  {{- end }}
+{{- end }}

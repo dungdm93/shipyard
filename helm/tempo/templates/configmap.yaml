@@ -1,0 +1,27 @@
+{{- $config := deepCopy .Values.config }}
+
+{{- $ringKVStore := deepCopy .Values.ringKVStore }}
+{{- if eq $ringKVStore.store "memberlist" }}
+  {{- $memberlist := $ringKVStore.memberlist }}
+  {{- $members := list (printf "dnssrv+%s-memberlist:%d" (include "tempo.fullname" .) (int $memberlist.bind_port)) }}
+  {{- $_ := set $memberlist "join_members" $members }}
+
+  {{- $_ := dict "memberlist" $memberlist | mergeOverwrite $config -}}
+{{- end }}
+{{- $_ := unset $ringKVStore "memberlist" }}
+{{- $_ := dict "distributor"                        (dict "ring" (dict "kvstore" $ringKVStore))  | mergeOverwrite $config -}}
+{{- $_ := dict "ingester"        (dict "lifecycler" (dict "ring" (dict "kvstore" $ringKVStore))) | mergeOverwrite $config -}}
+{{- $_ := dict "metrics_generator"                  (dict "ring" (dict "kvstore" $ringKVStore))  | mergeOverwrite $config -}}
+{{- $_ := dict "compactor"                          (dict "ring" (dict "kvstore" $ringKVStore))  | mergeOverwrite $config -}}
+
+{{- $_ := dict "storage" (dict "trace" .Values.storage) | mergeOverwrite $config -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tempo.fullname" . }}-config
+  labels:
+    {{- include "tempo.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    {{- toYaml $config | nindent 4 }}
