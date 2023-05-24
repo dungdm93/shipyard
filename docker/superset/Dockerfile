@@ -2,27 +2,26 @@ FROM python:3.9-slim as base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libev4 libssl1.1 libisal2 libnss3 libsasl2-modules \
         libpq5 libmariadb3 libodbc1 \
         libldap-2.4-2 libkrb5-3 \
-        curl locales; \
-    \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/*
+        curl locales;
 
 # Firefox + Gecko driver. For Ubuntu, using `apt install firefox firefox-geckodriver`
-ARG GECKO_DRIVER_VERSION=v0.32.0
-RUN set -eux; cd /tmp/; \
+ARG GECKO_DRIVER_VERSION=v0.33.0
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         xvfb libxi6 libgconf-2-4 \
         firefox-esr; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/*; \
     curl -sSL "https://github.com/mozilla/geckodriver/releases/download/${GECKO_DRIVER_VERSION}/geckodriver-${GECKO_DRIVER_VERSION}-linux64.tar.gz" \
         | tar -xzf - -C /usr/local/bin --no-same-owner;
 
@@ -41,9 +40,11 @@ WORKDIR ${SUPERSET_HOME}
 
 FROM base AS builder
 
-ARG SUPERSET_VERSION=1.5.2
+ARG SUPERSET_VERSION=2.1.0
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y \
         build-essential \
@@ -56,14 +57,16 @@ RUN set -eux; \
         # pip install sasl
         libsasl2-dev;
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    set -eux; \
     function join { local IFS="$1"; echo "${*:2}"; }; \
     SUPERSET_PACKAGES=( \
         # Cloud
-        athena bigquery redshift \
+        athena bigquery redshift dynamodb \
         dremio databricks snowflake teradata vertica exasol \
+        firebolt rockset starrocks \
         # Database
-        mysql postgres mmsql oracle hana solr \
+        mysql postgres mssql oracle hana solr \
         clickhouse cockroachdb elasticsearch \
         excel gsheets \
         # Big Data
@@ -84,7 +87,7 @@ RUN set -eux; \
 FROM base
 
 COPY --from=builder /usr/local /usr/local
-COPY ./scripts/* /usr/local/bin/
+COPY --link ./scripts/* /usr/local/bin/
 
 ENV FLASK_APP=superset
 USER superset
