@@ -2,7 +2,9 @@ FROM python:3.10-slim AS base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
@@ -13,14 +15,13 @@ RUN set -eux; \
         libsasl2-modules-gssapi-mit \
         libsasl2-modules-ldap \
         libsasl2-modules-otp \
-        libsasl2-modules-sql; \
-    \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/*
+        libsasl2-modules-sql;
 
 FROM base AS builder
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y \
         build-essential \
@@ -40,19 +41,20 @@ RUN set -eux; \
         unixodbc-dev \
         libev-dev
 
-ARG DATAHUB_VERSION=0.10.1.1
+ARG DATAHUB_VERSION=0.10.3
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    set -eux; \
     function join { local IFS="$1"; echo "${*:2}"; }; \
     DATAHUB_PACKAGES=( \
         # Sink plugins
         datahub-kafka datahub-rest datahub-lite \
         # Integrations (exclude airflow)
         circuit-breaker great-expectations \
-        # Source plugins (exclude spark, delta-lake, s3, kafka-connect)
+        # Source plugins (exclude spark, delta-lake, s3, gcs, kafka-connect, unity-catalog (databricks))
         azure-ad ldap okta \
         athena glue redshift sagemaker bigquery \
-        clickhouse clickhouse-usage dbt dbt-cloud hana salesforce snowflake vertica unity-catalog \
+        clickhouse clickhouse-usage dbt dbt-cloud hana salesforce snowflake vertica \
         looker lookml metabase mode redash superset tableau powerbi powerbi-report-server \
         hive iceberg presto trino starburst-trino-usage kafka pulsar druid nifi elasticsearch feast \
         sqlalchemy mongodb mssql mssql-odbc mysql mariadb oracle postgres \
