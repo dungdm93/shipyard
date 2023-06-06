@@ -51,7 +51,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         unixodbc-dev \
         libev-dev
 
-ARG AIRFLOW_VERSION=2.4.2
+ARG AIRFLOW_VERSION=2.6.1
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \
@@ -60,7 +60,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     function join { local IFS="$1"; echo "${*:2}"; }; \
     AIRFLOW_PACKAGES=( \
         # Core
-        http ftp ssh grpc \
+        http ftp ssh grpc microsoft.psrp \
         async cgroups redis rabbitmq leveldb \
         celery dask pandas docker cncf.kubernetes \
         github_enterprise google_auth kerberos ldap password \
@@ -69,17 +69,17 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         mongo elasticsearch neo4j \
         jdbc odbc \
         # BigData
-        apache.beam apache.cassandra apache.drill apache.druid apache.hdfs \
-        apache.hive apache.kylin apache.pig apache.pinot apache.sqoop \
+        apache.beam apache.cassandra apache.drill apache.druid apache.flink apache.hdfs \
+        apache.hive apache.impala apache.kafka apache.kylin apache.pig apache.pinot apache.sqoop \
         presto trino \
         # Cloud Providers
         alibaba amazon microsoft.azure google github \
         # Cloud Services
-        databricks snowflake tableau vertica \
+        airbyte databricks snowflake tableau vertica \
         yandex facebook zendesk salesforce \
         # Others
         crypto slack sendgrid telegram \
-        sentry statsd hashicorp \
+        sentry statsd hashicorp otel \
     ); \
     pip install --constraint "${CONSTRAINT_URL}" \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
