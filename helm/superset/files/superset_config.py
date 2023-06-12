@@ -32,14 +32,26 @@ SQLA_DATABASE = {{ $xdb.database | quote }}
 
 SQLALCHEMY_DATABASE_URI = f'{SQLA_TYPE}://{SQLA_USERNAME}:{SQLA_PASSWORD}@{SQLA_HOST}:{SQLA_PORT}/{SQLA_DATABASE}'
 
-{{ $redis  := .Values.redis -}}
-{{ if $redis.enabled -}}
-{{- $redisHost := include "common.names.fullname" .Subcharts.redis }}
-{{- if not $redis.sentinel.enabled -}}
-    {{- $redisHost = printf "%s-master" $redisHost }}
-{{- end -}}
-{{- $redisPort := $redis.sentinel.enabled | ternary $redis.sentinel.service.ports.redis $redis.master.service.ports.redis }}
-{{- $redisPassword := include "redis.password" .Subcharts.redis }}
+{{- if or .Values.redis.enabled .Values.externalRedis.enabled }}
+    {{- $redisHost := ""  }}
+    {{- $redisPort := ""  }}
+    {{- $redisPassword := ""  }}
+
+    {{- if .Values.redis.enabled -}}
+        {{- $redis := .Values.redis -}}
+        {{- $redisHost = include "common.names.fullname" .Subcharts.redis }}
+        {{- if not $redis.sentinel.enabled -}}
+            {{- $redisHost = printf "%s-master" $redisHost }}
+        {{- end -}}
+        {{- $redisPort = $redis.sentinel.enabled | ternary $redis.sentinel.service.ports.redis $redis.master.service.ports.redis }}
+        {{- $redisPassword = include "redis.password" .Subcharts.redis }}
+    {{- else }}
+        {{- $redis := .Values.externalRedis -}}
+        {{- $redisHost = $redis.host }}
+        {{- $redisPort = $redis.port }}
+        {{- $redisPassword = $redis.password }}
+    {{- end }}
+
 from cachelib.redis import RedisCache
 from celery.schedules import crontab
 

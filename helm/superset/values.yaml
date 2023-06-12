@@ -111,6 +111,12 @@ redis:
     persistence:
       enabled: true
 
+externalRedis:
+  enabled: false
+  host: localhost
+  port: 6379
+  password: my-secret
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
