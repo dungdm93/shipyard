@@ -13,6 +13,11 @@
 {{- $_ := dict "ring" (dict "kvstore" $ringKVStore) | mergeOverwrite $common -}}
 
 {{- $_ := dict "storage" .Values.storage | mergeOverwrite $common -}}
+{{- $compactorAddress := include "loki.fullname" . -}}
+{{- if eq (lower .Values.deploymentMode) "simplescalable" }}
+  {{- $compactorAddress = printf "%s-backend" $compactorAddress }}
+{{- end }}
+{{- $_ := set $common "compactor_address" $compactorAddress }}
 ---
 apiVersion: v1
 kind: ConfigMap
