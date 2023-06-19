@@ -14,10 +14,17 @@ config:
     log_level: info
   storage_config:
     boltdb_shipper:
-      active_index_directory: /loki/index
-      cache_location: /loki/index-cache
+      active_index_directory: /loki/index/boltdb
+      cache_location: /loki/index/boltdb-cache
       cache_ttl: 24h
       resync_interval: 5m
+    tsdb_shipper:
+      active_index_directory: /loki/index/tsdb
+      cache_location: /loki/index/tsdb-cache
+      cache_ttl: 24h
+      resync_interval: 5m
+    filesystem:
+      directory: /loki/chunk
   ingester:
     max_transfer_retries: 0 # require when wal enabled
     wal:
