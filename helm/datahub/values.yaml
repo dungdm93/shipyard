@@ -34,7 +34,7 @@ commons:
 gms:
   image:
     repository: linkedin/datahub-gms
-    tag: v0.9.6.1
+    tag: v0.10.4
   service:
     type: ClusterIP
     clusterIP:
@@ -51,7 +51,7 @@ gms:
 frontend:
   image:
     repository: linkedin/datahub-frontend-react
-    tag: v0.9.6.1
+    tag: v0.10.4
   baseUrl:
   # SHOULD >= random 16 chars.
   # See https://www.playframework.com/documentation/2.8.x/ApplicationSecret
@@ -91,23 +91,23 @@ setup:
   elasticsearch:
     image:
       repository: linkedin/datahub-elasticsearch-setup
-      tag: v0.9.6.1
+      tag: v0.10.4
   kafka:
     image:
       repository: linkedin/datahub-kafka-setup
-      tag: v0.9.6.1
+      tag: v0.10.4
   postgresql:
     image:
       repository: acryldata/datahub-postgres-setup
-      tag: v0.9.6.4
+      tag: v0.10.4
   mysql:
     image:
       repository: acryldata/datahub-mysql-setup
-      tag: v0.9.6.4
+      tag: v0.10.4
   systemUpdate:
     image:
       repository: acryldata/datahub-upgrade
-      tag: v0.9.6.4
+      tag: v0.10.4
 
 serviceAccount:
   create: true
