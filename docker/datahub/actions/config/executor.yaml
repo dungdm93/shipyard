@@ -36,6 +36,15 @@ action:
   type: executor
   config:
     executor_id: ${EXECUTOR_ID:-default}
+    task_configs:
+      - name: RUN_INGEST
+        type: datahub_kubernetes.executor.execution.kubernetes_pod_ingestion_task.KubernetesPodIngestionTask
+        configs:
+          image_template: ${DATAHUB_INGESTION_IMAGE_TEMPLATE}
+          k8s_config:
+            in_cluster: ${KUBERNETES_IN_CLUSTER:-false}
+            config_file: ${KUBERNETES_CONFIG_FILE:-null}
+            namespace: ${KUBERNETES_NAMESPACE:-default}
 datahub:
   server: "${DATAHUB_GMS_PROTOCOL:-http}://${DATAHUB_GMS_HOST:-localhost}:${DATAHUB_GMS_PORT:-8080}"
   extra_headers:

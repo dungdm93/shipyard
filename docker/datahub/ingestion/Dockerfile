@@ -8,9 +8,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
-        libev4 libssl1.1 libisal2 libnss3 \
+        libev4 libssl1.* libisal2 libnss3 \
         libpq5 libmariadb3 libodbc1 \
-        libldap-2.4-2 libkrb5-3 \
+        libldap-2.4-* libkrb5-3 \
         libsasl2-2 \
         libsasl2-modules-gssapi-mit \
         libsasl2-modules-ldap \
@@ -41,7 +41,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         unixodbc-dev \
         libev-dev
 
-ARG DATAHUB_VERSION=0.10.3
+ARG DATAHUB_VERSION=0.10.4.1
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \

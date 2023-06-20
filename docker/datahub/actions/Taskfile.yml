@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/datahub/actions:0.0.10
+  IMAGE: hub.teko.vn/dataops/datahub/actions:0.0.12
 
 includes:
   docker: ../../
