@@ -20,7 +20,6 @@ DataHub Actions checksum pod annotations
 {{- define "datahub.actions.checksum" -}}
 checksum/env: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
 checksum/actions-env: {{ include (print $.Template.BasePath "/actions/secret.yaml") . | sha256sum }}
-checksum/actions-extra: {{ include (print $.Template.BasePath "/actions/secret-actions.yaml") . | sha256sum }}
 {{- end -}}
 
 {{/*

@@ -51,8 +51,6 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ include "datahub.fullname" . }}
-            - secretRef:
-                name: {{ include "datahub.fullname" . }}-actions
           env:
             - name: KUBERNETES_NAMESPACE
               valueFrom:
@@ -71,7 +69,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: actions
-              mountPath: /etc/datahub/actions/conf/
+              mountPath: /etc/datahub/actions/system/conf/
           {{- with $actions.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -88,7 +86,7 @@ spec:
       volumes:
         - name: actions
           secret:
-            secretName: {{ include "datahub.fullname" . }}-actions-extra
+            secretName: {{ include "datahub.fullname" . }}-actions
             optional: true
       {{- with $actions.extraVolumes }}
         {{- toYaml . | nindent 8 }}
