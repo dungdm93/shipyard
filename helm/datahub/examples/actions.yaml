@@ -16,6 +16,9 @@ kafka:
 
 ##############################
 actions:
+  env:
+  - name: FOO
+    value: bar
   ingestionExecutor:
     executorId: foobar
   slackAction:
@@ -37,3 +40,10 @@ actions:
       name: abcxyz
       source:
         type: kafka
+
+actionServiceAccount:
+  name: super-actions
+  clusterRole:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "watch", "list"]

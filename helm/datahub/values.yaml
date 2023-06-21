@@ -72,9 +72,10 @@ frontend:
 actions:
   image:
     repository: hub.teko.vn/dataops/datahub/actions
-    tag: 0.0.10
+    tag: 0.0.12
   ingestionExecutor:
     executorId:
+    imageTemplate: hub.teko.vn/dataops/datahub/ingestion:0.10.4
   slackAction:
     enabled: false
     botToken:
@@ -113,6 +114,16 @@ serviceAccount:
   create: true
   annotations: {}
   name: ""
+
+actionServiceAccount:
+  create: true
+  annotations: {}
+  name: ""
+  role:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "secrets"]
+    verbs: ["*"]
+  clusterRole: []
 
 ingress:
   enabled: false
