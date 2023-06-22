@@ -72,20 +72,34 @@ frontend:
 actions:
   image:
     repository: hub.teko.vn/dataops/datahub/actions
-    tag: 0.0.10
-  ingestionExecutor:
-    executorId:
-  slackAction:
-    enabled: false
-    botToken:
-    signingSecret:
-    defaultChannel:
-    suppressSystemActivity:
-  teamsAction:
-    enabled: false
-    webhookUrl:
-    suppressSystemActivity:
-  extraActions:
+    tag: 0.0.12
+  # https://github.com/acryldata/datahub-actions/blob/main/datahub-actions/src/datahub_actions/pipeline/pipeline_config.py
+  # `kafka` `source` and `datahub` client will be set by default
+  pipelineConfigs:
+  - name: ingestion_executor
+    filter:
+      event_type: MetadataChangeLogEvent_v1
+      event:
+        entityType: dataHubExecutionRequest
+        changeType: UPSERT
+        aspectName:
+          - dataHubExecutionRequestInput
+          - dataHubExecutionRequestSignal
+        aspect:
+          value:
+            executorId: default
+    action:
+      type: executor
+      config:
+        executor_id: default
+        task_configs:
+          - name: RUN_INGEST
+            type: datahub_kubernetes.executor.execution.kubernetes_pod_ingestion_task.KubernetesPodIngestionTask
+            configs:
+              image_template: hub.teko.vn/dataops/datahub/ingestion:0.10.4
+              k8s_config:
+                in_cluster: true
+                namespace: ${KUBERNETES_NAMESPACE}
 
 setup:
   elasticsearch:
@@ -113,6 +127,16 @@ serviceAccount:
   create: true
   annotations: {}
   name: ""
+
+actionServiceAccount:
+  create: true
+  annotations: {}
+  name: ""
+  role:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "secrets"]
+    verbs: ["*"]
+  clusterRole: []
 
 ingress:
   enabled: false

@@ -16,24 +16,31 @@ kafka:
 
 ##############################
 actions:
-  ingestionExecutor:
-    executorId: foobar
-  slackAction:
+  pipelineConfigs:
+  - name: slack_action
+    action:
+      type: slack
+      config:
+        base_url: ${DATAHUB_BASE_URL}
+        bot_token: DATAHUB_ACTIONS_SLACK_BOT_TOKEN
+        signing_secret: DATAHUB_ACTIONS_SLACK_SIGNING_SECRET
+        default_channel: DATAHUB_ACTIONS_SLACK_CHANNEL
+        suppress_system_activity: true
+  - name: teams_action
+    action:
+      type: teams
+      config:
+        base_url: ${DATAHUB_BASE_URL}
+        webhook_url: DATAHUB_ACTIONS_TEAMS_WEBHOOK_URL
+        suppress_system_activity: true
+
+actionServiceAccount:
+  name: super-actions
+  clusterRole:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "watch", "list"]
+
+authn:
+  gms:
     enabled: true
-    botToken: xxxxxxxxx
-    signingSecret: yyyyyyyyy
-    defaultChannel: datahub
-    suppressSystemActivity: true
-  teamsAction:
-    enabled: true
-    webhookUrl: https://foobar.abc
-    suppressSystemActivity: false
-  extraActions:
-    foobar.yaml: |
-      name: foobar
-      source:
-        type: kafka
-    abcxyz.yaml: |
-      name: abcxyz
-      source:
-        type: kafka

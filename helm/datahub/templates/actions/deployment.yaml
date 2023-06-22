@@ -49,17 +49,27 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           envFrom:
-          - secretRef:
-              name: {{ include "datahub.fullname" . }}
-          - secretRef:
-              name: {{ include "datahub.fullname" . }}-actions
-          {{- with $actions.env }}
+            - secretRef:
+                name: {{ include "datahub.fullname" . }}
           env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KUBERNETES_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KUBERNETES_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          {{- with $actions.env }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: actions
-              mountPath: /etc/datahub/actions/conf/
+              mountPath: /etc/datahub/actions/system/conf/
           {{- with $actions.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -67,7 +77,7 @@ spec:
             {{- toYaml $actions.resources | nindent 12 }}
           securityContext:
             {{- toYaml $actions.securityContext | nindent 12 }}
-      serviceAccountName: {{ include "datahub.serviceAccountName" . }}
+      serviceAccountName: {{ include "datahub.actions.serviceAccountName" . }}
       priorityClassName:  {{ $actions.priorityClassName }}
       runtimeClassName:   {{ $actions.runtimeClassName }}
       schedulerName:      {{ $actions.schedulerName }}
@@ -76,7 +86,7 @@ spec:
       volumes:
         - name: actions
           secret:
-            secretName: {{ include "datahub.fullname" . }}-actions-extra
+            secretName: {{ include "datahub.fullname" . }}-actions
             optional: true
       {{- with $actions.extraVolumes }}
         {{- toYaml . | nindent 8 }}
