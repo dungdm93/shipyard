@@ -13,20 +13,6 @@ config:
     grpc_listen_port: 9095
     log_format: logfmt
     log_level: info
-  distributor:
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-          http:
-      jaeger:
-        protocols:
-          grpc:
-          thrift_http:
-          thrift_binary:
-          thrift_compact:
-      zipkin:
-      opencensus:
   metrics_generator:
     storage:
       path: /var/lib/tempo/metrics
@@ -59,6 +45,47 @@ storage:
     version: vParquet
     v2_encoding: zstd
     search_encoding: snappy
+
+receivers:
+  # https://github.com/open-telemetry/opentelemetry-collector/blob/receiver/otlpreceiver/v0.80.0/receiver/otlpreceiver/config.go#L28
+  otlp:
+    enabled: true
+    # https://github.com/open-telemetry/opentelemetry-collector/blob/receiver/otlpreceiver/v0.80.0/config/configgrpc/configgrpc.go#L119
+    protocols:
+      grpc:
+        enabled: true
+        port: 4317
+      # https://github.com/open-telemetry/opentelemetry-collector/blob/receiver/otlpreceiver/v0.80.0/config/confighttp/confighttp.go#L203
+      http:
+        enabled: true
+        port: 4318
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.80.0/receiver/jaegerreceiver/config.go#L70
+  jaeger:
+    enabled: false
+    protocols:
+      grpc:
+        enabled: true
+        port: 14250
+      thrift_http:
+        enabled: true
+        port: 14268
+      thrift_binary:
+        enabled: false
+        port: 6832
+      thrift_compact:
+        enabled: false
+        port: 6831
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.80.0/receiver/zipkinreceiver/config.go#L12
+  zipkin:
+    enabled: false
+    port: 9411
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.80.0/receiver/opencensusreceiver/config.go#L12
+  opencensus:
+    enabled: false
+    port: 55678
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.80.0/receiver/kafkareceiver/config.go#L35
+  kafka:
+    enabled: false
 
 deploymentMode: AIO  # AIO | SimpleScalable
 

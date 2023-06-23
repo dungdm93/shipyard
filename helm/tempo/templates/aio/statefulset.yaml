@@ -76,30 +76,61 @@ spec:
             - name: memberlist
               containerPort: {{ .Values.ringKVStore.memberlist.bind_port }}
               protocol: TCP
+            {{- $receivers := .Values.receivers }}
+
+            {{- if $receivers.otlp.enabled }}
+            ### OTLP ports
+            {{- $otlp := $receivers.otlp.protocols }}
+            {{- if $otlp.grpc.enabled }}
             - name: otlp-grpc
-              containerPort: 4317
+              containerPort: {{ $otlp.grpc.port }}
               protocol: TCP
+            {{- end }}
+            {{- if $otlp.http.enabled }}
             - name: otlp-http
-              containerPort: 4318
+              containerPort: {{ $otlp.http.port }}
               protocol: TCP
+            {{- end }}
+            {{- end }}
+
+            {{- if $receivers.jaeger.enabled }}
+            ### Jaeger ports
+            {{- $jaeger := $receivers.jaeger.protocols }}
+            {{- if $jaeger.grpc.enabled }}
             - name: jaeger-grpc
-              containerPort: 14250
+              containerPort: {{ $jaeger.grpc.port }}
               protocol: TCP
+            {{- end }}
+            {{- if $jaeger.thrift_http.enabled }}
             - name: jaeger-thrift-h
-              containerPort: 14268
+              containerPort: {{ $jaeger.thrift_http.port }}
               protocol: TCP
+            {{- end }}
+            {{- if $jaeger.thrift_binary.enabled }}
             - name: jaeger-thrift-b
-              containerPort: 6832
+              containerPort: {{ $jaeger.thrift_binary.port }}
               protocol: UDP
+            {{- end }}
+            {{- if $jaeger.thrift_compact.enabled }}
             - name: jaeger-thrift-c
-              containerPort: 6831
+              containerPort: {{ $jaeger.thrift_compact.port }}
               protocol: UDP
+            {{- end }}
+            {{- end }}
+
+            {{- if $receivers.zipkin.enabled }}
+            ### Zipkin ports
             - name: zipkin
-              containerPort: 9411
+              containerPort: {{ $receivers.zipkin.port }}
               protocol: TCP
+            {{- end }}
+
+            {{- if $receivers.opencensus.enabled }}
+            ### OpenCensus ports
             - name: opencensus
-              containerPort: 55678
+              containerPort: {{ $receivers.opencensus.port }}
               protocol: TCP
+            {{- end }}
           volumeMounts:
             {{- include "tempo.volumeMounts" . | nindent 12 }}
             - name: data

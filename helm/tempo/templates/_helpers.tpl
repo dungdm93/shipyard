@@ -91,3 +91,44 @@ Tempo volumes
   configMap:
     name: {{ include "tempo.fullname" . }}-config
 {{- end -}}
+
+{{/*
+Tempo config protocol
+*/}}
+{{- define "tempo.configProtocol" -}}
+{{- $envelope := index . 0 }}
+{{- $name  := index . 1 }}
+{{- $protocol := get $envelope $name }}
+{{- if $protocol.enabled }}
+  {{- $_ := unset $protocol "enabled" }}
+  {{- $_ := set   $protocol "endpoint" (printf ":%d" ($protocol.port | int)) }}
+  {{- $_ := unset $protocol "port" }}
+{{- else }}
+  {{- $_ := unset $envelope $name }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Tempo config endpoint
+*/}}
+{{- define "tempo.configReceiver" -}}
+{{- $envelope := index . 0 }}
+{{- $name  := index . 1 }}
+{{- $receiver := get $envelope $name }}
+{{- if $receiver.enabled }}
+  {{- $_ := unset $receiver "enabled" }}
+
+  {{- if hasKey $receiver "protocols" }}
+    {{- range $proto := keys $receiver.protocols }}
+      {{- $_ := include "tempo.configProtocol" (list $receiver.protocols $proto) }}
+    {{- end }}
+  {{- end }}
+
+  {{- if hasKey $receiver "port" }}
+    {{- $_ := set   $receiver "endpoint" (printf ":%d" ($receiver.port | int)) }}
+    {{- $_ := unset $receiver "port" }}
+  {{- end }}
+{{- else }}
+  {{- $_ := unset $envelope $name }}
+{{- end }}
+{{- end -}}
