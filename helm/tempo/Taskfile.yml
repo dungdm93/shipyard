@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  RELEASE: tempox
+
+includes:
+  helm: ../

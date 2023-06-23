@@ -1,0 +1,180 @@
+{{- if eq (lower .Values.deploymentMode) "aio" }}
+{{- $aio := deepCopy .Values.commons -}}
+{{- $service := $aio.service -}}
+{{- $specifyNodePort := or (eq $service.type "NodePort") (and (eq $service.type "LoadBalancer") $service.allocateLoadBalancerNodePorts) -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tempo.fullname" . }}
+  labels:
+    {{- include "tempo.aio.labels" . | nindent 4 }}
+  {{- with $service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $service.type }}
+  {{- with $service.clusterIP }}
+  clusterIP: {{ . }}
+  {{- end }}
+  {{- if eq $service.type "LoadBalancer" }}
+  {{- with $service.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with $service.loadBalancerClass }}
+  loadBalancerClass: {{ . }}
+  {{- end }}
+  {{- if not $service.allocateLoadBalancerNodePorts }}
+  allocateLoadBalancerNodePorts: false
+  {{- end }}
+  {{- end }}
+  {{- with $service.internalTrafficPolicy }}
+  internalTrafficPolicy: {{ . }}
+  {{- end }}
+  {{- with $service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ . }}
+  {{- end }}
+  {{- with $service.sessionAffinity }}
+  sessionAffinity: {{ . }}
+  {{- end }}
+  {{- with $service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    {{- include "tempo.aio.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: http
+    port: 3200
+    targetPort: http
+    protocol: TCP
+    appProtocol: http
+    {{- if and $specifyNodePort $service.nodePorts.http }}
+    nodePort: {{ $service.nodePorts.http }}
+    {{- end }}
+  - name: grpc
+    port: 9095
+    targetPort: grpc
+    protocol: TCP
+    appProtocol: gRPC
+    {{- if and $specifyNodePort $service.nodePorts.grpc }}
+    nodePort: {{ $service.nodePorts.grpc }}
+    {{- end }}
+  {{- $receivers := .Values.receivers }}
+
+  {{- if $receivers.otlp.enabled }}
+  ### OTLP ports
+  {{- $otlp := $receivers.otlp.protocols }}
+  {{- if $otlp.grpc.enabled }}
+  - name: otlp-grpc
+    port: {{ $otlp.grpc.port }}
+    targetPort: otlp-grpc
+    protocol: TCP
+    appProtocol: gRPC
+    {{- if and $specifyNodePort $service.nodePorts.otlpGrpc }}
+    nodePort: {{ $service.nodePorts.otlpGrpc }}
+    {{- end }}
+  {{- end }}
+  {{- if $otlp.http.enabled }}
+  - name: otlp-http
+    port: {{ $otlp.http.port }}
+    targetPort: otlp-http
+    protocol: TCP
+    appProtocol: http
+    {{- if and $specifyNodePort $service.nodePorts.otlpHttp }}
+    nodePort: {{ $service.nodePorts.otlpHttp }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
+
+  {{- if $receivers.jaeger.enabled }}
+  ### Jaeger ports
+  {{- $jaeger := $receivers.jaeger.protocols }}
+  {{- if $jaeger.grpc.enabled }}
+  - name: jaeger-grpc
+    port: {{ $jaeger.grpc.port }}
+    targetPort: jaeger-grpc
+    protocol: TCP
+    appProtocol: gRPC
+    {{- if and $specifyNodePort $service.nodePorts.jaegerGrpc }}
+    nodePort: {{ $service.nodePorts.jaegerGrpc }}
+    {{- end }}
+  {{- end }}
+  {{- if $jaeger.thrift_http.enabled }}
+  - name: jaeger-thrift-h
+    port: {{ $jaeger.thrift_http.port }}
+    targetPort: jaeger-thrift-h
+    protocol: TCP
+    appProtocol: thrift
+    {{- if and $specifyNodePort $service.nodePorts.jaegerThriftHttp }}
+    nodePort: {{ $service.nodePorts.jaegerThriftHttp }}
+    {{- end }}
+  {{- end }}
+  {{- if $jaeger.thrift_binary.enabled }}
+  - name: jaeger-thrift-b
+    port: {{ $jaeger.thrift_binary.port }}
+    targetPort: jaeger-thrift-b
+    protocol: UDP
+    appProtocol: thrift
+    {{- if and $specifyNodePort $service.nodePorts.jaegerThriftBinary }}
+    nodePort: {{ $service.nodePorts.jaegerThriftBinary }}
+    {{- end }}
+  {{- end }}
+  {{- if $jaeger.thrift_compact.enabled }}
+  - name: jaeger-thrift-c
+    port: {{ $jaeger.thrift_compact.port }}
+    targetPort: jaeger-thrift-c
+    protocol: UDP
+    appProtocol: thrift
+    {{- if and $specifyNodePort $service.nodePorts.jaegerThriftCompact }}
+    nodePort: {{ $service.nodePorts.jaegerThriftCompact }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
+
+  {{- if $receivers.zipkin.enabled }}
+  ### Zipkin ports
+  - name: zipkin
+    port: {{ $receivers.zipkin.port }}
+    targetPort: zipkin
+    protocol: TCP
+    {{- if and $specifyNodePort $service.nodePorts.zipkin }}
+    nodePort: {{ $service.nodePorts.zipkin }}
+    {{- end }}
+  {{- end }}
+
+  {{- if $receivers.opencensus.enabled }}
+  ### OpenCensus ports
+  - name: opencensus
+    port: {{ $receivers.opencensus.port }}
+    targetPort: opencensus
+    protocol: TCP
+    {{- if and $specifyNodePort $service.nodePorts.opencensus }}
+    nodePort: {{ $service.nodePorts.opencensus }}
+    {{- end }}
+  {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tempo.fullname" . }}-headless
+  labels:
+    {{- include "tempo.aio.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "tempo.aio.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: http
+    port: 3200
+    targetPort: http
+    protocol: TCP
+    appProtocol: http
+  - name: grpc
+    port: 9095
+    targetPort: grpc
+    protocol: TCP
+    appProtocol: gRPC
+{{- end }}

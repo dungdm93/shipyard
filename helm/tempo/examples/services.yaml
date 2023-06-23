@@ -1,0 +1,26 @@
+commons:
+  service:
+    type: LoadBalancer
+    clusterIP: 4.3.2.1
+    loadBalancerIP: 10.10.10.10
+    loadBalancerClass: internal
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 1234
+    internalTrafficPolicy: Local
+    externalTrafficPolicy: Local
+    annotations:
+      foo: bar
+      abc: xyz
+    nodePorts:
+      http: 1234
+      grpc: 1235
+      otlpGrpc: 1236
+      otlpHttp: 1237
+      jaegerGrpc: 1238
+      jaegerThriftHttp: 1239
+      jaegerThriftBinary: 1240
+      jaegerThriftCompact: 1241
+      zipkin: 1242
+      opencensus: 1243

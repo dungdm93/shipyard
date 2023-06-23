@@ -1,0 +1,33 @@
+receivers:
+  otlp:
+    enabled: true
+    protocols:
+      grpc:
+        enabled: true
+        port: 1001
+      http:
+        enabled: true
+        port: 1002
+  jaeger:
+    enabled: true
+    protocols:
+      grpc:
+        enabled: true
+        port: 2001
+      thrift_http:
+        enabled: true
+        port: 2002
+      thrift_binary:
+        enabled: true
+        port: 2003
+      thrift_compact:
+        enabled: true
+        port: 2004
+  zipkin:
+    enabled: true
+    port: 3001
+  opencensus:
+    enabled: true
+    port: 4001
+  kafka:
+    enabled: true

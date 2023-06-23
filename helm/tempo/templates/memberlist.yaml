@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tempo.fullname" . }}-memberlist
+  labels:
+    {{- include "tempo.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "tempo.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/part-of: memberlist
+  ports:
+    - name: memberlist
+      port: 7946
+      targetPort: memberlist
+      protocol: TCP
+
+## Components in memberlist
+# * [x] distributor
+# * [x] ingester
+# * [ ] querier
+# * [ ] query-frontend
+# * [x] compactor
+# * [x] metrics-generator
