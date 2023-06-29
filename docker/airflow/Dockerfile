@@ -8,9 +8,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
-        libev4 libssl1.1 libisal2 libnss3 libsasl2-modules \
+        libev4 libssl3 libisal2 libnss3 libsasl2-modules \
         libpq5 libmariadb3 libodbc1 \
-        libldap-2.4-2 libkrb5-3 \
+        libldap-2.5-0 libkrb5-3 \
         curl locales;
 
 RUN set -eux; \
@@ -51,7 +51,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         unixodbc-dev \
         libev-dev
 
-ARG AIRFLOW_VERSION=2.6.1
+ARG AIRFLOW_VERSION=2.6.2
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \
