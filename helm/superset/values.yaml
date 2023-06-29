@@ -16,7 +16,7 @@ superset:
 commons:
   image:
     repository: hub.teko.vn/dataops/superset
-    tag: "1.0"
+    tag: "2.1.0"
   replicas: null
   command: []
   args: []
@@ -129,8 +129,6 @@ serviceAccount:
 rbac:
   # If true, create & use RBAC resources
   create: true
-  # If true, create and use PodSecurityPolicy
-  pspEnable: true
   # The name of the ServiceAccount to use.
   # If not set and create is true, a name is generated using the fullname template
   name:
@@ -152,7 +150,6 @@ ingress:
   enabled: false
   ingressClassName:
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
     - host: superset.local
