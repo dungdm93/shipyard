@@ -4,6 +4,8 @@ NOTE
 ## 0. Hive Standalone Metastore
 * [Tutorial](https://techjogging.com/standalone-hive-metastore-presto-docker.html)
 * [AdminManual Guide](https://cwiki.apache.org/confluence/display/Hive/AdminManual+Metastore+3.0+Administration)
+    * [Standalone `metastore`](https://cwiki.apache.org/confluence/display/Hive/AdminManual+Metastore+3.0+Administration#AdminManualMetastore3.0Administration-RunningtheMetastoreWithoutHive)
+* [Hive Metastore](https://blog.devgenius.io/hive-metastore-a9dc9e139cf2)
 
 ## 1. Known Issues
 * Hive 3.1.2 incompatible with Hadoop 3.1.1+
