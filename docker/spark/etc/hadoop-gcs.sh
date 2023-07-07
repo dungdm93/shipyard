@@ -6,7 +6,7 @@ fi
 
 function _hadoop-gcs_hadoop_classpath
 {
-  local jar="${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}/gcs-connector-hadoop3-2.1.4.jar"
+  local jar="${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}/gcs-connector-hadoop3-*.jar"
   if [[ -f "$jar" ]]; then
     hadoop_add_classpath "$jar"
   fi

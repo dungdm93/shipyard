@@ -6,10 +6,14 @@ fi
 
 function _hadoop-iceberg_hadoop_classpath
 {
-  local jar="${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}/iceberg-spark-runtime-3.3_2.12-1.0.0.jar"
-  if [[ -f "$jar" ]]; then
-    hadoop_add_classpath "$jar"
-  fi
+  local jars=(
+    "${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}/"iceberg-spark-runtime-*.jar
+  )
+  for jar in "${jars[@]}"; do
+    if [[ -f "$jar" ]]; then
+        hadoop_add_classpath "$jar"
+    fi
+  done
 }
 
 if hadoop_verify_entry HADOOP_TOOLS_OPTIONS "hadoop-iceberg-aws"; then
@@ -20,8 +24,8 @@ fi
 function _hadoop-iceberg-aws_hadoop_classpath
 {
   local jars=(
-      "${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}/awssdk-bundle-2.15.40.jar"
-      "${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}/awssdk-url-connection-client-2.15.40.jar"
+    "${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}"/awssdk-bundle-*.jar
+    "${HADOOP_TOOLS_HOME}/${HADOOP_TOOLS_LIB_JARS_DIR}"/awssdk-url-connection-client-*.jar
   )
   for jar in "${jars[@]}"; do
     if [[ -f "$jar" ]]; then
