@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/hadoop:3.3.2
+  IMAGE: hub.teko.vn/dataops/hadoop:3.3.4
 
 includes:
   docker: ../
