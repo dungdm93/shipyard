@@ -1,4 +1,4 @@
-FROM alpine:3.10 AS downloader
+FROM alpine:3.18 AS downloader
 
 WORKDIR /build
 RUN apk add -U curl gnupg tar
@@ -9,7 +9,7 @@ RUN apk add -U curl gnupg tar
 ARG APACHE_DIST=https://downloads.apache.org
 ARG APACHE_MIRROR=${APACHE_DIST}
 ARG HADOOP_VERSION=3 \
-    SPARK_VERSION=3.3.1 \
+    SPARK_VERSION=3.4.1 \
     TINI_VERSION=0.19.0
 
 RUN set -eux; \
@@ -32,15 +32,20 @@ RUN set -eux; \
     curl -LO "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini"; \
     chmod +x tini;
 
-FROM hub.teko.vn/dataops/hadoop:3.3.2 as hadoop
+FROM hub.teko.vn/dataops/hadoop:3.3.4 as hadoop
 WORKDIR /build/hadoop
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends curl;
 
 # ARG HADOOP_TOOLS="hadoop-aliyun,hadoop-aws,hadoop-azure,hadoop-azure-datalake,hadoop-kafka,hadoop-openstack"
-ARG HADOOP_TOOLS="hadoop-aws"
+ARG SPARK_RUNTIME_VERSION=3.4_2.12 \
+    HADOOP_TOOLS="hadoop-aws"
+
+ARG MAVEN_DIST=https://repo1.maven.org/maven2
 
 RUN set -eux; \
     mkdir -p "./lib/native/"; \
@@ -67,14 +72,14 @@ RUN set -eux; \
         cp ${JARS//:/ } "./lib/tools/"; \
     done;
 
-ARG ICEBERG_VERSION=1.0.0 \
+ARG ICEBERG_VERSION=1.3.0 \
     AWSSDK_V2_VERSION=2.15.40
 COPY ./etc/hadoop-iceberg.sh "./libexec/shellprofile.d/"
 RUN set -eux; cd "./lib/tools/"; \
-    curl -LO "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.3_2.12/${ICEBERG_VERSION}/iceberg-spark-runtime-3.3_2.12-${ICEBERG_VERSION}.jar"; \
-    curl -L  "https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/${AWSSDK_V2_VERSION}/bundle-${AWSSDK_V2_VERSION}.jar" \
+    curl -LO "${MAVEN_DIST}/org/apache/iceberg/iceberg-spark-runtime-${SPARK_RUNTIME_VERSION}/${ICEBERG_VERSION}/iceberg-spark-runtime-${SPARK_RUNTIME_VERSION}-${ICEBERG_VERSION}.jar"; \
+    curl -L  "${MAVEN_DIST}/software/amazon/awssdk/bundle/${AWSSDK_V2_VERSION}/bundle-${AWSSDK_V2_VERSION}.jar" \
          -o  "awssdk-bundle-${AWSSDK_V2_VERSION}.jar"; \
-    curl -L  "https://repo1.maven.org/maven2/software/amazon/awssdk/url-connection-client/${AWSSDK_V2_VERSION}/url-connection-client-${AWSSDK_V2_VERSION}.jar" \
+    curl -L  "${MAVEN_DIST}/software/amazon/awssdk/url-connection-client/${AWSSDK_V2_VERSION}/url-connection-client-${AWSSDK_V2_VERSION}.jar" \
          -o  "awssdk-url-connection-client-${AWSSDK_V2_VERSION}.jar";
 
 # # Cloud Storage connector for Hadoop + Spark
@@ -99,8 +104,10 @@ FROM ubuntu:jammy
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL [ "/bin/bash", "-c" ]
 
-ARG JAVA_VERSION=8
-RUN set -eux; \
+ARG JAVA_VERSION=17
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         openjdk-${JAVA_VERSION}-jre-headless ca-certificates tzdata \
@@ -108,9 +115,7 @@ RUN set -eux; \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
         libssl3 libisal2 libnss3 libpam-modules krb5-user procps \
         # Spark native packages
-        libopenblas-base libatlas3-base libarpack2; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/*
+        libopenblas-base libatlas3-base libarpack2;
 
 RUN set -eux; \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su; \
@@ -123,9 +128,9 @@ ENV JAVA_HOME="/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64" \
     OPENBLAS_NUM_THREADS=1 \
     MKL_NUM_THREADS=1
 
-COPY --from=downloader /build/tini   /usr/bin/tini
-COPY --from=downloader /build/spark  ${SPARK_HOME}
-COPY --from=hadoop     /build/hadoop ${SPARK_HOME}/hadoop
+COPY --link --from=downloader /build/tini   /usr/bin/tini
+COPY --link --from=downloader /build/spark  ${SPARK_HOME}
+COPY --link --from=hadoop     /build/hadoop ${SPARK_HOME}/hadoop
 
 ENV PATH="${SPARK_HOME}/bin:${PATH}" \
     LD_LIBRARY_PATH="${SPARK_HOME}/hadoop/lib/native:${LD_LIBRARY_PATH}"

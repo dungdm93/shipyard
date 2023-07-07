@@ -1,8 +1,8 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/spark:3.3.1-java-${JAVA_VERSION:-8}
-  BUILD_ARGS: --build-arg JAVA_VERSION=${JAVA_VERSION:-8}
+  IMAGE: hub.teko.vn/dataops/spark:3.4.1-java-${JAVA_VERSION:-17}
+  BUILD_ARGS: --build-arg JAVA_VERSION=${JAVA_VERSION:-17}
 
 includes:
   docker: ../

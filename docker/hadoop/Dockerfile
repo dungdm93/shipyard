@@ -1,4 +1,4 @@
-FROM alpine:3.10 AS downloader
+FROM alpine:3.18 AS downloader
 
 WORKDIR /build
 RUN apk add -U curl gnupg tar
@@ -8,7 +8,7 @@ RUN apk add -U curl gnupg tar
 #   * https://dist.apache.org/repos/dist/release
 ARG APACHE_DIST=https://downloads.apache.org
 ARG APACHE_MIRROR=${APACHE_DIST}
-ARG HADOOP_VERSION=3.3.2
+ARG HADOOP_VERSION=3.3.4
 
 RUN set -eux; \
     curl -L  "${APACHE_DIST}/hadoop/common/KEYS" | gpg --batch --import -; \
@@ -25,14 +25,14 @@ FROM  ubuntu:jammy
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL [ "/bin/bash", "-c" ]
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         openjdk-8-jre-headless ca-certificates libc6 \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
-        libssl3 libisal2 libnss3 libpam-modules krb5-user procps; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/*
+        libssl3 libisal2 libnss3 libpam-modules krb5-user procps;
 
 ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" \
     HADOOP_HOME="/opt/hadoop"
