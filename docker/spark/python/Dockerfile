@@ -31,11 +31,7 @@ RUN set -eux; \
     echo "$PYTHON_VERSION" | grep -oP '^\d+.\d+' | xargs -I% echo "python %.*" >> "${CONDA_HOME}/conda-meta/pinned";
 
 RUN --mount=type=cache,target=${CONDA_HOME}/pkgs,sharing=locked \
-    conda install -n base -c conda-forge --no-update-deps -y \
-        mamba;
-
-RUN --mount=type=cache,target=${CONDA_HOME}/pkgs,sharing=locked \
-    mamba install -c conda-forge --no-update-deps -y \
+    conda install -c conda-forge --no-update-deps -y \
         numpy \
         pandas \
         pyarrow;
