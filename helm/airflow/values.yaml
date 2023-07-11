@@ -43,7 +43,7 @@ airflow_local_settings: ""
 commons:
   image:
     repository: hub.teko.vn/dataops/airflow
-    tag: 2.4-b1
+    tag: 2.6.2
   replicas: null
   command: []
   args: []

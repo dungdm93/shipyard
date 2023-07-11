@@ -65,9 +65,8 @@ spec:
             timeoutSeconds: 10
             exec:
               command:
-              - python
-              - -Wignore
-              - /opt/airflow/scripts/scheduler_liveness_probe.py
+              - bash
+              - /opt/airflow/scripts/scheduler_liveness_probe.sh
           resources:
             {{- toYaml $scheduler.resources | nindent 12 }}
           securityContext:
