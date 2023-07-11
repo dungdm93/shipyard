@@ -51,7 +51,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         unixodbc-dev \
         libev-dev
 
-ARG AIRFLOW_VERSION=2.6.2
+ARG AIRFLOW_VERSION=2.6.2 \
+    ASTRONOMER_PROVIDERS_VERSION=1.17.1 \
+    ASTRONOMER_COSMOS_VERSION=0.7.4
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \
@@ -82,7 +84,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         sentry statsd hashicorp otel \
     ); \
     pip install --constraint "${CONSTRAINT_URL}" \
-        "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}";
+        "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}"; \
+    pip install "astronomer-providers[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${ASTRONOMER_PROVIDERS_VERSION}"; \
+    pip install "astronomer-cosmos[dbt-all]==${ASTRONOMER_COSMOS_VERSION}";
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \
