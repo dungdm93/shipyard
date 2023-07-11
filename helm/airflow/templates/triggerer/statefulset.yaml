@@ -72,9 +72,8 @@ spec:
             timeoutSeconds: 10
             exec:
               command:
-              - python
-              - -Wignore
-              - /opt/airflow/scripts/triggerer_liveness_probe.py
+              - bash
+              - /opt/airflow/scripts/triggerer_liveness_probe.sh
           resources:
             {{- toYaml $triggerer.resources | nindent 12 }}
           securityContext:
