@@ -1,4 +1,4 @@
-FROM python:3.9-slim as base
+FROM python:3.10-slim as base
 LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
 SHELL ["/bin/bash", "-c"]
 
@@ -8,9 +8,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         libbz2-1.0 liblz4-1 libsnappy1v5 zlib1g libzstd1 \
-        libev4 libssl1.1 libisal2 libnss3 libsasl2-modules \
-        libpq5 libmariadb3 libodbc1 \
-        libldap-2.4-2 libkrb5-3 \
+        libev4 libssl3 libisal2 libnss3 libsasl2-modules \
+        libpq5 libmariadb3 libodbc1 libct4 libsybdb5 \
+        libldap-2.5-0 libkrb5-3 \
         curl locales;
 
 # Firefox + Gecko driver. For Ubuntu, using `apt install firefox firefox-geckodriver`
@@ -47,7 +47,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     set -eux; \
     apt-get update; \
     apt-get install -y \
-        build-essential \
+        build-essential pkg-config \
+        # pip install pymssql
+        freetds-dev \
         # pip install pyodbc
         unixodbc-dev \
         # pip install mysqlclient
@@ -60,27 +62,38 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \
     function join { local IFS="$1"; echo "${*:2}"; }; \
+    # exasol | crate: ignore because SQLAlchemy version conflict
+    # drill: pinned version 0.1.dev requires jpype
+    # clickhouse: Unrecognized common setting `product_name`
     SUPERSET_PACKAGES=( \
         # Cloud
         athena bigquery redshift dynamodb \
-        dremio databricks snowflake teradata vertica exasol \
-        firebolt rockset starrocks \
+        dremio databricks snowflake teradata \
+        vertica firebolt rockset  \
         # Database
         mysql postgres mssql oracle hana solr \
-        clickhouse cockroachdb elasticsearch \
+        cockroachdb elasticsearch \
         excel gsheets \
         # Big Data
-        drill druid hive impala kylin pinot presto trino \
+        druid hive impala kylin pinot \
+        presto trino starrocks \
         # Others
         cors thumbnails \
     ); \
     pip install "apache-superset[$(join ',' ${SUPERSET_PACKAGES[@]})]==${SUPERSET_VERSION}" \
+        # Remove those pinned when superset is upgrated to 2.1.1
+        # => https://github.com/apache/superset/pull/22355
         # See https://github.com/pallets/markupsafe/issues/283
         # breaking change introduced in markupsafe causes jinja, flask to break
-        "markupsafe<2.1"; \
+        "markupsafe<2.1" \
+        # See https://github.com/apache/superset/issues/23742
+        "sqlparse==0.4.3" \
+        "marshmallow-enum" \
+        "clickhouse-connect>=0.5.14, <1.0" \
+        "sqlalchemy-drill>=1.1, <2.0"; \
     pip install \
-        "gunicorn[gevent,eventlet]" "flower~=0.9" "authlib~=1.0" \
-        "redis~=4.3" "pylibmc~=1.6" "statsd~=3.3" "prophet~=1.1"; \
+        "gunicorn[gevent,eventlet]" "flower~=2.0" "authlib~=1.2" \
+        "redis~=4.6" "pylibmc~=1.6" "statsd~=4.0" "prophet~=1.1"; \
     \
     rm -rf /usr/local/cx_Oracle-doc;
 

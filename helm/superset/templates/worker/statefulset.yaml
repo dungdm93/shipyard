@@ -62,20 +62,14 @@ spec:
           {{- with $worker.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          ## This healthcheck don't work as expected and create zombie processes
-          # livenessProbe:
-          #   exec:
-          #     command:
-          #     - bash
-          #     - -c
-          #     - >
-          #       celery inspect ping
-          #         --app=superset.tasks.celery_app:app
-          #         --config=$CELERY_CONFIG_PATH
-          #         -d celery@$HOSTNAME
-          #   initialDelaySeconds: 60
-          #   timeoutSeconds: 15
-          #   periodSeconds: 30
+          livenessProbe:
+            exec:
+              command:
+              - docker-entrypoint.sh
+              - celery-ping
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 15
           resources:
             {{- toYaml $worker.resources | nindent 12 }}
       serviceAccountName: {{ include "superset.worker.serviceAccountName" . }}

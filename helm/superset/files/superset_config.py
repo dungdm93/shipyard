@@ -117,6 +117,17 @@ RESULTS_BACKEND = RedisCache(
 )
 {{- end }}
 
+TALISMAN_ENABLED = True
+TALISMAN_CONFIG = {
+    "content_security_policy": {
+        "default-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        "img-src": ["'self'", "data:"],
+        "worker-src": ["'self'", "blob:"],
+        "connect-src": ["'self'", "https://api.mapbox.com", "https://events.mapbox.com"],
+        "object-src": "'none'",
+    }
+}
+
 {{ if .Values.superset.extraSupersetConfig -}}
 {{ tpl .Values.superset.extraSupersetConfig . }}
 {{- end }}
