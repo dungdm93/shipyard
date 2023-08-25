@@ -40,12 +40,15 @@ spec:
     {{- end }}
       enableServiceLinks: false
       initContainers:
-      {{- if .Values.metrics.enabled }}
-        {{- include "trino.initContainers.jmxAgents" . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.cache.enabled }}
-        {{- include "trino.initContainer.cacheDirCreator" . | nindent 8}}
-      {{- end }}
+        {{- if .Values.metrics.enabled }}
+          {{- include "trino.initContainers.jmxAgents" . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.cache.enabled }}
+          {{- include "trino.initContainer.cacheDirCreator" . | nindent 8}}
+        {{- end }}
+        {{- with $worker.initContainers }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
         - name: trino-worker
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -92,6 +95,9 @@ spec:
             {{- toYaml $worker.resources | nindent 12 }}
           securityContext:
             {{- toYaml $worker.securityContext | nindent 12 }}
+        {{- with $worker.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       serviceAccountName: {{ include "trino.serviceAccountName" . }}
       priorityClassName:  {{ $worker.priorityClassName }}
       runtimeClassName:   {{ $worker.runtimeClassName }}

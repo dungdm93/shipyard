@@ -127,6 +127,9 @@ commons:
   tolerations: []
   nodeSelector: {}
 
+  extraContainers: []
+  initContainers: []
+
   extraVolumeMounts: []
   extraVolumes: []
 
@@ -195,6 +198,8 @@ metrics:
   port: 9090
   podMonitor:
     enabled: false
+    opa:
+      enabled: false
 
 service:
   type: ClusterIP

@@ -18,4 +18,7 @@ spec:
   podMetricsEndpoints:
   - port: metrics
     path: /metrics
+  {{- with .Values.metrics.podMonitor.extraEndpoints }}
+  {{- toYaml . | nindent 2 }}
+  {{- end -}}
 {{- end -}}
