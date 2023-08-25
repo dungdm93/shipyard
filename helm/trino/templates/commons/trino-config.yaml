@@ -32,7 +32,7 @@
 {{- if $faultTolerant.policy }}
   {{- $_ := set $config "retry-policy" $faultTolerant.policy }}
   {{- if $exchangeManager.type }}
-    {{- range $key, $value := $exchangeManager.tunning }}
+    {{- range $key, $value := $exchangeManager.config }}
       {{- $_ := set $exchangeConfig (printf "exchange.%s" $key) $value }}
     {{- end }}
     {{- if $exchangeManager.compress }}

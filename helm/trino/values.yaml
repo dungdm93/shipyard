@@ -155,7 +155,7 @@ faultTolerant:
     baseDirectories: ""
     compress: false
 
-    tunning: {}
+    config: {}
       # sink-buffer-pool-min-size:
       # sink-buffers-per-partition:
       # sink-max-file-size:
@@ -205,6 +205,16 @@ service:
   type: ClusterIP
   httpPort: 8080
   httpsPort: 8443
+  extraPorts: []
+  clusterIP:
+  loadBalancerIP:
+  loadBalancerClass:
+  allocateLoadBalancerNodePorts: true
+  nodePort:
+  sessionAffinity:
+  sessionAffinityConfig:
+  internalTrafficPolicy:
+  externalTrafficPolicy:
   annotations: {}
 
 ingress:
