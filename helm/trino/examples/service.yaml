@@ -1,0 +1,24 @@
+httpServer:
+  https:
+    enabled: true
+    port: 8443
+
+service:
+  type: LoadBalancer
+  httpPort: 8081
+  httpsPort: 8444
+  clusterIP: 10.10.10.10
+  loadBalancerIP: 192.168.56.123
+  loadBalancerClass: nginx
+  allocateLoadBalancerNodePorts: true
+  nodePort: 10.11.12.13
+  sessionAffinity: abc
+  sessionAffinityConfig:
+    clientIP: 1.2.3.4
+  internalTrafficPolicy: bar
+  externalTrafficPolicy: foo
+  extraPorts:
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP

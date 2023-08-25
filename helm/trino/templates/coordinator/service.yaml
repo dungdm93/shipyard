@@ -1,4 +1,5 @@
 {{- $httpServer := .Values.httpServer }}
+{{- $service := .Values.service }}
 ---
 apiVersion: v1
 kind: Service
@@ -11,19 +12,49 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ $service.type }}
+  {{- with $service.clusterIP }}
+  clusterIP: {{ . }}
+  {{- end }}
+  {{- if eq $service.type "LoadBalancer" }}
+  {{- with $service.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with $service.loadBalancerClass }}
+  loadBalancerClass: {{ . }}
+  {{- end }}
+  {{- if not $service.allocateLoadBalancerNodePorts }}
+  allocateLoadBalancerNodePorts: false
+  {{- end }}
+  {{- end }}
+  {{- with $service.internalTrafficPolicy }}
+  internalTrafficPolicy: {{ . }}
+  {{- end }}
+  {{- with $service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ . }}
+  {{- end }}
+  {{- with $service.sessionAffinity }}
+  sessionAffinity: {{ . }}
+  {{- end }}
+  {{- with $service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   ports:
   {{- if $httpServer.http.enabled }}
-    - port: {{ .Values.service.httpPort }}
+    - port: {{ $service.httpPort }}
       targetPort: http
       protocol: TCP
       name: http
   {{- end }}
   {{- if $httpServer.https.enabled }}
-    - port: {{ .Values.service.httpsPort }}
+    - port: {{ $service.httpsPort }}
       targetPort: https
       protocol: TCP
       name: https
+  {{- end }}
+  {{- with $service.extraPorts }}
+    {{- toYaml . | nindent 4}}
   {{- end }}
   selector:
     {{- include "trino.coordinator.selectorLabels" . | nindent 4 }}
@@ -39,13 +70,13 @@ spec:
   publishNotReadyAddresses: true
   ports:
   {{- if $httpServer.http.enabled }}
-    - port: {{ .Values.service.httpPort }}
+    - port: {{ $service.httpPort }}
       targetPort: http
       protocol: TCP
       name: http
   {{- end }}
   {{- if $httpServer.https.enabled }}
-    - port: {{ .Values.service.httpsPort }}
+    - port: {{ $service.httpsPort }}
       targetPort: https
       protocol: TCP
       name: https
