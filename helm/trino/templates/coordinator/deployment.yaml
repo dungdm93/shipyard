@@ -35,9 +35,12 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       initContainers:
-      {{- if .Values.metrics.enabled }}
-        {{- include "trino.initContainers.jmxAgents" . | nindent 8 }}
-      {{- end }}
+        {{- if .Values.metrics.enabled }}
+          {{- include "trino.initContainers.jmxAgents" . | nindent 8 }}
+        {{- end }}
+        {{- with $coordinator.initContainers }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       enableServiceLinks: false
       containers:
         - name: trino-coordinator
@@ -81,6 +84,9 @@ spec:
             {{- toYaml $coordinator.resources | nindent 12 }}
           securityContext:
             {{- toYaml $coordinator.securityContext | nindent 12 }}
+        {{- with $coordinator.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       serviceAccountName: {{ include "trino.serviceAccountName" . }}
       priorityClassName:  {{ $coordinator.priorityClassName }}
       runtimeClassName:   {{ $coordinator.runtimeClassName }}
