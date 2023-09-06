@@ -70,6 +70,9 @@ spec:
               protocol: TCP
               containerPort: {{ .Values.metrics.port }}
           {{- end }}
+          {{- with $coordinator.extraPorts }}
+          {{- toYaml . | nindent 12}}
+          {{- end }}
           volumeMounts:
             {{- include "trino.coordinator.volumeMounts" . | nindent 12 }}
           livenessProbe:
