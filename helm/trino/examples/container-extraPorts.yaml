@@ -1,0 +1,20 @@
+coordinator:
+  extraPorts:
+    - name: plugin
+      protocol: TCP
+      containerPort: 9998
+
+worker:
+  extraPorts:
+    - name: worker
+      protocol: TCP
+      containerPort: 9999
+
+metrics:
+  enabled: true
+  port: 9090
+  podMonitor:
+    enabled: true
+    extraEndpoints:
+    - port: plugin
+      path: /metrics
