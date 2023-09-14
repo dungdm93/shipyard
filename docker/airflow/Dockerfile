@@ -53,7 +53,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 ARG AIRFLOW_VERSION=2.6.2 \
     ASTRONOMER_PROVIDERS_VERSION=1.17.1 \
-    ASTRONOMER_COSMOS_VERSION=0.7.4
+    ASTRONOMER_COSMOS_VERSION=0.7.4 \
+    DATAHUB_REST_EMITTER_VERSION=0.11.0
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \
@@ -86,7 +87,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --constraint "${CONSTRAINT_URL}" \
         "apache-airflow[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${AIRFLOW_VERSION}"; \
     pip install "astronomer-providers[$(join ',' ${AIRFLOW_PACKAGES[@]})]==${ASTRONOMER_PROVIDERS_VERSION}"; \
-    pip install "astronomer-cosmos[dbt-all]==${ASTRONOMER_COSMOS_VERSION}";
+    pip install "astronomer-cosmos[dbt-all]==${ASTRONOMER_COSMOS_VERSION}"; \
+    pip install "acryl-datahub[datahub-rest]==${DATAHUB_REST_EMITTER_VERSION}";
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \
