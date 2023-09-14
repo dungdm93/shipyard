@@ -1,0 +1,7 @@
+version: '3'
+
+vars:
+  IMAGE: hub.teko.vn/tools/bazel:6.3.2
+
+includes:
+  docker: ../../
