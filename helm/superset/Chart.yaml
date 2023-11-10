@@ -3,7 +3,7 @@ name: superset
 description: Superset helm chart
 icon: https://github.com/apache/superset/raw/master/docs/src/images/s.png
 type: application
-version: 1.1.0
+version: 1.1.1
 appVersion: 2.1.0
 # kubeVersion: ^1.19
 dependencies:

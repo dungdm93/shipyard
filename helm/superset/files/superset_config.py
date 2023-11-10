@@ -91,15 +91,17 @@ class CeleryConfig:
             'task': 'reports.scheduler',
             'schedule': crontab(minute="*", hour="*"),
         },
-        'cache-warmup-hourly': {
-            'task': 'cache-warmup',
-            'schedule': crontab(minute=0, hour='*'),  # hourly
-            'kwargs': {
-                'strategy_name': 'top_n_dashboards',
-                'top_n': 5,
-                'since': '7 days ago',
-            },
-        },
+        # Cache warmup feature deprecated.
+        # Link: https://github.com/apache/superset/pull/20269
+        # 'cache-warmup-hourly': {
+        #     'task': 'cache-warmup',
+        #     'schedule': crontab(minute=0, hour='*'),  # hourly
+        #     'kwargs': {
+        #         'strategy_name': 'top_n_dashboards',
+        #         'top_n': 5,
+        #         'since': '7 days ago',
+        #     },
+        # },
         "reports.prune_log": {
             "task": "reports.prune_log",
             "schedule": crontab(minute=0, hour=0),
