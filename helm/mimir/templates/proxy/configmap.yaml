@@ -1,0 +1,12 @@
+{{- if and (eq (lower .Values.deploymentMode) "simplescalable") (.Values.proxy.enabled) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mimir.fullname" . }}-proxy-config
+  labels:
+    {{- include "mimir.proxy.labels" . | nindent 4 }}
+data:
+  envoy-config.yaml: |
+    {{- tpl (.Files.Get "files/envoy-config.yaml") . | trim | nindent 4 }}
+{{- end }}
