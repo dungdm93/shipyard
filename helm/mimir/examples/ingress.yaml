@@ -1,0 +1,7 @@
+ingress:
+  enabled: true
+
+# proxy:
+#   enabled: true
+#
+# deploymentMode: AIO

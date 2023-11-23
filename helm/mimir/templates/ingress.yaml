@@ -1,0 +1,138 @@
+{{- if .Values.ingress.enabled -}}
+{{- $readService := printf "%s-read" (include "mimir.fullname" .) -}}
+{{- $writeService := printf "%s-write" (include "mimir.fullname" .) -}}
+{{- $backendService := printf "%s-backend" (include "mimir.fullname" .) -}}
+{{- $proxyService := printf "%s-proxy" (include "mimir.fullname" .) -}}
+{{- $aioService := include "mimir.fullname" . -}}
+{{- $prometheusPrefix := .Values.config.api.prometheus_http_prefix | trimSuffix "/" }}
+{{- $alertmanagerPrefix := .Values.config.api.alertmanager_http_prefix | trimSuffix "/" }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "mimir.fullname" . }}
+  labels:
+    {{- include "mimir.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+  - hosts:
+    {{- range .hosts }}
+    - {{ . }}
+    {{- end }}
+    secretName: {{ .secretName }}
+  {{- end }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      {{- if eq (lower $.Values.deploymentMode) "aio" }}
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $aioService }}
+            port: { name: http }
+      {{- else if $.Values.proxy.enabled }}
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $proxyService }}
+            port: { name: http }
+      {{- else }}
+      # Distributor endpoints
+      - path: /distributor
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $writeService }}
+            port: { name: http }
+      - path: /api/v1/push
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $writeService }}
+            port: { name: http }
+      - path: /otlp/v1/metrics
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $writeService }}
+            port: { name: http }
+      # Alertmanager endpoints
+      - path: {{ $alertmanagerPrefix }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      - path: /multitenant_alertmanager/status
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      - path: /api/v1/alerts
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      # Ruler endpoints
+      - path: {{ $prometheusPrefix }}/config/v1/rules
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      - path: {{ $prometheusPrefix }}/api/v1/rules
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      - path: {{ $prometheusPrefix }}/api/v1/alerts
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      - path: /ruler/ring
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      # Rest of /prometheus goes to the query-frontend
+      - path: {{ $prometheusPrefix }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $readService }}
+            port: { name: http }
+      # Buildinfo endpoint can go to any component
+      - path: /api/v1/status/buildinfo
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $readService }}
+            port: { name: http }
+      # Compactor endpoint for uploading blocks
+      - path: /api/v1/upload/block/
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      {{- end }}
+  {{- end }}
+{{- end }}
