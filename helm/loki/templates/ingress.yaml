@@ -1,0 +1,122 @@
+{{- if .Values.ingress.enabled -}}
+{{- $readService := printf "%s-read" (include "loki.fullname" .) -}}
+{{- $writeService := printf "%s-write" (include "loki.fullname" .) -}}
+{{- $backendService := printf "%s-backend" (include "loki.fullname" .) -}}
+{{- $proxyService := printf "%s-proxy" (include "loki.fullname" .) -}}
+{{- $aioService := include "loki.fullname" . -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "loki.fullname" . }}
+  labels:
+    {{- include "loki.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+  - hosts:
+    {{- range .hosts }}
+    - {{ . }}
+    {{- end }}
+    secretName: {{ .secretName }}
+  {{- end }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      {{- if eq (lower $.Values.deploymentMode) "aio" }}
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $aioService }}
+            port: { name: http }
+      {{- else if $.Values.proxy.enabled }}
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $proxyService }}
+            port: { name: http }
+      {{- else }}
+      # Distributor
+      - path: /api/prom/push  # Deprecated, use /loki/api/v1/push instead
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $writeService }}
+            port: { name: http }
+      - path: /loki/api/v1/push
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $writeService }}
+            port: { name: http }
+      # Ruler
+      - path: /api/prom/rules
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      - path: /loki/api/v1/rules
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      - path: /prometheus/api/v1/alerts
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      - path: /prometheus/api/v1/rules
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      # Compactor
+      - path: /loki/api/v1/delete
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $backendService }}
+            port: { name: http }
+      # QueryFrontend, Querier
+      - path: /api/prom/tail  # Deprecated, use /loki/api/v1/tail instead
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $readService }}
+            port: { name: http }
+      - path: /loki/api/v1/tail
+        pathType: Exact
+        backend:
+          service:
+            name: {{ $readService }}
+            port: { name: http }
+      - path: /api/prom
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $readService }}
+            port: { name: http }
+      - path: /loki/api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ $readService }}
+            port: { name: http }
+      {{- end }}
+  {{- end }}
+{{- end }}
