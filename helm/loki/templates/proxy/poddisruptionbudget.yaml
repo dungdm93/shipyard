@@ -1,0 +1,21 @@
+{{- if and (eq (lower .Values.deploymentMode) "simplescalable") (.Values.proxy.enabled) }}
+{{- $proxy := mergeOverwrite (deepCopy .Values.commons) .Values.proxy -}}
+{{- if and $proxy.podDisruptionBudget.enabled (gt (int $proxy.replicas | default 1) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "loki.fullname" . }}-proxy
+  labels:
+   {{- include "loki.proxy.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "loki.proxy.selectorLabels" . | nindent 4 }}
+  {{- if $proxy.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $proxy.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $proxy.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $proxy.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}
+{{- end }}
