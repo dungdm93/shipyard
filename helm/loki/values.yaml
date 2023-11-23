@@ -221,6 +221,14 @@ backend:
     size: 10Gi
     annotations: {}
 
+proxy:
+  enabled: false
+  image:
+    repository: envoyproxy/envoy
+    tag: v1.28.0
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+
 serviceAccount:
   create: true
   annotations: {}
