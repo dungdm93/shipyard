@@ -2,8 +2,13 @@
 # * https://grafana.com/docs/mimir/latest/references/http-api/
 # * https://github.com/bitnami/charts/blob/main/bitnami/grafana-mimir/templates/gateway/configmap-http.yaml
 # * https://github.com/grafana/mimir/blob/mimir-2.10.0/operations/helm/charts/mimir-distributed/values.yaml#L2643-L2782
+# Access Logs:
+# * https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage
+# * https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/access_loggers/open_telemetry/v3/logs_service.proto
+# * https://github.com/helpfulBadger/envoy_getting_started/blob/master/08_log_taps_traces/front-envoy-jaeger.yaml
 {{- $prometheusPrefix := .Values.config.api.prometheus_http_prefix | trimSuffix "/" }}
 {{- $alertmanagerPrefix := .Values.config.api.alertmanager_http_prefix | trimSuffix "/" }}
+{{- $accessLog := .Values.proxy.accessLog }}
 ---
 admin:
   access_log_path: "/dev/null"
@@ -101,6 +106,24 @@ static_resources:
                             prefix: /api/v1/upload/block/
                           route:
                             cluster: mimir-backend-http
+                access_log:
+                {{- if $accessLog.openTelemetry.enabled }}
+                  {{- $ot := $accessLog.openTelemetry }}
+                  - name: envoy.access_loggers.open_telemetry
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.open_telemetry.v3.OpenTelemetryAccessLogConfig
+                      common_config:
+                        log_name: mimir
+                        transport_api_version: V3
+                        grpc_service:
+                          {{- toYaml $ot.grpcService | nindent 26 }}
+                      body:
+                        # default log format (https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#default-format-string)
+                        string_value: >
+                          [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%" %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% "%REQ(X-FORWARDED-FOR)%" "%REQ(USER-AGENT)%" "%REQ(X-REQUEST-ID)%" "%REQ(:AUTHORITY)%" "%UPSTREAM_HOST%"
+                      attributes:
+                        {{- .Files.Get "files/opentelemetry-attributes.yaml" | trim | nindent 24 }}
+                {{- end }}
   clusters:
     - name: mimir-read-http
       type: LOGICAL_DNS

@@ -3,7 +3,7 @@ name: mimir
 description: Helm chart for Grafana Mimir in simple scalable mode
 icon: https://grafana.com/static/img/logos/logo-mimir.svg
 type: application
-version: 0.3.0
+version: 0.3.1
 appVersion: 2.8.0
 maintainers:
 - name: Teko's DataOps team
