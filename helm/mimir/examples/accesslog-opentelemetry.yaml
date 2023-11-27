@@ -1,0 +1,9 @@
+proxy:
+  enabled: true
+  accessLog:
+    openTelemetry:
+      enabled: true
+      grpcService:
+        google_grpc:
+          target_uri: access-logs-collector.opentelemetry-collector.svc:4317
+          stat_prefix: access_log_http

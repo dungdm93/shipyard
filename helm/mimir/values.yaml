@@ -235,6 +235,11 @@ proxy:
     tag: v1.28.0
     pullPolicy: IfNotPresent
     pullSecrets: []
+  accessLog:
+    openTelemetry:
+      enabled: false
+      # https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/core/v3/grpc_service.proto#envoy-v3-api-msg-config-core-v3-grpcservice
+      grpcService: {}
 
 serviceAccount:
   create: true

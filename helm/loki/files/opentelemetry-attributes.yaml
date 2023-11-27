@@ -1,0 +1,68 @@
+values:
+## client
+- key: client.address
+  value: { string_value: "%DOWNSTREAM_REMOTE_ADDRESS%" }
+- key: client.transport_failure.reason
+  value: { string_value: "%DOWNSTREAM_TRANSPORT_FAILURE_REASON%" }
+## envoy
+- key: envoy.virtual_host
+  value: { string_value: "%VIRTUAL_CLUSTER_NAME%" }
+- key: envoy.route
+  value: { string_value: "%ROUTE_NAME%" }
+## server
+- key: server.cluster
+  value: { string_value: "%UPSTREAM_CLUSTER%" }
+- key: server.address
+  value: { string_value: "%UPSTREAM_REMOTE_ADDRESS%" }
+- key: server.transport_failure.reason
+  value: { string_value: "%UPSTREAM_TRANSPORT_FAILURE_REASON%" }
+
+## http
+- key: http.protocol
+  value: { string_value: "%PROTOCOL%" }
+- key: http.duration
+  value: { string_value: "%DURATION%" }
+- key: http.user_agent
+  value: { string_value: "%REQ(USER-AGENT)%" }
+- key: http.forwarded-for
+  value: { string_value: "%REQ(X-FORWARDED-FOR)%" }
+- key: http.grafana.tenant
+  value: { string_value: "%REQ(X-Scope-OrgId)%" }
+## http.request
+- key: http.request.id
+  value: { string_value: "%REQ(X-REQUEST-ID)%" }
+- key: http.request.host
+  value: { string_value: "%REQ(HOST)%" }
+- key: http.request.path
+  value: { string_value: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%" }
+- key: http.request.method
+  value: { string_value: "%REQ(:METHOD)%" }
+- key: http.request.duration
+  value: { string_value: "%REQUEST_DURATION%" }
+- key: http.request.body.bytes
+  value: { string_value: "%BYTES_RECEIVED%" }
+- key: http.request.headers.accept
+  value: { string_value: "%REQ(ACCEPT)%" }
+- key: http.request.headers.authority
+  value: { string_value: "%REQ(:AUTHORITY)%" }
+- key: http.request.headers.content-type
+  value: { string_value: "%REQ(CONTENT-TYPE)%" }
+- key: http.request.headers.content-length
+  value: { string_value: "%REQ(CONTENT-LENGTH)%" }
+## http.response
+- key: http.response.server
+  value: { string_value: "%RESP(SERVER)%" }
+- key: http.response.code
+  value: { string_value: "%RESPONSE_CODE%" }
+- key: http.response.flags
+  value: { string_value: "%RESPONSE_FLAGS%" }
+- key: http.response.duration
+  value: { string_value: "%RESPONSE_DURATION%" }
+- key: http.response.body.bytes
+  value: { string_value: "%BYTES_SENT%" }
+- key: http.response.headers.content-type
+  value: { string_value: "%RESP(CONTENT-TYPE)%" }
+- key: http.response.headers.content-length
+  value: { string_value: "%RESP(CONTENT-LENGTH)%" }
+- key: http.response.headers.access-control
+  value: { string_value: "%RESP(ACCESS-CONTROL-ALLOW-ORIGIN)%" }
