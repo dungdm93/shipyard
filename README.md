@@ -1,6 +1,7 @@
-Data stacks
-===========
-Template for build data warehouse stack based on Kubernetes
+`shipyard`
+==========
+Template for build cloud-native stack: `Kubernetes`, `Terraform` and friends...
+
 
 ## 1. Folder structure
 * [`docker`](/docker): Dockerfile and other stuffs for build docker images.
