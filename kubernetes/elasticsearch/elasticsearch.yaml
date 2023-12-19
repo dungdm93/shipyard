@@ -1,0 +1,71 @@
+# pin to elasticsearch version 7.x due to:
+# * https://github.com/elastic/elasticsearch/issues/41059
+# * https://github.com/spring-projects/spring-data-elasticsearch/issues/1880
+image: docker.elastic.co/elasticsearch/elasticsearch
+imageTag: "7.17.3"
+
+clusterName: elasticsearch
+nodeGroup: master
+replicas: 3
+
+podManagementPolicy: Parallel
+enableServiceLinks: false
+
+esConfig:
+  elasticsearch.yml: |
+    xpack.security.enabled: false
+
+  # NOTE:
+  #  * Set MinHeapSize to bypass ES autoconfig HeapSize
+  #     https://github.com/elastic/elasticsearch/blob/7.17/distribution/tools/launchers/src/main/java/org/elasticsearch/tools/launchers/MachineDependentHeap.java#L63-L73
+  #  * check: MaxHeapSize MUST be equals InitialHeapSize
+  #     https://github.com/elastic/elasticsearch/blob/7.17/server/src/main/java/org/elasticsearch/bootstrap/BootstrapChecks.java#L221-L240
+  #  * autoconfig: MaxDirectMemorySize = heapSize / 2
+  #     https://github.com/elastic/elasticsearch/blob/7.17/distribution/tools/launchers/src/main/java/org/elasticsearch/tools/launchers/JvmErgonomics.java#L55
+  jvm.options: |
+    -XX:+UseZGC
+    -XX:+UseStringDeduplication
+    -XX:+ExitOnOutOfMemoryError
+    -XX:+UseContainerSupport
+    -XX:MinHeapSize=1g
+    -XX:InitialRAMPercentage=66.0
+    -XX:MaxRAMPercentage=66.0
+
+# esJavaOpts: # for inline option
+# esJvmOptions: # mount files to /usr/share/elasticsearch/config/jvm.options.d
+
+resources:
+  requests:
+    cpu: 1000m
+    memory: 1Gi
+  limits:
+    cpu: 4000m
+    memory: 6Gi
+
+persistence:
+  enabled: true
+
+volumeClaimTemplate:
+  storageClassName: topolvm-nvme
+  resources:
+    requests:
+      storage: 64Gi
+
+rbac:
+  create: true
+
+ingress:
+  enabled: false
+
+service:
+  enabled: true
+  type: LoadBalancer
+  loadBalancerIP: 192.168.10.10
+
+sysctlInitContainer:
+  enabled: false
+
+keystore: []
+
+tests:
+  enabled: false

@@ -1,0 +1,42 @@
+image: docker.elastic.co/kibana/kibana
+imageTag: "7.17.3"
+
+elasticsearchHosts: http://elasticsearch:9200
+replicas: 2
+
+kibanaConfig:
+  # https://www.elastic.co/guide/en/kibana/7.17/settings.html
+  kibana.yml: |
+    server.publicBaseUrl: https://kibana.dungdm93.me
+    server.shutdownTimeout: 5s
+    logging.events.request: "!"
+    logging.events.response: "!"
+    monitoring.ui.container.elasticsearch.enabled: true
+    monitoring.ui.container.logstash.enabled: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+
+updateStrategy:
+  type: RollingUpdate
+
+ingress:
+  enabled: false
+  # className: nginx
+  # pathtype: Prefix
+  # annotations:
+  #   kubernetes.io/ingress.class: nginx
+  #   kubernetes.io/tls-acme: "true"
+  # hosts:
+  #   - host: kibana.dungdm93.local
+  #     paths:
+  #       - path: /
+  # tls:
+  #   - secretName: kibana.dungdm93.local-tls
+  #     hosts:
+  #       - kibana.dungdm93.local

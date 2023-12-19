@@ -1,0 +1,20 @@
+repositories:
+- name: elastic
+  url:  https://helm.elastic.co
+
+releases:
+- name: elasticsearch
+  namespace: elasticsearch
+  chart: elastic/elasticsearch
+  version: 7.17.3
+  values:
+  - ./elasticsearch.yaml
+  - fullnameOverride: elasticsearch
+
+- name: kibana
+  namespace: elasticsearch
+  chart: elastic/kibana
+  version: 7.17.3
+  values:
+  - ./kibana.yaml
+  - fullnameOverride: kibana
