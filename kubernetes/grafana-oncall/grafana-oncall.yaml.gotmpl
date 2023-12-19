@@ -1,0 +1,96 @@
+base_url: oncall.dungdm93.me
+
+engine:
+  replicaCount: 2
+
+celery:
+  replicaCount: 3
+  worker_queue: "default,critical,long,slack,telegram,webhook,celery"
+  worker_concurrency: 4
+  worker_max_tasks_per_child: 100
+  worker_beat_enabled: true
+  worker_shutdown_interval: null
+
+env:
+  - name: GRAFANA_CLOUD_NOTIFICATIONS_ENABLED
+    value: "false"
+  - name: GRAFANA_CLOUD_ONCALL_HEARTBEAT_ENABLED
+    value: "false"
+
+oncall:
+  mirageCipherIV: {{ fetchSecretValue "ref+vault://secret/gitops/grafana-oncall/secret#/mirage_cipher_iv" | quote }}
+  secrets:
+    existingSecret: grafana-oncall
+    secretKey: SECRET_KEY
+    mirageSecretKey: MIRAGE_SECRET_KEY
+  slack:
+    enabled: true
+    command: oncall
+    clientId:      {{ fetchSecretValue "ref+vault://secret/gitops/grafana-oncall/slack#/client_id" | quote }}
+    clientSecret:  {{ fetchSecretValue "ref+vault://secret/gitops/grafana-oncall/slack#/client_secret" | quote }}
+    signingSecret: {{ fetchSecretValue "ref+vault://secret/gitops/grafana-oncall/slack#/signing_secret" | quote }}
+    redirectHost: https://oncall.dungdm93.me
+
+  telegram:
+    enabled: false
+
+  smtp:
+    enabled: true
+    host: smtp.sendgrid.net
+    port: 587
+    username: {{ fetchSecretValue "ref+vault://secret/gitops/grafana-oncall/smtp#/username" | quote }}
+    password: {{ fetchSecretValue "ref+vault://secret/gitops/grafana-oncall/smtp#/password" | quote }}
+    tls: true
+    fromEmail: oncall@dungdm93.me
+
+migrate:
+  enabled: true
+
+database:
+  type: postgresql
+
+externalPostgresql:
+  host: infradb.dungdm93.me
+  port: 5432
+  db: grafana-oncall
+  user:     {{ fetchSecretValue "ref+vault://secret/gitops/grafana-oncall/database#/username" | quote }}
+  password: {{ fetchSecretValue "ref+vault://secret/gitops/grafana-oncall/database#/password" | quote }}
+
+broker:
+  type: redis
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+    password: grafana-oncall
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ceph-rbd-ssd
+
+grafana:
+  enabled: false
+
+externalGrafana:
+  url: https://grafana.dungdm93.me
+
+ingress:
+  enabled: false
+
+ingress-nginx:
+  enabled: false
+
+cert-manager:
+  enabled: false
+
+mariadb:
+  enabled: false
+
+postgresql:
+  enabled: false
+
+rabbitmq:
+  enabled: false
