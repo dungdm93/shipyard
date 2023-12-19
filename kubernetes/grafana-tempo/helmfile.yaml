@@ -1,0 +1,8 @@
+releases:
+- name: tempo
+  namespace: grafana-tempo
+  chart: oci://ghcr.io/dungdm93/helm/tempo
+  version: 0.2.0
+  values:
+  - ./tempo.yaml.gotmpl
+  - fullnameOverride: tempo

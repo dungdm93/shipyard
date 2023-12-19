@@ -1,0 +1,52 @@
+image:
+  repository: grafana/tempo
+  tag: 2.1.1
+
+commons:
+  replicas: 1
+  persistence:
+    enabled: true
+    storageClass: topolvm-ssd
+    size: 16Gi
+  service:
+    type: LoadBalancer
+    loadBalancerIP: 192.168.10.10
+    allocateLoadBalancerNodePorts: false
+
+config:
+  multitenancy_enabled: true
+
+  ingester:
+    lifecycler:
+      ring:
+        replication_factor: 1
+
+  usage_report:
+    reporting_enabled: false
+
+ringKVStore:
+  store: memberlist
+
+storage:
+  backend: s3
+  s3:
+    endpoint: s3.dungdm93.me:7480
+    insecure: true
+    forcepathstyle: true
+    region: aws-global
+    bucket: apps-traces
+    access_key: {{ fetchSecretValue "ref+vault://secret/gitops/tempo/storage/s3#/access_key" | quote }}
+    secret_key: {{ fetchSecretValue "ref+vault://secret/gitops/tempo/storage/s3#/secret_key" | quote }}
+  block:
+    version: vParquet2
+
+receivers:
+  otlp:
+    enabled: true
+    protocols:
+      grpc:
+        enabled: true
+        port: 4317
+      http:
+        enabled: true
+        port: 4318
