@@ -1,5 +1,5 @@
 image:
-  repository: hub.teko.vn/dataops/kafka/schema-registry
+  repository: ghcr.io/dungdm93/docker/kafka/schema-registry
   tag: 6.1.0
 
 imagePullPolicy: Always

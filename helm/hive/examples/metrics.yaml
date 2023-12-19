@@ -1,5 +1,5 @@
 image:
-  repository: hub.teko.vn/dataops/hive
+  repository: ghcr.io/dungdm93/docker/hive
   tag: 3.1.3
 
 metrics:

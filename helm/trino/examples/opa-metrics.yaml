@@ -1,7 +1,7 @@
 coordinator:
   extraContainers:
     - name: opa
-      image: hub.teko.vn/dataops/opa:staging-v2
+      image: ghcr.io/dungdm93/docker/opa:staging-v2
       ports:
       - name: opa
         containerPort: 8181

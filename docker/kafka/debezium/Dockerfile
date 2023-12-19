@@ -20,6 +20,6 @@ RUN set -eux; \
             | tar -xzvf - -C plugins --no-same-owner; \
     done
 
-FROM hub.teko.vn/dataops/kafka/connect:3.4.0
+FROM ghcr.io/dungdm93/docker/kafka/connect:3.4.0
 
 COPY --from=downloader /build/plugins /opt/kafka/plugins

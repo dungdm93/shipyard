@@ -38,7 +38,7 @@ RUN set -eux; \
     curl -LO "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-hive-runtime/${ICEBERG_VERSION}/iceberg-hive-runtime-${ICEBERG_VERSION}.jar"; \
     curl -LO "https://github.com/delta-io/connectors/releases/download/v${DELTALAKE_VERSION}/delta-hive-assembly_2.11-${DELTALAKE_VERSION}.jar";
 
-FROM hub.teko.vn/dataops/hadoop:${HADOOP_VERSION}
+FROM ghcr.io/dungdm93/docker/hadoop:${HADOOP_VERSION}
 
 # Tools
 RUN set -eux; \

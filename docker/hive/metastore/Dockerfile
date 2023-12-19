@@ -28,7 +28,7 @@ RUN set -eux; \
 
 
 
-FROM hub.teko.vn/dataops/hadoop:${HADOOP_VERSION}
+FROM ghcr.io/dungdm93/docker/hadoop:${HADOOP_VERSION}
 
 # Tools
 RUN set -eux; \

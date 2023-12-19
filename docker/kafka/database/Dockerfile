@@ -35,7 +35,7 @@ COPY ./pom.xml /build/
 RUN mvn dependency:resolve \
         dependency:copy-dependencies -DoutputDirectory=plugins/confluentinc-kafka-connect-jdbc/;
 
-FROM hub.teko.vn/dataops/kafka/connect:2.8.1
+FROM ghcr.io/dungdm93/docker/kafka/connect:2.8.1
 
 COPY --from=confluent  /build/plugins /opt/kafka/plugins
 COPY --from=downloader /build/plugins /opt/kafka/plugins

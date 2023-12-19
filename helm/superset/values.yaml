@@ -15,7 +15,7 @@ superset:
 # superset components: webserver, worker, beat, flower
 commons:
   image:
-    repository: hub.teko.vn/dataops/superset
+    repository: ghcr.io/dungdm93/docker/superset
     tag: "2.1.0"
   replicas: null
   command: []

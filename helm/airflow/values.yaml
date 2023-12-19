@@ -42,7 +42,7 @@ airflow_local_settings: ""
 # airflow components: webserver, scheduler, worker, flower
 commons:
   image:
-    repository: hub.teko.vn/dataops/airflow
+    repository: ghcr.io/dungdm93/docker/airflow
     tag: 2.6.2
   replicas: null
   command: []

@@ -33,6 +33,6 @@ RUN set -eux; \
         cp -r "${KAFKA_CONNECTOR_PATH}/${plugin}/lib" "./${plugin}"; \
     done
 
-FROM hub.teko.vn/dataops/kafka/connect:2.8.1
+FROM ghcr.io/dungdm93/docker/kafka/connect:2.8.1
 
 COPY --from=confluent /build/plugins /opt/kafka/plugins

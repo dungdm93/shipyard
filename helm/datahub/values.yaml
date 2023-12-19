@@ -71,7 +71,7 @@ frontend:
 
 actions:
   image:
-    repository: hub.teko.vn/dataops/datahub/actions
+    repository: ghcr.io/dungdm93/docker/datahub/actions
     tag: 0.0.12
   # https://github.com/acryldata/datahub-actions/blob/main/datahub-actions/src/datahub_actions/pipeline/pipeline_config.py
   # `kafka` `source` and `datahub` client will be set by default
@@ -96,7 +96,7 @@ actions:
           - name: RUN_INGEST
             type: datahub_kubernetes.executor.execution.kubernetes_pod_ingestion_task.KubernetesPodIngestionTask
             configs:
-              image_template: hub.teko.vn/dataops/datahub/ingestion:0.10.4
+              image_template: ghcr.io/dungdm93/docker/datahub/ingestion:0.10.4
               k8s_config:
                 in_cluster: true
                 namespace: ${KUBERNETES_NAMESPACE}

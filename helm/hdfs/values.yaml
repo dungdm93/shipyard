@@ -1,6 +1,6 @@
 # The base hadoop image to use for all components.
 image:
-  repository: hub.teko.vn/dataops/hadoop
+  repository: ghcr.io/dungdm93/docker/hadoop
   tag: 3.3.1
   pullPolicy: IfNotPresent
 

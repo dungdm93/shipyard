@@ -1,6 +1,6 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/flink-operator:1.1.0
+  IMAGE: ghcr.io/dungdm93/docker/flink-operator:1.1.0
 includes:
   docker: ../

@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/dataops/jupyter/dotnet-notebook:6.0
+  IMAGE: ghcr.io/dungdm93/docker/jupyter/dotnet-notebook:6.0
 
 includes:
   docker: ../../

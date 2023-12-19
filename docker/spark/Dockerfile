@@ -32,7 +32,7 @@ RUN set -eux; \
     curl -LO "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini"; \
     chmod +x tini;
 
-FROM hub.teko.vn/dataops/hadoop:3.3.4 as hadoop
+FROM ghcr.io/dungdm93/docker/hadoop:3.3.4 as hadoop
 WORKDIR /build/hadoop
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
