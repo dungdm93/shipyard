@@ -1,0 +1,8 @@
+releases:
+- name: mimir
+  namespace: grafana-mimir
+  chart: oci://ghcr.io/dungdm93/helm/mimir
+  version: 0.3.1
+  values:
+  - ./mimir.yaml.gotmpl
+  - fullnameOverride: mimir

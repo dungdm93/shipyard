@@ -1,0 +1,107 @@
+image:
+  repository: grafana/mimir
+  tag: 2.10.4
+
+config:
+  multitenancy_enabled: true
+
+  ingester:
+    ring:
+      replication_factor: 1
+
+  store_gateway:
+    sharding_ring:
+      replication_factor: 1
+
+  alertmanager:
+    poll_interval: 1m
+
+  ruler:
+    poll_interval: 1m
+    evaluation_interval: 1m
+
+  limits:
+    ingestion_rate: 1_000_000           # -distributor.ingestion-rate-limit
+    ingestion_burst_size: 2_000_000_000 # -distributor.ingestion-burst-size
+    max_global_series_per_user:     0 # disable
+    max_global_series_per_metric:   0 # disable
+    max_global_metadata_per_user:   0 # disable
+    max_global_metadata_per_metric: 0 # disable
+    max_global_exemplars_per_user:  0 # disable
+    out_of_order_time_window: 15m
+
+  usage_stats:
+    enabled: false
+
+ringKVStore:
+  store: memberlist
+
+storage:
+  backend: s3
+
+  s3:
+    endpoint: s3.dungdm93.me:7480
+    signature_version: v4
+    insecure: true
+    region: aws-global
+    bucket_name: apps-metrics
+    access_key_id:     {{ fetchSecretValue "ref+vault://secret/gitops/mimir/storage/s3#/access_key" | quote }}
+    secret_access_key: {{ fetchSecretValue "ref+vault://secret/gitops/mimir/storage/s3#/secret_key" | quote }}
+
+write:
+  replicas: 5
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 24Gi
+  persistence:
+    enabled: true
+    size: 64Gi
+    storageClass: topolvm-ssd
+
+read:
+  replicas: 3
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 8000m
+      memory: 8Gi
+
+backend:
+  replicas: 3
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 12Gi
+  persistence:
+    enabled: true
+    size: 64Gi
+    storageClass: topolvm-ssd
+
+proxy:
+  enabled: true
+  replicas: 3
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  service:
+    type: LoadBalancer
+    loadBalancerIP: 192.168.10.10
+    allocateLoadBalancerNodePorts: false
+
+metrics:
+  enabled: true
+  podMonitor:
+    enabled: true
