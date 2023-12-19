@@ -1,7 +1,11 @@
 {
   "files.associations": {
     "*.tpl": "go",
+    "*.tmpl": "go",
+    "*.yml.gotmpl": "yaml",
+    "*.yaml.gotmpl": "yaml",
     "*.hcl": "terraform",
+    "*.river": "terraform",
     "Dockerfile.*": "dockerfile",
   },
   "editor.autoIndent": "advanced"
