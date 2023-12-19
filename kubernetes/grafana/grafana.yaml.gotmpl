@@ -1,0 +1,216 @@
+##### Kubernetes configuration #####
+replicas: 3
+enableServiceLinks: false
+
+ingress:
+  enabled: false
+  # annotations:
+  #   kubernetes.io/ingress.class: nginx
+  #   kubernetes.io/tls-acme: "true"
+  # pathType: Prefix
+  # hosts:
+  #   - grafana.dungdm93.local
+  # path: /
+  # tls:
+  #   - secretName: grafana.dungdm93.local-tls
+  #     hosts:
+  #       - grafana.dungdm93.local
+
+podDisruptionBudget:
+  minAvailable: 1
+
+serviceMonitor:
+  enabled: true
+
+##### Grafana configuration #####
+grafana.ini:
+  server:
+    domain:   grafana.dungdm93.me
+    root_url: https://grafana.dungdm93.me
+  database:
+    type:     postgres
+    host:     infradb.dungdm93.me:5432
+    name:     grafana
+    user:     {{ fetchSecretValue "ref+vault://secret/gitops/grafana/database#/username" | quote }}
+    password: {{ fetchSecretValue "ref+vault://secret/gitops/grafana/database#/password" | quote }}
+  smtp:
+    # Gmail:    https://support.google.com/a/answer/176600?hl=en
+    # SendGrid: https://sendgrid.com/docs/API_Reference/SMTP_API/getting_started_smtp.html
+    enabled: true
+    host:     smtp.sendgrid.net:587
+    user:     {{ fetchSecretValue "ref+vault://secret/gitops/grafana/smtp#/username" | quote }}
+    password: {{ fetchSecretValue "ref+vault://secret/gitops/grafana/smtp#/password" | quote }}
+    from_name:    KiT106 Platform
+    from_address: grafana@dungdm93.me
+    startTLS_policy: OpportunisticStartTLS
+  auth:
+    disable_login_form: true
+    signout_redirect_url: https://dungdm93.me
+  auth.basic:
+    enabled: false
+  auth.generic_oauth:
+    enabled: true
+    name: KeyCloak
+    use_pkce: true
+    auto_login: true
+    allow_sign_up: true
+    skip_org_role_sync: true
+    client_id:     {{ fetchSecretValue "ref+vault://secret/gitops/grafana/auth#/client_id" | quote }}
+    client_secret: {{ fetchSecretValue "ref+vault://secret/gitops/grafana/auth#/client_secret" | quote }}
+    scopes:    openid profile email
+    auth_url:  https://keycloak.dungdm93.me/realms/kit106/protocol/openid-connect/auth
+    token_url: https://keycloak.dungdm93.me/realms/kit106/protocol/openid-connect/token
+    api_url:   https://keycloak.dungdm93.me/realms/kit106/protocol/openid-connect/userinfo
+  security:
+    allow_embedding: true
+
+# ldap: {}
+# smtp: {}
+
+adminUser:     {{ fetchSecretValue "ref+vault://secret/gitops/grafana/admin#/username" | quote }}
+adminPassword: {{ fetchSecretValue "ref+vault://secret/gitops/grafana/admin#/password" | quote }}
+
+# env:
+#   GF_PLUGIN_REPO: http://nexus.dungdm93.local:8081/repository/raw-proxy_grafana.com/api/plugins
+# plugins:
+# - grafana-oncall-app
+# - grafana-piechart-panel
+# - vonage-status-panel
+
+## Configure grafana datasources
+## ref: http://docs.grafana.org/administration/provisioning/#datasources
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: KiT106/Metrics
+        type: prometheus
+        uid:  kit106-metrics
+        url:  http://mimir-proxy.grafana-mimir.svc:9009/prometheus
+        access: proxy
+        isDefault: true
+        jsonData:
+          timeout: "600"  # 10m
+          prometheusType: Mimir
+          manageAlerts: true
+          alertmanagerUid: kit106-alerts
+          httpHeaderName1: X-Scope-OrgID
+        secureJsonData:
+          httpHeaderValue1: kit106
+      - name: KiT106/Logs
+        type: loki
+        uid:  kit106-logs
+        url:  http://loki-proxy.grafana-loki.svc:3100
+        access: proxy
+        jsonData:
+          timeout: "600"  # 10m
+          manageAlerts: true
+          alertmanagerUid: kit106-alerts
+          httpHeaderName1: X-Scope-OrgID
+        secureJsonData:
+          httpHeaderValue1: kit106
+      # ref: https://grafana.com/docs/grafana/latest/datasources/tempo/
+      - name: KiT106/Traces
+        type: tempo
+        uid:  kit106-traces
+        url:  http://tempo.grafana-tempo.svc:3200
+        access: proxy
+        jsonData:
+          timeout: "600"  # 10m
+          httpHeaderName1: X-Scope-OrgID
+          tracesToLogsV2:
+            datasourceUid: kit106-logs
+            spanStartTimeShift: 1h
+            spanEndTimeShift: -1h
+            filterByTraceID: false
+            filterBySpanID: false
+        secureJsonData:
+          httpHeaderValue1: kit106
+      - name: KiT106/Alerts
+        type: alertmanager
+        uid:  kit106-alerts
+        url:  http://mimir-proxy.grafana-mimir.svc:9009
+        access: proxy
+        jsonData:
+          implementation: mimir
+          httpHeaderName1: X-Scope-OrgID
+        secureJsonData:
+          httpHeaderValue1: kit106
+#     - name: KiT106/Audits
+#       type: elasticsearch
+#       uid:  kit106-audits
+#       url:  http://elasticsearch-coordinating.audits-center.svc:9200
+#       access: proxy
+#       database: kit106-*
+#       jsonData:
+#         esVersion: 7.0.0
+#         interval: null
+#         timeField: "@timestamp"
+#         logMessageField: message
+#         timeout: "600"  # 10m
+      - name: KiTLab/Metrics
+        type: prometheus
+        uid:  kitlab-metrics
+        url:  http://mimir-proxy.grafana-mimir.svc:9009/prometheus
+        orgId: 2
+        access: proxy
+        jsonData:
+          timeout: "600"  # 10m
+          prometheusType: Mimir
+          manageAlerts: true
+          httpHeaderName1: X-Scope-OrgID
+        secureJsonData:
+          httpHeaderValue1: kitlab
+      - name: KiTLab/Logs
+        type: loki
+        uid:  kitlab-logs
+        url:  http://loki-proxy.grafana-loki.svc:3100
+        orgId: 2
+        access: proxy
+        jsonData:
+          timeout: "600"  # 10m
+          httpHeaderName1: X-Scope-OrgID
+        secureJsonData:
+          httpHeaderValue1: kitlab
+      - name: KiTLab/Traces
+        type: tempo
+        uid:  kitlab-traces
+        url:  http://tempo.grafana-tempo.svc:3200
+        orgId: 2
+        access: proxy
+        jsonData:
+          timeout: "600"  # 10m
+          httpHeaderName1: X-Scope-OrgID
+          tracesToLogsV2:
+            datasourceUid: kitlab-logs
+            spanStartTimeShift: 1h
+            spanEndTimeShift: -1h
+            filterByTraceID: false
+            filterBySpanID: false
+        secureJsonData:
+          httpHeaderValue1: kitlab
+
+## Configure notifiers
+## ref: http://docs.grafana.org/administration/provisioning/#alert-notification-channels
+notifiers: {}
+
+# dashboards: {}
+# dashboardProviders: {}
+# dashboardsConfigMaps: {}
+
+##### Sidecar configuration #####
+# sidecar:
+#   dashboards:
+#     enabled: true
+#     folder: /var/lib/grafana/dashboards/default
+#   datasources:
+#     enabled: true
+
+##### ImageRenderer configuration #####
+# imageRenderer:
+#   enabled: false
+#   replicas: 1
+
+##### Test framework #####
+testFramework:
+  enabled: false
