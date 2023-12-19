@@ -1,0 +1,51 @@
+server:
+  dev:
+    enabled: false
+  ha:
+    enabled: true
+    replicas: 3
+    config: |
+      {{ tpl (readFile "config.hcl") . | nindent 6 | trim }}
+    disruptionBudget:
+      enabled: true
+      maxUnavailable: 1
+
+  extraVolumes:
+  - type: secret
+    name: kms-creds
+
+  dataStorage:
+    enabled: false
+  auditStorage:
+    enabled: false
+
+  serviceAccount:
+    create: true
+
+  authDelegator:
+    enabled: true
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  ingress:
+    enabled: false
+
+# Already expose via ingress
+ui:
+  enabled: false
+
+# https://www.vaultproject.io/docs/platform/k8s/injector
+injector:
+  enabled: false
+
+serverTelemetry:
+  serviceMonitor:
+    enabled: true
+  prometheusRules:
+    enabled: false

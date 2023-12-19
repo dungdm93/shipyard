@@ -1,0 +1,12 @@
+repositories:
+- name: hashicorp
+  url:  https://helm.releases.hashicorp.com
+
+releases:
+- name: vault
+  namespace: vault
+  chart: hashicorp/vault
+  version: 0.22.1
+  values:
+  - ./vault.yaml.gotmpl
+  - fullnameOverride: vault
