@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/base:2.1
+FROM ghcr.io/dungdm93/tools/base:2.1
 
 ARG BAZEL_VERSION=6.3.2
 

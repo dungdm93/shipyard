@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/tools/kubectl:1.25
+  IMAGE: ghcr.io/dungdm93/tools/kubectl:1.25
 
 includes:
   docker: ../../

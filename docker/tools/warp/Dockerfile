@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/s3:1.0
+FROM ghcr.io/dungdm93/tools/s3:1.0
 
 ENV WARP_VERSION=v0.3.40
 RUN set -eux; \

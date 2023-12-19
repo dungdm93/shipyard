@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/kubectl:1.25
+FROM ghcr.io/dungdm93/tools/kubectl:1.25
 
 # Install rke
 ENV RKE_VERSION=v1.4.8

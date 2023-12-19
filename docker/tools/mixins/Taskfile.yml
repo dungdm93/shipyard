@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/tools/mixins:0.2
+  IMAGE: ghcr.io/dungdm93/tools/mixins:0.2
 
 includes:
   docker: ../../

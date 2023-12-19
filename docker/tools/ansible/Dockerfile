@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/base:2.0
+FROM ghcr.io/dungdm93/tools/base:2.0
 
 RUN set -eux; \
     apt-get update; \

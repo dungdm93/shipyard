@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/base:1.0
+FROM ghcr.io/dungdm93/tools/base:1.0
 
 # Install mc (minio client)
 RUN set -eux; \

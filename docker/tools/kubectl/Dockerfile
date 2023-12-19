@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/base:2.0
+FROM ghcr.io/dungdm93/tools/base:2.0
 
 # Install kubectl
 ENV KUBECTL_VERSION=v1.25.4

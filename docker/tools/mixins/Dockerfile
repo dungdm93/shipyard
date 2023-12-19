@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/terraform:1.0
+FROM ghcr.io/dungdm93/tools/terraform:1.0
 
 # Jsonnet
 ENV JSONNET_VERSION=v0.17.0

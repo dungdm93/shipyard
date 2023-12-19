@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/tools/warp:0.3
+  IMAGE: ghcr.io/dungdm93/tools/warp:0.3
 
 includes:
   docker: ../../

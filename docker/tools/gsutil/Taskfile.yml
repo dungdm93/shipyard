@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: hub.teko.vn/tools/gsutil:5.17.0
+  IMAGE: ghcr.io/dungdm93/tools/gsutil:5.17.0
 
 includes:
   docker: ../../

@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/kubectl:1.25
+FROM ghcr.io/dungdm93/tools/kubectl:1.25
 
 # Install helm
 ENV HELM_VERSION=v3.11.2

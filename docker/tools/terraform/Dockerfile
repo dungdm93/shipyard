@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/base:2.0
+FROM ghcr.io/dungdm93/tools/base:2.0
 
 # Terraform
 ENV TERRAFORM_VERSION=1.3.*

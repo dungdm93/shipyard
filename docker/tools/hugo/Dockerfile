@@ -1,4 +1,4 @@
-FROM hub.teko.vn/tools/base:1.0
+FROM ghcr.io/dungdm93/tools/base:1.0
 
 ENV HUGO_VERSION=v0.74.2
 RUN set -eux; \
