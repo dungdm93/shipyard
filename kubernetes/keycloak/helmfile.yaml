@@ -1,0 +1,8 @@
+releases:
+- name: keycloak
+  namespace: keycloak
+  chart: oci://registry-1.docker.io/bitnamicharts/keycloak
+  version: 17.3.6
+  values:
+  - ./keycloak.yaml.gotmpl
+  - fullnameOverride: keycloak

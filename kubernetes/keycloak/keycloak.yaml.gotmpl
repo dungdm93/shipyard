@@ -1,0 +1,41 @@
+replicaCount: 3
+
+auth:
+  adminUser:     {{ fetchSecretValue "ref+vault://secret/gitops/keycloak/admin/username" | quote }}
+  adminPassword: {{ fetchSecretValue "ref+vault://secret/gitops/keycloak/admin/password" | quote }}
+
+production: true
+proxy: edge
+serviceDiscovery:
+  enabled: true
+
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+
+pdb:
+  create: true
+  minAvailable: 1
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+
+postgresql:
+  enabled: false
+
+externalDatabase:
+  host: infradb.dungdm93.me
+  port: 5432
+  database: keycloak
+  user:     {{ fetchSecretValue "ref+vault://secret/gitops/keycloak/database/username" | quote }}
+  password: {{ fetchSecretValue "ref+vault://secret/gitops/keycloak/database/password" | quote }}
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
