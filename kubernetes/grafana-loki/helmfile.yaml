@@ -1,0 +1,8 @@
+releases:
+- name: loki
+  namespace: grafana-loki
+  chart: oci://ghcr.io/dungdm93/helm/loki
+  version: 0.4.1
+  values:
+  - ./loki.yaml.gotmpl
+  - fullnameOverride: loki
