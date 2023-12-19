@@ -4,5 +4,5 @@ description: A place for all the Kubernetes resources which don't already have a
 type: application
 version: 0.3.0
 maintainers:
-- name: Teko's DataOps team
-  email: dataops@teko.vn
+- name: Đặng Minh Dũng
+  email: hello@dungdm93.me

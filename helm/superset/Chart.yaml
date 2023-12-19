@@ -16,5 +16,5 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   condition: redis.enabled
 maintainers:
-- name: Teko's DataOps team
-  email: dataops@teko.vn
+- name: Đặng Minh Dũng
+  email: hello@dungdm93.me

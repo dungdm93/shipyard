@@ -8,5 +8,5 @@ sources:
 - https://github.com/apache/hadoop
 icon: http://hadoop.apache.org/elephant.png
 maintainers:
-- name: Teko's DataOps team
-  email: dataops@teko.vn
+- name: Đặng Minh Dũng
+  email: hello@dungdm93.me
