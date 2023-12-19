@@ -1,0 +1,8 @@
+releases:
+- name: clickhouse
+  namespace: clickhouse
+  chart: oci://registry-1.docker.io/bitnamicharts/clickhouse
+  version: 2.3.2
+  values:
+  - ./clickhouse.yaml.gotmpl
+  - fullnameOverride: clickhouse

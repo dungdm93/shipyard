@@ -1,0 +1,40 @@
+shards: 1
+replicaCount: 1
+
+auth:
+  username: {{ fetchSecretValue "ref+vault://secret/gitops/clickhouse/admin#/username" | quote }}
+  password: {{ fetchSecretValue "ref+vault://secret/gitops/clickhouse/admin#/password" | quote }}
+
+resources:
+  requests:
+    cpu: 2000m
+    memory: 8Gi
+  limits:
+    cpu: 16000m
+    memory: 32Gi
+
+persistence:
+  enabled: true
+  size: 500Gi
+  storageClass: topolvm-nvme
+  accessModes:
+    - ReadWriteOnce
+
+startupProbe:
+  enabled: true
+
+externalAccess:
+  enabled: false
+  # service:
+  #   type: LoadBalancer
+  #   loadBalancerIPs: 192.168.10.10
+
+keeper:
+  enabled: true
+zookeeper:
+  enabled: false
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
