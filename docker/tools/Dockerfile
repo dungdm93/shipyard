@@ -1,5 +1,5 @@
 FROM  ubuntu:22.04
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+LABEL maintainer="dungdm93"
 SHELL [ "/bin/bash", "-c" ]
 
 ARG DEBIAN_FRONTEND=noninteractive

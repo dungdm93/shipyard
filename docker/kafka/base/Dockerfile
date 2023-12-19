@@ -8,6 +8,6 @@ RUN mvn dependency:resolve \
         dependency:copy-dependencies -DoutputDirectory=plugins/confluent-schema-registry/;
 
 FROM quay.io/strimzi/kafka:0.34.0-kafka-3.4.0
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+LABEL maintainer="dungdm93"
 
 COPY --from=downloader /build/plugins /opt/kafka/plugins

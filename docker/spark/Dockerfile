@@ -101,7 +101,7 @@ RUN set -eux; cd "./lib/tools/"; \
 #     curl -LO "https://storage.googleapis.com/spark-lib/bigquery/spark-bigquery-with-dependencies_2.12-0.17.1.jar";
 
 FROM ubuntu:jammy
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+LABEL maintainer="dungdm93"
 SHELL [ "/bin/bash", "-c" ]
 
 ARG JAVA_VERSION=17

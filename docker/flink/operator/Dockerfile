@@ -3,7 +3,7 @@
 ARG FLINK_K8S_VERSION=1.1.0
 
 FROM apache/flink-kubernetes-operator:$FLINK_K8S_VERSION
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+LABEL maintainer="dungdm93"
 
 # https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/filesystems/plugins/
 COPY --from=apache/flink:1.15.1 [ \

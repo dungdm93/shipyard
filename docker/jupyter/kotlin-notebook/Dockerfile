@@ -1,5 +1,5 @@
 FROM jupyter/base-notebook:ubuntu-22.04
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+LABEL maintainer="dungdm93"
 USER root
 COPY ./scripts/ /usr/local/bin/
 

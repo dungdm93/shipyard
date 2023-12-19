@@ -1,5 +1,5 @@
 FROM python:3.10-slim AS base
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+LABEL maintainer="dungdm93"
 SHELL ["/bin/bash", "-c"]
 
 ARG ACRYL_DATAHUB_VERSION=0.11.0

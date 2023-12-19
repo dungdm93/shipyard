@@ -1,6 +1,6 @@
 FROM jupyter/scipy-notebook
 
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+LABEL maintainer="dungdm93"
 
 USER root
 SHELL [ "/bin/bash", "-c" ]

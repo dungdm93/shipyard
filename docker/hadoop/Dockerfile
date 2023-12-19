@@ -22,7 +22,7 @@ RUN tar -xf  "hadoop-${HADOOP_VERSION}.tar.gz" --no-same-owner \
 
 
 FROM  ubuntu:jammy
-LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+LABEL maintainer="dungdm93"
 SHELL [ "/bin/bash", "-c" ]
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
