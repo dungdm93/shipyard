@@ -1,0 +1,76 @@
+logging {
+	level  = "info"
+	format = "logfmt"
+}
+
+otelcol.receiver.otlp "otlp" {
+	grpc {
+		endpoint = "0.0.0.0:4317"
+	}
+
+	http {
+		endpoint = "0.0.0.0:4318"
+	}
+
+	output {
+		metrics = [otelcol.processor.batch.default.input]
+		logs    = [otelcol.processor.batch.default.input]
+		traces  = [otelcol.processor.batch.default.input]
+	}
+}
+
+otelcol.processor.batch "default" {
+	output {
+		metrics = [otelcol.exporter.prometheus.mimir.input]
+		logs    = [otelcol.exporter.loki.loki.input]
+		traces  = [otelcol.exporter.otlp.tempo.input]
+	}
+}
+
+otelcol.exporter.prometheus "mimir" {
+	forward_to = [prometheus.remote_write.kit.receiver]
+}
+
+prometheus.remote_write "kit" {
+	endpoint {
+		url = "http://mimir-proxy.grafana-mimir.svc:9009/api/v1/push"
+
+		headers = {
+			"X-Scope-OrgId" = "kit106",
+		}
+	}
+
+	external_labels = {
+		cluster = "kit106",
+	}
+}
+
+otelcol.exporter.loki "loki" {
+	forward_to = [loki.write.kit.receiver]
+}
+
+loki.write "kit" {
+	endpoint {
+		url       = "http://loki-proxy.grafana-loki.svc:3100/loki/api/v1/push"
+		tenant_id = "kit106"
+	}
+
+	external_labels = {
+		cluster = "kit106",
+	}
+}
+
+otelcol.exporter.otlp "tempo" {
+	client {
+		endpoint = "tempo.grafana-tempo.svc:4317"
+
+		headers = {
+			"X-Scope-OrgId" = "kit106",
+		}
+
+		tls {
+			insecure             = true
+			insecure_skip_verify = true
+		}
+	}
+}

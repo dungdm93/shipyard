@@ -1,0 +1,69 @@
+controller:
+  type: daemonset
+  tolerations:
+  - effect: NoSchedule
+    operator: Exists
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+  - key: node-role.kubernetes.io/controlplane
+    operator: Exists
+  - key: node-role.kubernetes.io/etcd
+    operator: Exists
+  volumes:
+    extra:
+    - name: docker
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
+    - name: journal
+      hostPath:
+        path: /var/log/journal
+    - name: machine-id
+      hostPath:
+        path: /etc/machine-id
+    - name: data
+      hostPath:
+        path: /var/lib/grafana-agent
+        type: DirectoryOrCreate
+
+agent:
+  mode: flow
+  configMap:
+    create: true
+    content: |
+      {{ readFile "logs-agent.river" | nindent 6 | trim }}
+  storagePath: /var/lib/agent
+  mounts:
+    varlog: true
+    dockercontainers: true
+    extra:
+    - name: docker
+      mountPath: /var/run/docker.sock
+      readOnly: true
+    - name: journal
+      mountPath: /var/log/journal
+      readOnly: true
+    - name: machine-id
+      mountPath: /etc/machine-id
+      readOnly: true
+    - name: data
+      mountPath: /var/lib/agent
+  resources:
+    requests:
+      cpu: 10m
+      memory: 200Mi
+    limits:
+      cpu: 1000m
+      memory: 2000Mi
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+
+service:
+  enabled: true
+
+ingress:
+  enabled: false

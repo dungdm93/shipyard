@@ -1,0 +1,56 @@
+controller:
+  type: statefulset
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: data
+    spec:
+      storageClassName: ceph-rbd-ssd
+      volumeMode: Filesystem
+      accessModes: [ReadWriteOnce]
+      resources:
+        requests:
+          storage: 10Gi
+
+agent:
+  mode: flow
+  configMap:
+    create: true
+    content: |
+      {{ readFile "otel-agent.river" | nindent 6 | trim }}
+  storagePath: /var/lib/agent
+  mounts:
+    varlog: false
+    dockercontainers: false
+    extra:
+    - name: data
+      mountPath: /var/lib/agent
+  extraPorts:
+  - name: otlp-grpc
+    port: 4317
+    targetPort: 4317
+    protocol: TCP
+  - name: otlp-http
+    port: 4318
+    targetPort: 4318
+    protocol: TCP
+  resources:
+    requests:
+      cpu: 10m
+      memory: 200Mi
+    limits:
+      cpu: 1000m
+      memory: 2000Mi
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+
+service:
+  enabled: true
+
+ingress:
+  enabled: false

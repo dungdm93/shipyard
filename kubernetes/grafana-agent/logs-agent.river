@@ -1,0 +1,213 @@
+logging {
+	level  = "info"
+	format = "logfmt"
+}
+
+loki.write "kit" {
+	endpoint {
+		url       = "http://loki-proxy.grafana-loki.svc:3100/loki/api/v1/push"
+		tenant_id = "kit106"
+	}
+
+	external_labels = {
+		cluster = "kit106",
+	}
+}
+
+/////////////////////// kubernetes-pods ///////////////////////
+discovery.kubernetes "pod" {
+	role = "pod"
+
+	selectors {
+		role  = "pod"
+		field = "spec.nodeName=" + env("HOSTNAME")
+	}
+}
+
+discovery.relabel "pod_logs" {
+	targets = discovery.kubernetes.pod.targets
+
+	// handle indirect controller (e.g Deployment -> ReplicaSet -> Pod)
+	rule {
+		source_labels = ["__meta_kubernetes_pod_controller_name"]
+		regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
+		target_label  = "__tmp_controller_name"
+	}
+
+	// retrieve first non-null label
+	rule {
+		source_labels = [
+			"__meta_kubernetes_pod_label_app_kubernetes_io_name",
+			"__meta_kubernetes_pod_label_app",
+			"__tmp_controller_name",
+			"__meta_kubernetes_pod_name",
+		]
+		regex        = "^;*([^;]+)(;.*)?$"
+		target_label = "app"
+	}
+
+	rule {
+		source_labels = [
+			"__meta_kubernetes_pod_label_app_kubernetes_io_instance",
+			"__meta_kubernetes_pod_label_release",
+		]
+		regex        = "^;*([^;]+)(;.*)?$"
+		target_label = "instance"
+	}
+
+	rule {
+		source_labels = [
+			"__meta_kubernetes_pod_label_app_kubernetes_io_component",
+			"__meta_kubernetes_pod_label_component",
+		]
+		regex        = "^;*([^;]+)(;.*)?$"
+		target_label = "component"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_node_name"]
+		target_label  = "node_name"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_namespace"]
+		target_label  = "namespace"
+	}
+
+	rule {
+		source_labels = ["namespace", "app"]
+		separator     = "/"
+		target_label  = "job"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_name"]
+		target_label  = "pod"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_container_name"]
+		target_label  = "container"
+	}
+
+	rule {
+		source_labels = [
+			"__meta_kubernetes_namespace",
+			"__meta_kubernetes_pod_name",
+			"__meta_kubernetes_pod_uid",
+			"__meta_kubernetes_pod_container_name",
+		]
+		regex        = "(?P<namespace>.+);(?P<pod_name>.+);(?P<pod_uid>.+);(?P<container_name>.+)"
+		replacement  = "/var/log/pods/${namespace}_${pod_name}_${pod_uid}/${container_name}/0.log"
+		target_label = "__path__"
+	}
+}
+
+loki.source.file "pod_logs" {
+	targets    = discovery.relabel.pod_logs.output
+	forward_to = [loki.process.cri.receiver]
+}
+
+loki.process "cri" {
+	forward_to = [loki.write.kit.receiver]
+
+	stage.cri { }
+
+	stage.static_labels {
+		values = {
+			scrape_job = "kubernetes-pods",
+		}
+	}
+}
+
+/////////////////////// docker-container ///////////////////////
+discovery.docker "linux" {
+	host = "unix:///var/run/docker.sock"
+
+	filter {
+		name   = "label"
+		values = ["io.rancher.rke.container.name"]
+	}
+}
+
+discovery.relabel "container_logs" {
+	targets = discovery.docker.linux.targets
+
+	rule {
+		source_labels = ["__meta_docker_container_name"]
+		regex         = "/(.*)"
+		target_label  = "container"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_log_stream"]
+		target_label  = "stream"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_label_io_rancher_rke_container_name"]
+		target_label  = "component"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_id"]
+		replacement   = "/var/lib/docker/containers/$1/$1-json.log"
+		target_label  = "__path__"
+	}
+}
+
+loki.source.file "container_logs" {
+	targets    = discovery.relabel.container_logs.output
+	forward_to = [loki.process.docker.receiver]
+}
+
+loki.process "docker" {
+	forward_to = [loki.write.kit.receiver]
+
+	stage.docker { }
+
+	stage.static_labels {
+		values = {
+			scrape_job = "docker-container",
+			node_name  = env("HOSTNAME"),
+		}
+	}
+}
+
+/////////////////////// systemd-journal ///////////////////////
+loki.source.journal "service_logs" {
+	forward_to     = [loki.process.journal.receiver]
+	format_as_json = false
+	max_age        = "12h"
+	path           = "/var/log/journal"
+	relabel_rules  = loki.relabel.journal.rules
+}
+
+loki.relabel "journal" {
+	forward_to = [loki.process.journal.receiver]
+
+	rule {
+		source_labels = ["__journal__systemd_unit"]
+		target_label  = "systemd_unit"
+	}
+
+	rule {
+		source_labels = ["__journal_syslog_identifier"]
+		target_label  = "syslog_identifier"
+	}
+
+	rule {
+		source_labels = ["__journal__hostname"]
+		target_label  = "node_name"
+	}
+}
+
+loki.process "journal" {
+	forward_to = [loki.write.kit.receiver]
+
+	stage.static_labels {
+		values = {
+			scrape_job = "systemd-journal",
+		}
+	}
+}

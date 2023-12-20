@@ -1,0 +1,50 @@
+controller:
+  type: statefulset
+  replicas: 3
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: data
+    spec:
+      storageClassName: ceph-rbd-ssd
+      volumeMode: Filesystem
+      accessModes: [ReadWriteOnce]
+      resources:
+        requests:
+          storage: 10Gi
+
+agent:
+  mode: flow
+  configMap:
+    create: true
+    content: |
+      {{ readFile "metrics-agent.river" | nindent 6 | trim }}
+  storagePath: /var/lib/agent
+  mounts:
+    varlog: false
+    dockercontainers: false
+    extra:
+    - name: data
+      mountPath: /var/lib/agent
+  resources:
+    requests:
+      cpu: 10m
+      memory: 200Mi
+    limits:
+      cpu: 1000m
+      memory: 4000Mi
+  clustering:
+    enabled: true
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+
+service:
+  enabled: true
+
+ingress:
+  enabled: false

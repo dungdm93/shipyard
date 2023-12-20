@@ -1,0 +1,28 @@
+repositories:
+- name: grafana
+  url:  https://grafana.github.io/helm-charts
+
+releases:
+- name: logs-agent
+  namespace: grafana-agent
+  chart: grafana/grafana-agent
+  version: 0.28.0
+  values:
+  - ./logs-agent.yaml.gotmpl
+  - fullnameOverride: logs-agent
+
+- name: metrics-agent
+  namespace: grafana-agent
+  chart: grafana/grafana-agent
+  version: 0.28.0
+  values:
+  - ./metrics-agent.yaml.gotmpl
+  - fullnameOverride: metrics-agent
+
+- name: otel-agent
+  namespace: grafana-agent
+  chart: grafana/grafana-agent
+  version: 0.28.0
+  values:
+  - ./otel-agent.yaml.gotmpl
+  - fullnameOverride: otel-agent
