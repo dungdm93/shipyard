@@ -1,0 +1,56 @@
+argument "receivers" {
+  optional = false
+}
+
+discovery.docker "linux" {
+	host = "unix:///var/run/docker.sock"
+
+	filter {
+		name   = "label"
+		values = ["io.rancher.rke.container.name"]
+	}
+}
+
+discovery.relabel "container_logs" {
+	targets = discovery.docker.linux.targets
+
+	rule {
+		source_labels = ["__meta_docker_container_name"]
+		regex         = "/(.*)"
+		target_label  = "container"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_log_stream"]
+		target_label  = "stream"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_label_io_rancher_rke_container_name"]
+		target_label  = "component"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_id"]
+		replacement   = "/var/lib/docker/containers/$1/$1-json.log"
+		target_label  = "__path__"
+	}
+}
+
+loki.source.file "container_logs" {
+	targets    = discovery.relabel.container_logs.output
+	forward_to = [loki.process.docker.receiver]
+}
+
+loki.process "docker" {
+	forward_to = argument.receivers.value
+
+	stage.docker { }
+
+	stage.static_labels {
+		values = {
+			scrape_job = "docker-container",
+			node_name  = env("HOSTNAME"),
+		}
+	}
+}

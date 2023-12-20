@@ -1,0 +1,108 @@
+argument "receivers" {
+  optional = false
+}
+
+discovery.kubernetes "pod" {
+	role = "pod"
+
+	selectors {
+		role  = "pod"
+		field = "spec.nodeName=" + env("HOSTNAME")
+	}
+}
+
+discovery.relabel "pod_logs" {
+	targets = discovery.kubernetes.pod.targets
+
+	// handle indirect controller (e.g Deployment -> ReplicaSet -> Pod)
+	rule {
+		source_labels = ["__meta_kubernetes_pod_controller_name"]
+		regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
+		target_label  = "__tmp_controller_name"
+	}
+
+	// retrieve first non-null label
+	rule {
+		source_labels = [
+			"__meta_kubernetes_pod_label_app_kubernetes_io_name",
+			"__meta_kubernetes_pod_label_app",
+			"__tmp_controller_name",
+			"__meta_kubernetes_pod_name",
+		]
+		regex        = "^;*([^;]+)(;.*)?$"
+		target_label = "app"
+	}
+
+	rule {
+		source_labels = [
+			"__meta_kubernetes_pod_label_app_kubernetes_io_instance",
+			"__meta_kubernetes_pod_label_release",
+		]
+		regex        = "^;*([^;]+)(;.*)?$"
+		target_label = "instance"
+	}
+
+	rule {
+		source_labels = [
+			"__meta_kubernetes_pod_label_app_kubernetes_io_component",
+			"__meta_kubernetes_pod_label_component",
+		]
+		regex        = "^;*([^;]+)(;.*)?$"
+		target_label = "component"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_node_name"]
+		target_label  = "node_name"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_namespace"]
+		target_label  = "namespace"
+	}
+
+	rule {
+		source_labels = ["namespace", "app"]
+		separator     = "/"
+		target_label  = "job"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_name"]
+		target_label  = "pod"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_container_name"]
+		target_label  = "container"
+	}
+
+	rule {
+		source_labels = [
+			"__meta_kubernetes_namespace",
+			"__meta_kubernetes_pod_name",
+			"__meta_kubernetes_pod_uid",
+			"__meta_kubernetes_pod_container_name",
+		]
+		regex        = "(?P<namespace>.+);(?P<pod_name>.+);(?P<pod_uid>.+);(?P<container_name>.+)"
+		replacement  = "/var/log/pods/${namespace}_${pod_name}_${pod_uid}/${container_name}/0.log"
+		target_label = "__path__"
+	}
+}
+
+loki.source.file "pod_logs" {
+	targets    = discovery.relabel.pod_logs.output
+	forward_to = [loki.process.cri.receiver]
+}
+
+loki.process "cri" {
+	forward_to = argument.receivers.value
+
+	stage.cri { }
+
+	stage.static_labels {
+		values = {
+			scrape_job = "kubernetes-pods",
+		}
+	}
+}
