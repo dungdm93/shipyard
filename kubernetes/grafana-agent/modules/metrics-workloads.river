@@ -1,0 +1,191 @@
+argument "receivers" {
+	optional = false
+}
+
+discovery.kubernetes "endpoints" {
+	role = "endpoints"
+}
+
+// https://github.com/prometheus-community/helm-charts/blob/prometheus-25.8.0/charts/prometheus/values.yaml#L902-L935
+discovery.relabel "endpoints_target" {
+	targets = discovery.kubernetes.endpoints.targets
+
+	rule {
+		source_labels = ["__meta_kubernetes_service_annotation_prometheus_io_scrape"]
+		regex         = "true"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_service_annotation_prometheus_io_scheme"]
+		regex         = "(https?)"
+		action        = "replace"
+		target_label  = "__scheme__"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_service_annotation_prometheus_io_path"]
+		action        = "replace"
+		target_label  = "__metrics_path__"
+	}
+
+	rule {
+		source_labels = ["__address__", "__meta_kubernetes_service_annotation_prometheus_io_port"]
+		regex         = "(.+?)(?::\\d+)?;(\\d+)"
+		action        = "replace"
+		target_label  = "__address__"
+		replacement   = "$1:$2"
+	}
+
+	rule {
+		action       = "labelmap"
+		regex        = "__meta_kubernetes_service_annotation_prometheus_io_param_(.+)"
+		target_label = "__param_$1"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_service_name"]
+		action        = "replace"
+		target_label  = "service"
+	}
+}
+
+discovery.kubernetes "pod" {
+	role = "pod"
+}
+
+// https://github.com/prometheus-community/helm-charts/blob/prometheus-25.8.0/charts/prometheus/values.yaml#L1053-L1094
+discovery.relabel "pod_target" {
+	targets = discovery.kubernetes.pod.targets
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_phase"]
+		regex         = "Running"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+		regex         = "true"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scheme"]
+		regex         = "(https?)"
+		action        = "replace"
+		target_label  = "__scheme__"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"]
+		action        = "replace"
+		target_label  = "__metrics_path__"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_port", "__meta_kubernetes_pod_ip"]
+		regex         = "(\\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})" // IPv6
+		action        = "replace"
+		target_label  = "__address__"
+		replacement   = "[$2]:$1"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_port", "__meta_kubernetes_pod_ip"]
+		regex         = "(\\d+);((([0-9]+?)(\\.|$)){4})" // IPv4
+		action        = "replace"
+		target_label  = "__address__"
+		replacement   = "$2:$1"
+	}
+
+	rule {
+		action       = "labelmap"
+		regex        = "__meta_kubernetes_pod_annotation_prometheus_io_param_(.+)"
+		target_label = "__param_$1"
+	}
+}
+
+discovery.relabel "pod" {
+	targets = concat(
+		discovery.relabel.endpoints_target.output,
+		discovery.relabel.pod_target.output,
+	)
+
+	// handle indirect controller (e.g Deployment -> ReplicaSet -> Pod)
+	rule {
+		source_labels = ["__meta_kubernetes_pod_controller_name"]
+		regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
+		target_label  = "__tmp_controller_name"
+	}
+
+	// retrieve first non-null label
+	rule {
+		source_labels = [
+			"__meta_kubernetes_pod_label_app_kubernetes_io_name",
+			"__meta_kubernetes_pod_label_app",
+			"__tmp_controller_name",
+			"__meta_kubernetes_pod_name",
+		]
+		regex        = "^;*([^;]+)(;.*)?$"
+		target_label = "app"
+	}
+
+	rule {
+		source_labels = [
+			"__meta_kubernetes_pod_label_app_kubernetes_io_instance",
+			"__meta_kubernetes_pod_label_release",
+		]
+		regex        = "^;*([^;]+)(;.*)?$"
+		target_label = "instance"
+	}
+
+	rule {
+		source_labels = [
+			"__meta_kubernetes_pod_label_app_kubernetes_io_component",
+			"__meta_kubernetes_pod_label_component",
+		]
+		regex        = "^;*([^;]+)(;.*)?$"
+		target_label = "component"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_node_name"]
+		target_label  = "node_name"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_namespace"]
+		target_label  = "namespace"
+	}
+
+	rule {
+		source_labels = ["namespace", "app"]
+		separator     = "/"
+		target_label  = "job"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_name"]
+		target_label  = "pod"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_container_name"]
+		target_label  = "container"
+	}
+}
+
+prometheus.scrape "pod" {
+	targets    = discovery.relabel.pod.output
+	forward_to = argument.receivers.value
+
+	scrape_interval = "30s"
+	scrape_timeout  = "10s"
+	metrics_path    = "/metrics"
+	scheme          = "http"
+
+	clustering {
+		enabled = true
+	}
+}

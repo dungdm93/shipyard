@@ -16,4 +16,5 @@ configMapGenerator:
       - etcd.river=metrics-etcd.river
       - worker.river=metrics-worker.river
       - controlplane.river=metrics-controlplane.river
+      - workloads.river=metrics-workloads.river
       - workloads_operator.river=metrics-workloads_operator.river
