@@ -1,0 +1,27 @@
+argument "receivers" {
+	optional = false
+}
+
+prometheus.operator.servicemonitors "service_metrics" {
+	forward_to = argument.receivers.value
+
+	clustering {
+		enabled = true
+	}
+}
+
+prometheus.operator.podmonitors "pods_metrics" {
+	forward_to = argument.receivers.value
+
+	clustering {
+		enabled = true
+	}
+}
+
+prometheus.operator.probes "probes_metrics" {
+	forward_to = argument.receivers.value
+
+	clustering {
+		enabled = true
+	}
+}

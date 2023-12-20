@@ -50,272 +50,42 @@ discovery.relabel "node" {
 	}
 }
 
-/////////////////////// workloads ///////////////////////
-prometheus.operator.servicemonitors "service_metrics" {
-	forward_to = [prometheus.remote_write.kit.receiver]
+remote.kubernetes.configmap "metrics_module" {
+	name      = "metrics-module"
+	namespace = "grafana-agent"
+}
 
-	clustering {
-		enabled = true
+module.string "workloads" {
+	content = remote.kubernetes.configmap.metrics_module.data["workloads_operator.river"]
+
+	arguments {
+		receivers = [prometheus.remote_write.kit.receiver]
 	}
 }
 
-prometheus.operator.podmonitors "pods_metrics" {
-	forward_to = [prometheus.remote_write.kit.receiver]
+module.string "controlplane" {
+	content = remote.kubernetes.configmap.metrics_module.data["controlplane.river"]
 
-	clustering {
-		enabled = true
+	arguments {
+		nodes     = discovery.relabel.node.output
+		receivers = [prometheus.remote_write.kit.receiver]
 	}
 }
 
-/////////////////////// controlplane ///////////////////////
-discovery.relabel "kube_apiserver" {
-	targets = discovery.relabel.node.output
+module.string "etcd" {
+	content = remote.kubernetes.configmap.metrics_module.data["etcd.river"]
 
-	rule {
-		source_labels = ["__meta_kubernetes_node_label_node_role_kubernetes_io_controlplane"]
-		regex         = "true"
-		action        = "keep"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
-		replacement   = "$1:6443"
-		target_label  = "__address__"
-	}
-
-	rule {
-		replacement  = "kube-apiserver"
-		target_label = "job"
+	arguments {
+		nodes     = discovery.relabel.node.output
+		receivers = [prometheus.remote_write.kit.receiver]
 	}
 }
 
-discovery.relabel "kube_controller_manager" {
-	targets = discovery.relabel.node.output
+module.string "worker" {
+	content = remote.kubernetes.configmap.metrics_module.data["worker.river"]
 
-	rule {
-		source_labels = ["__meta_kubernetes_node_label_node_role_kubernetes_io_controlplane"]
-		regex         = "true"
-		action        = "keep"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
-		replacement   = "$1:10257"
-		target_label  = "__address__"
-	}
-
-	rule {
-		replacement  = "kube-controller-manager"
-		target_label = "job"
-	}
-}
-
-discovery.relabel "kube_scheduler" {
-	targets = discovery.relabel.node.output
-
-	rule {
-		source_labels = ["__meta_kubernetes_node_label_node_role_kubernetes_io_controlplane"]
-		regex         = "true"
-		action        = "keep"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
-		replacement   = "$1:10259"
-		target_label  = "__address__"
-	}
-
-	rule {
-		replacement  = "kube-scheduler"
-		target_label = "job"
-	}
-}
-
-prometheus.scrape "kube_controlplane" {
-	targets = concat(
-		discovery.relabel.kube_apiserver.output,
-		discovery.relabel.kube_controller_manager.output,
-		discovery.relabel.kube_scheduler.output,
-	)
-	forward_to = [prometheus.remote_write.kit.receiver]
-
-	scrape_interval = "30s"
-	scrape_timeout  = "10s"
-	metrics_path    = "/metrics"
-	scheme          = "https"
-
-	authorization {
-		type             = "Bearer"
-		credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	}
-
-	tls_config {
-		ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-		insecure_skip_verify = true
-	}
-
-	clustering {
-		enabled = true
-	}
-}
-
-/////////////////////// kube-etcd ///////////////////////
-discovery.relabel "kube_etcd" {
-	targets = discovery.relabel.node.output
-
-	rule {
-		source_labels = ["__meta_kubernetes_node_label_node_role_kubernetes_io_etcd"]
-		regex         = "true"
-		action        = "keep"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
-		replacement   = "$1:2381"
-		target_label  = "__address__"
-	}
-
-	rule {
-		replacement  = "kube-etcd"
-		target_label = "job"
-	}
-}
-
-prometheus.scrape "kube_etcd" {
-	targets    = discovery.relabel.kube_etcd.output
-	forward_to = [prometheus.remote_write.kit.receiver]
-
-	scrape_interval = "30s"
-	scrape_timeout  = "10s"
-	metrics_path    = "/metrics"
-	scheme          = "http"
-
-	authorization {
-		type             = "Bearer"
-		credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	}
-
-	clustering {
-		enabled = true
-	}
-}
-
-/////////////////////// kube-proxy ///////////////////////
-discovery.relabel "kube_proxy" {
-	targets = discovery.relabel.node.output
-
-	rule {
-		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
-		replacement   = "$1:10249"
-		target_label  = "__address__"
-	}
-
-	rule {
-		replacement  = "kube-proxy"
-		target_label = "job"
-	}
-}
-
-prometheus.scrape "kube_proxy" {
-	targets    = discovery.relabel.kube_proxy.output
-	forward_to = [prometheus.remote_write.kit.receiver]
-
-	scrape_interval = "30s"
-	scrape_timeout  = "10s"
-	metrics_path    = "/metrics"
-	scheme          = "http"
-
-	authorization {
-		type             = "Bearer"
-		credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	}
-
-	clustering {
-		enabled = true
-	}
-}
-
-/////////////////////// kubelet ///////////////////////
-discovery.relabel "kubelet_metrics" {
-	targets = discovery.relabel.node.output
-
-	rule {
-		replacement  = "/metrics"
-		target_label = "__metrics_path__"
-	}
-}
-
-discovery.relabel "kubelet_cadvisor" {
-	targets = discovery.relabel.node.output
-
-	rule {
-		replacement  = "/metrics/cadvisor"
-		target_label = "__metrics_path__"
-	}
-}
-
-//discovery.relabel "kubelet_probes" {
-//	targets = discovery.relabel.node.output
-//
-//	rule {
-//		replacement  = "/metrics/probes"
-//		target_label = "__metrics_path__"
-//	}
-//}
-
-//discovery.relabel "kubelet_resource" {
-//	targets = discovery.relabel.node.output
-//
-//	rule {
-//		replacement  = "/metrics/resource"
-//		target_label = "__metrics_path__"
-//	}
-//}
-
-discovery.relabel "kubelet" {
-	targets = concat(
-		discovery.relabel.kubelet_metrics.output,
-		discovery.relabel.kubelet_cadvisor.output,
-	)
-
-	rule {
-		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
-		replacement   = "$1:10250"
-		target_label  = "__address__"
-	}
-
-	rule {
-		source_labels = ["__metrics_path__"]
-		target_label  = "metrics_path"
-	}
-
-	rule {
-		replacement  = "kubelet"
-		target_label = "job"
-	}
-}
-
-prometheus.scrape "kubelet" {
-	targets    = discovery.relabel.kubelet.output
-	forward_to = [prometheus.remote_write.kit.receiver]
-
-	scrape_interval  = "30s"
-	scrape_timeout   = "10s"
-	scheme           = "https"
-	honor_labels     = true
-	honor_timestamps = true
-
-	authorization {
-		type             = "Bearer"
-		credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	}
-
-	tls_config {
-		ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-		insecure_skip_verify = true
-	}
-
-	clustering {
-		enabled = true
+	arguments {
+		nodes     = discovery.relabel.node.output
+		receivers = [prometheus.remote_write.kit.receiver]
 	}
 }

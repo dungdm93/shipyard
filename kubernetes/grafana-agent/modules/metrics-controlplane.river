@@ -1,0 +1,98 @@
+argument "nodes" {
+	optional = false
+}
+
+argument "receivers" {
+	optional = false
+}
+
+discovery.relabel "kube_apiserver" {
+	targets = argument.nodes.value
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_label_node_role_kubernetes_io_controlplane"]
+		regex         = "true"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
+		replacement   = "$1:6443"
+		target_label  = "__address__"
+	}
+
+	rule {
+		replacement  = "kube-apiserver"
+		target_label = "job"
+	}
+}
+
+discovery.relabel "kube_controller_manager" {
+	targets = argument.nodes.value
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_label_node_role_kubernetes_io_controlplane"]
+		regex         = "true"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
+		replacement   = "$1:10257"
+		target_label  = "__address__"
+	}
+
+	rule {
+		replacement  = "kube-controller-manager"
+		target_label = "job"
+	}
+}
+
+discovery.relabel "kube_scheduler" {
+	targets = argument.nodes.value
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_label_node_role_kubernetes_io_controlplane"]
+		regex         = "true"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
+		replacement   = "$1:10259"
+		target_label  = "__address__"
+	}
+
+	rule {
+		replacement  = "kube-scheduler"
+		target_label = "job"
+	}
+}
+
+prometheus.scrape "kube_controlplane" {
+	targets = concat(
+		discovery.relabel.kube_apiserver.output,
+		discovery.relabel.kube_controller_manager.output,
+		discovery.relabel.kube_scheduler.output,
+	)
+	forward_to = argument.receivers.value
+
+	scrape_interval = "30s"
+	scrape_timeout  = "10s"
+	metrics_path    = "/metrics"
+	scheme          = "https"
+
+	authorization {
+		type             = "Bearer"
+		credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+	}
+
+	tls_config {
+		ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+		insecure_skip_verify = true
+	}
+
+	clustering {
+		enabled = true
+	}
+}

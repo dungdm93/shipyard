@@ -1,0 +1,127 @@
+argument "nodes" {
+	optional = false
+}
+
+argument "receivers" {
+	optional = false
+}
+
+/////////////////////// kube-proxy ///////////////////////
+discovery.relabel "kube_proxy" {
+	targets = argument.nodes.value
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
+		replacement   = "$1:10249"
+		target_label  = "__address__"
+	}
+
+	rule {
+		replacement  = "kube-proxy"
+		target_label = "job"
+	}
+}
+
+prometheus.scrape "kube_proxy" {
+	targets    = discovery.relabel.kube_proxy.output
+	forward_to = argument.receivers.value
+
+	scrape_interval = "30s"
+	scrape_timeout  = "10s"
+	metrics_path    = "/metrics"
+	scheme          = "http"
+
+	authorization {
+		type             = "Bearer"
+		credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+	}
+
+	clustering {
+		enabled = true
+	}
+}
+
+/////////////////////// kubelet ///////////////////////
+discovery.relabel "kubelet_metrics" {
+	targets = argument.nodes.value
+
+	rule {
+		replacement  = "/metrics"
+		target_label = "__metrics_path__"
+	}
+}
+
+discovery.relabel "kubelet_cadvisor" {
+	targets = argument.nodes.value
+
+	rule {
+		replacement  = "/metrics/cadvisor"
+		target_label = "__metrics_path__"
+	}
+}
+
+//discovery.relabel "kubelet_probes" {
+//	targets = argument.nodes.value
+//
+//	rule {
+//		replacement  = "/metrics/probes"
+//		target_label = "__metrics_path__"
+//	}
+//}
+
+//discovery.relabel "kubelet_resource" {
+//	targets = argument.nodes.value
+//
+//	rule {
+//		replacement  = "/metrics/resource"
+//		target_label = "__metrics_path__"
+//	}
+//}
+
+discovery.relabel "kubelet" {
+	targets = concat(
+		discovery.relabel.kubelet_metrics.output,
+		discovery.relabel.kubelet_cadvisor.output,
+	)
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
+		replacement   = "$1:10250"
+		target_label  = "__address__"
+	}
+
+	rule {
+		source_labels = ["__metrics_path__"]
+		target_label  = "metrics_path"
+	}
+
+	rule {
+		replacement  = "kubelet"
+		target_label = "job"
+	}
+}
+
+prometheus.scrape "kubelet" {
+	targets    = discovery.relabel.kubelet.output
+	forward_to = argument.receivers.value
+
+	scrape_interval  = "30s"
+	scrape_timeout   = "10s"
+	scheme           = "https"
+	honor_labels     = true
+	honor_timestamps = true
+
+	authorization {
+		type             = "Bearer"
+		credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+	}
+
+	tls_config {
+		ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+		insecure_skip_verify = true
+	}
+
+	clustering {
+		enabled = true
+	}
+}

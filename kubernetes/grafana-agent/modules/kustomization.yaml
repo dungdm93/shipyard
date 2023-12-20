@@ -8,3 +8,12 @@ configMapGenerator:
       - docker_container.river=logs-docker_container.river
       - kubernetes_pods.river=logs-kubernetes_pods.river
       - systemd_journal.river=logs-systemd_journal.river
+
+  - name: metrics-module
+    options:
+      disableNameSuffixHash: true
+    files:
+      - etcd.river=metrics-etcd.river
+      - worker.river=metrics-worker.river
+      - controlplane.river=metrics-controlplane.river
+      - workloads_operator.river=metrics-workloads_operator.river

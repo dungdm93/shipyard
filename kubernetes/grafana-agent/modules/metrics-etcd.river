@@ -1,0 +1,47 @@
+argument "nodes" {
+	optional = false
+}
+
+argument "receivers" {
+	optional = false
+}
+
+discovery.relabel "kube_etcd" {
+	targets = argument.nodes.value
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_label_node_role_kubernetes_io_etcd"]
+		regex         = "true"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_node_address_InternalIP"]
+		replacement   = "$1:2381"
+		target_label  = "__address__"
+	}
+
+	rule {
+		replacement  = "kube-etcd"
+		target_label = "job"
+	}
+}
+
+prometheus.scrape "kube_etcd" {
+	targets    = discovery.relabel.kube_etcd.output
+	forward_to = argument.receivers.value
+
+	scrape_interval = "30s"
+	scrape_timeout  = "10s"
+	metrics_path    = "/metrics"
+	scheme          = "http"
+
+	authorization {
+		type             = "Bearer"
+		credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+	}
+
+	clustering {
+		enabled = true
+	}
+}
