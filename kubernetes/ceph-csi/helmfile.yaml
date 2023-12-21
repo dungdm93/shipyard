@@ -1,0 +1,28 @@
+repositories:
+- name: ceph-csi
+  url:  https://ceph.github.io/csi-charts
+
+releases:
+- name: ceph-csi-rbd
+  namespace: kube-system
+  chart: ceph-csi/ceph-csi-rbd
+  version: 3.7.2
+  values:
+  - ./rbd/values.yaml
+  - fullnameOverride: ceph-csi-rbd
+    nodeplugin:
+      fullnameOverride: ceph-csi-rbd-nodeplugin
+    provisioner:
+      fullnameOverride: ceph-csi-rbd-provisioner
+
+- name: ceph-csi-cephfs
+  namespace: kube-system
+  chart: ceph-csi/ceph-csi-cephfs
+  version: 3.7.2
+  values:
+  - ./cephfs/values.yaml
+  - fullnameOverride: ceph-csi-cephfs
+    nodeplugin:
+      fullnameOverride: ceph-csi-cephfs-nodeplugin
+    provisioner:
+      fullnameOverride: ceph-csi-cephfs-provisioner

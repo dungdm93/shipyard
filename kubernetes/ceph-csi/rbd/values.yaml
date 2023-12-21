@@ -1,0 +1,17 @@
+driverName: rbd.csi.ceph.com
+configMapName: rbd.ceph-csi-config
+cephConfConfigMapName: rbd.ceph-config
+kmsConfigMapName: rbd.ceph-csi-encryption-kms-config
+csiConfig:
+- clusterID: rook-ceph
+  monitors:
+  - 172.16.10.10:6789
+
+rbac:
+  create: true
+
+serviceAccounts:
+  nodeplugin:
+    create: true
+  provisioner:
+    create: true

@@ -1,0 +1,18 @@
+driverName: cephfs.csi.ceph.com
+configMapName: cephfs.ceph-csi-config
+cephConfConfigMapName: cephfs.ceph-config
+csiConfig:
+- clusterID: rook-ceph
+  monitors:
+  - 172.16.10.10:6789
+  cephFS:
+    subvolumeGroup: csi
+
+rbac:
+  create: true
+
+serviceAccounts:
+  nodeplugin:
+    create: true
+  provisioner:
+    create: true
