@@ -1,0 +1,36 @@
+prometheus:
+  monitor:
+    enabled: true
+    honorLabels: true
+
+selfMonitor:
+  enabled: true
+
+# replicas: 1
+# autosharding:
+#   enabled: true
+
+collectors:
+  - nodes
+  - namespaces
+  - cronjobs
+  - jobs
+  - daemonsets
+  - statefulsets
+  - deployments
+  - pods
+  - services
+  - ingresses
+  - persistentvolumeclaims
+
+{{- $metricLabels := readFile "metric-labels.yaml" | fromYaml }}
+metricLabelsAllowlist:
+- {{ printf "nodes=[%s]" ($metricLabels.node | join ",") }}
+- {{ printf "pods=[%s]" (concat $metricLabels.base $metricLabels.pod | join ",") }}
+- {{ printf "deployments=[%s]" (concat $metricLabels.base $metricLabels.deployment | join ",") }}
+- {{ printf "statefulsets=[%s]" (concat $metricLabels.base $metricLabels.statefulset | join ",") }}
+- {{ printf "daemonsets=[%s]" (concat $metricLabels.base $metricLabels.daemonset | join ",") }}
+- {{ printf "services=[%s]" (concat $metricLabels.base $metricLabels.service | join ",") }}
+- {{ printf "secrets=[%s]" (concat $metricLabels.base $metricLabels.secret | join ",") }}
+- {{ printf "configmaps=[%s]" (concat $metricLabels.base $metricLabels.configmap | join ",") }}
+- {{ printf "persistentvolumeclaims=[%s]" (concat $metricLabels.base $metricLabels.persistentvolumeclaim | join ",") }}

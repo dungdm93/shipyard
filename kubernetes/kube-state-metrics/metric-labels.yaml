@@ -1,0 +1,35 @@
+# ref: https://kubernetes.io/docs/reference/labels-annotations-taints
+node:
+- kubernetes.io/os
+- kubernetes.io/arch
+- kubernetes.io/hostname
+- node.kubernetes.io/instance-type
+- topology.kubernetes.io/region
+- topology.kubernetes.io/zone
+
+base:
+# Kubernetes recommended labels
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
+- app.kubernetes.io/name
+- app.kubernetes.io/instance
+- app.kubernetes.io/version
+- app.kubernetes.io/component
+- app.kubernetes.io/part-of
+- app.kubernetes.io/managed-by
+- app.kubernetes.io/created-by
+# Helm
+- helm.sh/chart
+# Helm legacy labels
+- app
+- chart
+- release
+- heritage
+
+pod: []
+deployment: []
+statefulset: []
+daemonset: []
+service: []
+secret: []
+configmap: []
+persistentvolumeclaim: []
