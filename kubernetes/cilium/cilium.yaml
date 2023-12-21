@@ -1,0 +1,254 @@
+##### Installation #####
+identityAllocationMode: crd # crd | kvstore (etcd or consul)
+enableCnpStatusUpdates: true
+# enableRuntimeDeviceDetection: false
+# enableCiliumEndpointSlice: false
+# enableK8sEndpointSlice: true
+# enableK8sTerminatingEndpoint: true
+
+# https://docs.cilium.io/en/stable/network/concepts/ipam/
+# https://docs.cilium.io/en/stable/network/kubernetes/ipam/
+ipam:
+  mode: kubernetes
+  # operator:
+  #   clusterPoolIPv4PodCIDR: 172.22.0.0/16
+  #   clusterPoolIPv4MaskSize: 24
+
+wellKnownIdentities:
+  enabled: true
+
+##### Security ######
+## https://docs.cilium.io/en/stable/policy/intro/#policy-enforcement-modes
+policyEnforcementMode: default
+policyAuditMode: false
+## https://docs.cilium.io/en/stable/security/host-firewall/
+# hostFirewall:
+#   enabled: false
+
+##### Networking #####
+ipv4:
+  enabled: true
+ipv6:
+  enabled: false
+sctp:
+  enabled: false
+l7Proxy: true
+## https://docs.cilium.io/en/stable/network/concepts/routing/
+routingMode: tunnel # native | tunnel
+tunnelProtocol: vxlan   # vxlan (default) | geneve
+# autoDirectNodeRoutes: true
+# ipv4NativeRoutingCIDR: 172.16.56.0/24
+# ipv6NativeRoutingCIDR: ""
+## https://cilium.io/blog/2020/06/22/cilium-18#ebpf-based-masquerading-and-ip-masq-agent
+# enableIPv4Masquerade: true
+# enableIPv6Masquerade: true
+## https://docs.cilium.io/en/stable/network/concepts/masquerading/#implementation-modes
+# bpf.masquerade: false
+# ipMasqAgent.enabled: true
+## https://isovalent.com/blog/post/big-tcp-on-cilium/
+# enableIPv4BIGTCP: true
+# enableIPv6BIGTCP: true
+## https://docs.cilium.io/en/stable/network/kubernetes/bandwidth-manager/
+# bandwidthManager:
+#   enabled: false
+## https://docs.cilium.io/en/stable/network/kubernetes/local-redirect-policy/
+# localRedirectPolicy: false
+
+## https://docs.cilium.io/en/stable/network/bgp-control-plane/
+# bgpControlPlane:
+#   enabled: false
+## https://docs.cilium.io/en/stable/network/l2-announcements/
+# l2announcements:
+#   enabled: false
+
+##### kube-proxy free #####
+## https://cilium.io/blog/2019/08/20/cilium-16#socket-based-load-balancing
+## https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#socket-loadbalancer-bypass-in-pod-namespace
+socketLB:
+  enabled: true
+## https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/
+kubeProxyReplacement: false
+## In kube-proxy free mode, cilium CAN'T connect to k8s via kubernetes.default.svc
+## You MUST specify k8sService host/port.
+# k8sServiceHost:
+# k8sServicePort:
+## Manually specify which components for the eBPF kube-proxy replacement should be used.
+## * Container.port.hostPort
+## https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#container-hostport-support
+# hostPort:
+#   enabled: false
+## * Service.type=NodePort
+# nodePort:
+#   enabled: false
+## * Service.externalIPs
+# externalIPs:
+#   enabled: false
+
+##### LoadBalancer & Encryption #####
+loadBalancer:
+  ## https://cilium.io/blog/2020/11/10/cilium-19#maglev-load-balancing
+  algorithm: maglev # random | maglev
+
+  ## https://cilium.io/blog/2020/02/18/cilium-17#direct-server-return
+  ## https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#direct-server-return-dsr
+  ## DSR require: tunnel=disabled (Native-Routing mode)
+  mode: hybrid # snat, dsr, hybrid (DSR for TCP, SNAT for UDP)
+
+  ## https://cilium.io/blog/2020/06/22/cilium-18#kube-proxy-replacement-at-the-xdp-layer
+  acceleration: native  # disabled | native (XDP)
+
+  # enables K8s Topology Aware Routing
+  # https://kubernetes.io/docs/concepts/services-networking/topology-aware-routing/
+  serviceTopology: true
+
+  l7:
+    ## Enable L7 service load balancing via envoy proxy.
+    ## https://youtu.be/9qukYX370z8?si=Zuf6q23BC5iuP67E
+    backend: disabled # disabled | envoy
+
+# encryption:
+#   enabled: false
+#   nodeEncryption: false
+#   type: ipsec # ipsec (default) | wireguard
+
+## https://docs.cilium.io/en/stable/network/servicemesh/ingress/
+# ingressController:
+#   enabled: false
+#
+## https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/
+# gatewayAPI:
+#   enabled: false
+#
+## https://docs.cilium.io/en/stable/network/egress-gateway/
+# egressGateway:
+#   enabled: false
+#
+## https://docs.cilium.io/en/stable/network/external-workloads/
+# externalWorkloads:
+#   enabled: false
+
+### Cilium Operator
+operator:
+  rollOutPods: true
+  priorityClassName: system-cluster-critical
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+### Cilium Agent
+rollOutCiliumPods: true
+priorityClassName: system-node-critical
+
+containerRuntime:
+  integration: auto
+
+extraVolumeMounts:
+- name: clustermesh-client-tls
+  mountPath: /var/lib/cilium/clustermesh/client/
+
+extraVolumes:
+- name: clustermesh-client-tls
+  secret:
+    secretName:  clustermesh-apiserver-remote-cert
+    optional:    true
+    defaultMode: 0644
+
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+### ClusterMesh
+cluster:
+  id: 1
+  name: kit106
+
+clustermesh:
+  useAPIServer: false
+
+  ## NOTE: providedTls is not supported yet
+  # config:
+  #   enabled: false
+  #
+  # apiserver:
+  #   replicas: 2
+  #   service:
+  #     type: LoadBalancer
+  #     loadBalancerIP: 172.16.10.10
+  #   tls:
+  #     auto:
+  #       enabled: true
+  #       method: certmanager
+  #       certManagerIssuerRef:
+  #         group: cert-manager.io
+  #         kind: ClusterIssuer
+  #         name: vault-issuer
+  #       certValidityDuration: 365 # 1y
+  #     server:
+  #       extraDnsNames:
+  #         - kit.dungdm93.local
+
+### Envoy
+envoy:
+  # -- Enable Envoy Proxy in standalone DaemonSet.
+  enabled: true
+  priorityClassName: system-node-critical
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: false
+
+### SPIRE
+authentication:
+  enabled: true
+  mutual:
+    spire:
+      enabled: false
+
+### Hubble
+hubble:
+  enabled: true
+
+  tls:
+    enabled: true
+    auto:
+      enabled: true
+      method: certmanager
+      certManagerIssuerRef:
+        group: cert-manager.io
+        kind: ClusterIssuer
+        name: vault-issuer
+      certValidityDuration: 365 # 1y
+
+  metrics:
+    enabled:
+    - dns
+    - drop
+    - tcp
+    - flow
+    - icmp
+    - http
+    enableOpenMetrics: true
+    serviceMonitor:
+      enabled: true
+    dashboards:
+      enabled: false
+
+  relay:
+    enabled: true
+    rollOutPods: true
+
+  ui:
+    enabled: true
+    rollOutPods: true
+    # ingress:
+    #   enabled: true
+    #   annotations:
+    #     kubernetes.io/tls-acme: "true"
+    #   hosts:
+    #   - hubble.dungdm93.me
+    #   tls:
+    #   - secretName: hubble.dungdm93.me-tls
+    #     hosts:
+    #     - hubble.dungdm93.me
