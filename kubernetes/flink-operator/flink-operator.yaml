@@ -1,0 +1,35 @@
+image:
+  repository: ghcr.io/dungdm93/docker/flink-operator
+  tag: 1.7.0
+
+replicas: 2
+watchNamespaces: [flink]
+
+defaultConfiguration:
+  create: true
+  append: true
+  flink-conf.yaml: |+
+    ## Flink kubernetes operator
+    kubernetes.operator.dynamic.config.check.interval: 1 min
+    kubernetes.operator.leader-election.enabled: true
+    kubernetes.operator.leader-election.lease-name: flink-operator-lease
+    kubernetes.operator.periodic.savepoint.interval: 6 h
+
+    ## S3
+    s3a.endpoint: http://s3.dungdm93.me:7480
+    s3a.endpoint.region: aws-global
+    s3a.path.style.access: true
+    s3a.connection.ssl.enabled: false
+
+    ## Metrics
+    metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+    metrics.reporter.prom.class: org.apache.flink.metrics.prometheus.PrometheusReporter
+    metrics.reporter.prom.port: 9249
+    metrics.reporters: prom
+
+metrics:
+  port: 9091
+
+## TODO:
+# * reuse existing cert-manager Issuer:
+#   https://github.com/apache/flink-kubernetes-operator/blob/release-1.7/helm/flink-kubernetes-operator/templates/webhook.yaml#L44

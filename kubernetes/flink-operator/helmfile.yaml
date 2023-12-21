@@ -1,0 +1,12 @@
+repositories:
+- name: flink-operator
+  url:  https://downloads.apache.org/flink/flink-kubernetes-operator-1.7.0
+
+releases:
+- name: flink-operator
+  namespace: flink-operator
+  chart: flink-operator/flink-kubernetes-operator
+  version: 1.7.0
+  values:
+  - ./flink-operator.yaml
+  - fullnameOverride: flink-operator
