@@ -1,0 +1,23 @@
+token: {{ fetchSecretValue "ref+vault://secret/gitops/cloudflared#/token" | quote }}
+
+image:
+  tag: 2022.12.1
+
+kind: deployment
+replicas: 3
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        topologyKey: kubernetes.io/hostname
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: cloudflared
+            app.kubernetes.io/instance: cloudflared
+
+metrics:
+  enabled: true
+  podMonitor:
+    enabled: true

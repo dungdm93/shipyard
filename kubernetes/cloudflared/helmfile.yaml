@@ -1,0 +1,8 @@
+releases:
+- name: cloudflared
+  namespace: cloudflared
+  chart: oci://ghcr.io/dungdm93/helm/cloudflared
+  version: 0.1.0
+  values:
+  - ./cloudflared.yaml.gotmpl
+  - fullnameOverride: cloudflared
