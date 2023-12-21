@@ -1,0 +1,20 @@
+repositories:
+- name: redpanda
+  url:  https://charts.redpanda.com
+
+releases:
+- name: schema-registry
+  namespace: kafka
+  chart: oci://ghcr.io/dungdm93/helm/schema-registry
+  version: 1.0.0
+  values:
+  - ./schema-registry.yaml
+  - fullnameOverride: schema-registry
+
+- name: console
+  namespace: kafka
+  chart: redpanda/console
+  version: 0.7.14
+  values:
+  - ./console.yaml
+  - fullnameOverride: console

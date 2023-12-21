@@ -1,0 +1,29 @@
+image:
+  repository: confluentinc/cp-schema-registry
+  tag: 7.3.0
+
+replicas: 3
+
+schemaRegistry:
+  kafkastore.bootstrap.servers: databus-kafka-bootstrap.kafka.svc:9092
+  schema.compatibility.level: none
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+logging:
+  root: WARN
+
+metrics:
+  enabled: true
+  podMonitor:
+    enabled: true

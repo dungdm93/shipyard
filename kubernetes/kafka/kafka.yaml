@@ -1,0 +1,95 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: databus
+  namespace: kafka
+spec:
+  kafka:
+    version: 3.4.0
+    replicas: 6
+    listeners:
+    - name: plain
+      port: 9092
+      type: internal
+      tls: false
+    - name: tls
+      port: 9093
+      type: internal
+      tls: true
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      message.max.bytes: 33554432 # 32Mi
+      compression.type: snappy
+      num.partitions: 12
+      default.replication.factor: 3
+      log.retention.hours: 1080 # 45d
+      num.replica.fetchers: 8
+      replica.fetch.max.bytes: 33554432 # 32Mi
+      replica.fetch.response.max.bytes: 33554432 # 32Mi
+      replica.socket.receive.buffer.bytes: 1048576 # 1Mi
+      num.recovery.threads.per.data.dir: 12 # = nCore
+      min.insync.replicas: 1
+      # default.key.serde:
+      # default.value.serde:
+    storage:
+      type: persistent-claim
+      class: topolvm-ssd
+      size: 128Gi
+      deleteClaim: false
+    resources:
+      requests:
+        cpu: "4"
+        memory: 16Gi
+      limits:
+        cpu: "12"
+        memory: 32Gi
+    logging:
+      type: inline
+      loggers:
+        kafka.root.logger.level: WARN
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-metrics
+          key: kafka-broker-metrics.yaml
+  # NOTE: Zookeeper is ignored in KRaft mode
+  zookeeper:
+    replicas: 3
+    storage:
+      type: persistent-claim
+      class: topolvm-ssd
+      size: 32Gi
+      deleteClaim: false
+    resources:
+      requests:
+        cpu: "1"
+        memory: 4Gi
+      limits:
+        cpu: "2"
+        memory: 8Gi
+    logging:
+      type: inline
+      loggers:
+        zookeeper.root.logger: WARN
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-metrics
+          key: zookeeper-metrics.yaml
+  # entityOperator:
+  #   topicOperator: {}
+  #   userOperator: {}
+  # cruiseControl:
+  #   metricsConfig:
+  #     type: jmxPrometheusExporter
+  #     valueFrom:
+  #       configMapKeyRef:
+  #         name: kafka-metrics
+  #         key: cruise-control-metrics.yaml
+  kafkaExporter:
+    topicRegex: .*
+    groupRegex: .*

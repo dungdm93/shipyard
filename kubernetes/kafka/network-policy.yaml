@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-connect
+  namespace: kafka
+spec:
+  policyTypes:
+  - Ingress
+  podSelector:
+    matchLabels:
+      strimzi.io/kind: KafkaConnect
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: console
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/component: actions
+          app.kubernetes.io/instance: datahub
+          app.kubernetes.io/name: datahub
+    ports:
+    - port: rest-api
+      protocol: TCP
