@@ -1,0 +1,23 @@
+manager:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: false
+
+admissionWebhooks:
+  create: true
+
+  certManager:
+    enabled: true
+    issuerRef:
+      kind: ClusterIssuer
+      name: vault-issuer
+
+role:
+  create: true
+
+clusterRole:
+  create: true
+
+kubeRBACProxy:
+  enabled: false

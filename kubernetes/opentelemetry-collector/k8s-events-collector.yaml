@@ -1,0 +1,82 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: k8s-events
+  namespace: opentelemetry-collector
+spec:
+  mode: deployment
+  replicas: 1
+  config: |
+    extensions:
+      health_check: {}
+
+    receivers:
+      k8s_events: {}
+
+    processors:
+      resource:
+        attributes:
+        - key: k8s.node.cluster
+          value: kit106
+          action: upsert
+        - key: k8s.node.zone
+          value: vn-hanoi-viettel-hoalac
+          action: upsert
+        - key: k8s.node.region
+          value: vn-hanoi
+          action: upsert
+      batch: {}
+
+    exporters:
+      elasticsearch:
+        endpoints:
+        - http://elasticsearch.elasticsearch.svc:9200
+        logs_index: k8s_events
+        sending_queue:
+          enabled: true
+          num_consumers: 20
+          queue_size: 1000
+
+    service:
+      extensions:
+      - health_check
+
+      pipelines:
+        logs:
+          receivers: [k8s_events]
+          processors: [resource, batch]
+          exporters: [elasticsearch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: opentelemetry-collector.k8s-events
+  labels:
+    app.kubernetes.io/name: k8s-events-collector
+    app.kubernetes.io/instance: opentelemetry-collector.k8s-events
+rules:
+  - apiGroups:
+    - ""  # core
+    - events.k8s.io
+    resources:
+    - events
+    verbs:
+    - get
+    - list
+    - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: opentelemetry-collector.k8s-events
+  labels:
+    app.kubernetes.io/name: k8s-events-collector
+    app.kubernetes.io/instance: opentelemetry-collector.k8s-events
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: opentelemetry-collector.k8s-events
+subjects:
+- kind: ServiceAccount
+  name: k8s-events-collector
+  namespace: opentelemetry-collector

@@ -1,0 +1,42 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: access-logs
+  namespace: opentelemetry-collector
+spec:
+  mode: deployment
+  replicas: 3
+  config: |
+    extensions:
+      health_check: {}
+
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: :4317
+          http:
+            endpoint: :4318
+
+    processors:
+      batch: {}
+
+    exporters:
+      elasticsearch:
+        endpoints:
+        - http://elasticsearch.elasticsearch.svc:9200
+        logs_index: access_logs
+        sending_queue:
+          enabled: true
+          num_consumers: 20
+          queue_size: 1000
+
+    service:
+      extensions:
+      - health_check
+
+      pipelines:
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [elasticsearch]

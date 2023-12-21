@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: opentelemetry-collector
+  namespace: opentelemetry-collector
+spec:
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: opentelemetry
+      app.kubernetes.io/component: opentelemetry-collector
+  endpoints:
+  - port: monitoring
+    scheme: http
+    scrapeTimeout: 10s
