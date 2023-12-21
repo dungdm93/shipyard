@@ -1,0 +1,30 @@
+# ServiceAccount token used to Vault server authenticate to remote Kubernetes cluster
+# ref: https://developer.hashicorp.com/vault/docs/auth/kubernetes#kubernetes-1-21
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vault-token
+  namespace: kube-system
+  annotations:
+    kubernetes.io/service-account.name: vault
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vault:token-reviewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: vault
+    namespace: kube-system
