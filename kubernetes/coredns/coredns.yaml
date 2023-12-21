@@ -1,0 +1,33 @@
+isClusterService: true
+
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+
+priorityClassName: system-cluster-critical
+
+podDisruptionBudget:
+  minAvailable: 1
+
+serviceType: ClusterIP
+service:
+  clusterIP: 10.5.0.10
+
+autoscaler:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 20Mi
+    limits:
+      cpu: 100m
+      memory: 200Mi
+
+prometheus:
+  service:
+    enabled: true
+    annotations: null
+  monitor:
+    enabled: true

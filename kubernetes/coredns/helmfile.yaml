@@ -1,0 +1,12 @@
+repositories:
+- name: coredns
+  url:  https://coredns.github.io/helm
+
+releases:
+- name: coredns
+  namespace: kube-system
+  chart: coredns/coredns
+  version: 1.19.7
+  values:
+  - ./coredns.yaml
+  - fullnameOverride: coredns
