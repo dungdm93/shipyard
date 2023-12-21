@@ -1,3 +1,5 @@
+## BGP configuration in switch
+# https://gist.github.com/dungdm93/1633716ee1db14017a3a66f4b1f03cc1
 ---
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
