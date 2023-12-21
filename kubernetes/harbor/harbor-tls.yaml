@@ -1,0 +1,19 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: harbor-core-token-tls
+  namespace: harbor
+spec:
+  duration:    2160h # 90d
+  renewBefore: 360h  # 15d
+  isCA: false
+  usages:
+  - key encipherment
+  - data encipherment
+  commonName: harbor-core-token
+  issuerRef:
+    group: cert-manager.io
+    kind:  ClusterIssuer
+    name:  vault-issuer
+  secretName: harbor-core-token-tls
