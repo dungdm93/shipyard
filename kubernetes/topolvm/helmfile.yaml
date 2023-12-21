@@ -1,0 +1,12 @@
+repositories:
+- name: topolvm
+  url:  https://topolvm.github.io/topolvm
+
+releases:
+- name: topolvm
+  namespace: kube-system
+  chart: topolvm/topolvm
+  version: 11.0.0
+  values:
+  - ./topolvm.yaml
+  - fullnameOverride: topolvm

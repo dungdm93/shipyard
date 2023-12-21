@@ -1,0 +1,64 @@
+# https://github.com/topolvm/topolvm/blob/main/deploy/README.md
+# https://github.com/topolvm/topolvm/blob/main/docs/topolvm-scheduler.md
+scheduler:
+  enabled: false
+
+controller:
+  replicaCount: 2
+  # https://github.com/topolvm/topolvm/tree/main/deploy#storage-capacity-tracking
+  storageCapacityTracking:
+    enabled: true
+  podDisruptionBudget:
+    enabled: true
+  prometheus:
+    podMonitor:
+      enabled: true
+
+node:
+  prometheus:
+    podMonitor:
+      enabled: true
+
+# https://github.com/topolvm/topolvm/blob/main/docs/lvmd.md
+lvmd:
+  managed: true
+  deviceClasses:
+  - name: ssd
+    volume-group: topolvm-ssd
+    default: true
+    spare-gb: 10
+  - name: nvme
+    volume-group: topolvm-nvme
+    spare-gb: 10
+
+storageClasses:
+  - name: topolvm-ssd
+    storageClass:
+      fsType: xfs # ext4, xfs, and btrfs
+      reclaimPolicy: Delete
+      volumeBindingMode: WaitForFirstConsumer
+      allowVolumeExpansion: true
+      additionalParameters:
+        topolvm.io/device-class: ssd
+  - name: topolvm-nvme
+    storageClass:
+      fsType: xfs # ext4, xfs, and btrfs
+      reclaimPolicy: Delete
+      volumeBindingMode: WaitForFirstConsumer
+      allowVolumeExpansion: true
+      additionalParameters:
+        topolvm.io/device-class: nvme
+
+webhook:
+  existingCertManagerIssuer:
+    group: cert-manager.io
+    kind:  ClusterIssuer
+    name:  vault-issuer
+  podMutatingWebhook:
+    enabled: false
+
+priorityClass:
+  enabled: false
+
+cert-manager:
+  enabled: false
