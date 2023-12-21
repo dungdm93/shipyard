@@ -1,0 +1,36 @@
+replicas: 2
+
+apiService:
+  create: true
+
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+
+args:
+  - --kubelet-insecure-tls=true
+  # NOTE: this option won't work because RKE kubelet certificate doesn't contain any IP SANs
+  # - --kubelet-certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+service:
+  labels:
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "Metrics-server"
+
+addonResizer:
+  enabled: true
+
+metrics:
+  enabled: true
+serviceMonitor:
+  enabled: true
