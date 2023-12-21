@@ -1,0 +1,42 @@
+installCRDs: true
+global:
+  rbac:
+    create: true
+  leaderElection:
+    namespace: cert-manager
+
+serviceAccount:
+  create: true
+
+extraArgs: ["--enable-certificate-owner-ref"]
+ingressShim:
+  defaultIssuerGroup: cert-manager.io
+  defaultIssuerKind: ClusterIssuer
+  defaultIssuerName: vault-issuer
+
+resources: &resources
+  requests:
+    cpu: 10m
+    memory: 32Mi
+
+webhook:
+  enabled: true
+  resources: *resources
+  serviceAccount:
+    create: true
+
+cainjector:
+  enabled: true
+  resources: *resources
+  serviceAccount:
+    create: true
+
+startupapicheck:
+  enabled: true
+  serviceAccount:
+    create: true
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true

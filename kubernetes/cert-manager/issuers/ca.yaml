@@ -1,0 +1,32 @@
+# $ openssl req -x509 -days 3650 -newkey rsa:4096 -noenc -keyout tls.key -out tls.crt
+# Country Name (2 letter code) [AU]: VN
+# State or Province Name (full name) [Some-State]: Hanoi
+# Locality Name (eg, city) []: Hanoi
+# Organization Name (eg, company) [Internet Widgits Pty Ltd]: DungDM
+# Organizational Unit Name (eg, section) []: Platform
+# Common Name (e.g. server FQDN or YOUR name) []: dungdm93.me
+# Email Address []: hello@dungdm93.me
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dungdm93.me-ca
+  namespace: cert-manager
+type: kubernetes.io/tls
+stringData:
+  tls.crt: |
+    -----BEGIN CERTIFICATE-----
+    DATA+OMITTED
+    -----END CERTIFICATE-----
+  tls.key: |
+    -----BEGIN PRIVATE KEY-----
+    DATA+OMITTED
+    -----END PRIVATE KEY-----
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: ca-issuer
+spec:
+  ca:
+    secretName: dungdm93.me-ca
