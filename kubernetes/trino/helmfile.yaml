@@ -1,0 +1,8 @@
+releases:
+- name: trino
+  namespace: trino
+  chart: oci://ghcr.io/dungdm93/helm/trino
+  version: 1.3.3
+  values:
+  - ./trino.yaml.gotmpl
+  - fullnameOverride: trino

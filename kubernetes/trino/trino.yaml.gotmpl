@@ -1,0 +1,117 @@
+image:
+  repository: trinodb/trino
+  tag: 435
+
+trino:
+  ### JVM on Container
+  # * https://merikan.com/2019/04/jvm-in-a-container/
+  # * https://www.baeldung.com/gc-release-memory
+  # * https://malloc.se/blog/zgc-jdk18
+  # * https://docs.oracle.com/en/java/javase/18/gctuning/z-garbage-collector.html
+  jvm.config: |
+    -server
+    -agentpath:/usr/lib/trino/bin/libjvmkill.so
+    -XX:+UseZGC
+    -XX:+UseStringDeduplication
+    -XX:+ExitOnOutOfMemoryError
+    -XX:+UseContainerSupport
+    -XX:MaxRAMPercentage=85.0
+    # default config at /etc/trino/jvm.config
+    -XX:ReservedCodeCacheSize=512M
+    -XX:PerMethodRecompilationCutoff=10000
+    -XX:PerBytecodeRecompilationCutoff=10000
+    -Djdk.attach.allowAttachSelf=true
+    -Djdk.nio.maxCachedBufferSize=2000000
+    -XX:+UnlockDiagnosticVMOptions
+    -XX:+UseAESCTRIntrinsics
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:HeapDumpPath=/opt/trino/cache
+  # * https://trino.io/docs/current/admin/tuning.html
+  # * https://trino.io/docs/current/admin/properties-query-management.html
+  # * https://docs.qubole.com/en/latest/troubleshooting-guide/ts-presto/presto-tuning.html
+  config.properties:
+    task.concurrency: 32
+    query.max-run-time:       15m
+    query.max-execution-time: 15m
+    query.max-memory:         32GB
+    query.max-total-memory:   48GB
+    query.max-memory-per-node:       16GB
+    query.low-memory-killer.delay:   0s
+    memory.heap-headroom-per-node:   5GB
+    hide-inaccessible-columns: true
+
+commons:
+  resources:
+    requests:
+      cpu: "2"
+      memory: "8Gi"
+    limits:
+      cpu: "8"
+      memory: "64Gi"
+  extraVolumeMounts:
+  - name: trino-tls
+    mountPath: /etc/trino/pki/
+    readOnly: true
+  extraVolumes:
+  - name: trino-tls
+    secret:
+      secretName: trino.dungdm93.me-tls
+  podSecurityContext:
+    fsGroup: 1000
+
+worker:
+  replicas: 6
+
+cache:
+  enabled: true
+
+  persistence:
+    enabled: true
+    accessModes:
+    - ReadWriteOnce
+    storageClass: topolvm-ssd
+    size: 100Gi
+
+httpServer:
+  http:
+    enabled: true
+    port: 8080
+  https:
+    enabled: true
+    port: 8443
+  keystore:
+    path: /etc/trino/pki/keystore.p12
+    key: jTATy27H2jQquoGHTxar3gGXgdg354GSA
+  truststore:
+    path: /etc/trino/pki/truststore.p12
+    key: jTATy27H2jQquoGHTxar3gGXgdg354GSA
+
+catalog:
+  jmx.properties: |
+    {{ tpl (readFile "catalogs/jmx.properties") . | nindent 4 | trim }}
+  databus.properties: |
+    {{ tpl (readFile "catalogs/databus.properties") . | nindent 4 | trim }}
+
+authen:
+  type: OAUTH2
+  sharedSecret: {{ fetchSecretValue "ref+vault://secret/gitops/trino/internal#/shared_secret" | quote }}
+
+  oauth2:
+    oidc.discovery: true
+    issuer: https://keycloak.dungdm93.me/realms/kit106
+    client-id:     {{ fetchSecretValue "ref+vault://secret/gitops/trino/auth#/client_id" | quote }}
+    client-secret: {{ fetchSecretValue "ref+vault://secret/gitops/trino/auth#/client_secret" | quote }}
+    principal-field: preferred_username
+    refresh-tokens: true
+    oidc.use-userinfo-endpoint: false
+    additional-audiences: account
+    # groups-field: groups
+
+metrics:
+  enabled: true
+  port: 9090
+  podMonitor:
+    enabled: true
+
+ingress:
+  enabled: false
