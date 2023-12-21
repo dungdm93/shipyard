@@ -1,0 +1,27 @@
+crds:
+  enabled: true
+
+rbac:
+  create: true
+
+controller:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+speaker:
+  secretValue: {{ fetchSecretValue "ref+vault://secret/gitops/metallb/speaker#/secret" | quote }}
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+prometheus:
+  scrapeAnnotations: false
+  podMonitor:
+    enabled: false
+  serviceMonitor:
+    enabled: false
+  prometheusRule:
+    enabled: false

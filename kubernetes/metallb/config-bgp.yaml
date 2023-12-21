@@ -1,0 +1,29 @@
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: bgp
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.10.0/24
+  autoAssign: false
+---
+apiVersion: metallb.io/v1beta1
+kind: BGPAdvertisement
+metadata:
+  name: bgp
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - bgp
+---
+apiVersion: metallb.io/v1beta2
+kind: BGPPeer
+metadata:
+  name: bgp
+  namespace: metallb-system
+spec:
+  peerAddress: 172.16.16.1
+  peerASN: 135958
+  myASN: 63941
