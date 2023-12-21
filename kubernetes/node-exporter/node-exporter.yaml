@@ -1,0 +1,23 @@
+extraArgs:
+  # ignore shm | tmpfs
+  - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs|shm|tmpfs)$
+  # ignore nbd\d+ | dm-\d+
+  - --collector.diskstats.device-exclude=^(ram|loop|fd|(h|s|v|xv)d[a-z]|nvme\d+n\d+p|nbd|dm-)\d+$
+  # ignore cilium lxc.*
+  - --collector.ethtool.device-exclude=^lxc
+  - --collector.netdev.device-exclude=^lxc
+  - --collector.netclass.ignored-devices=^lxc
+
+tolerations:
+- effect: NoSchedule
+  operator: Exists
+- key: node-role.kubernetes.io/master
+  operator: Exists
+- key: node-role.kubernetes.io/controlplane
+  operator: Exists
+- key: node-role.kubernetes.io/etcd
+  operator: Exists
+
+prometheus:
+  monitor:
+    enabled: true
