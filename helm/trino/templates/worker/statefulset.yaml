@@ -82,10 +82,6 @@ spec:
           {{- end }}
           volumeMounts:
             {{- include "trino.worker.volumeMounts" . | nindent 12 }}
-            {{- if .Values.cache.enabled }}
-            - name: cache
-              mountPath: /opt/trino/cache
-            {{- end }}
           livenessProbe:
             httpGet:
               path: /v1/info
@@ -109,10 +105,6 @@ spec:
         {{- toYaml $worker.podSecurityContext | nindent 8 }}
       volumes:
         {{- include "trino.worker.volumes" . | nindent 8 }}
-        {{- if and .Values.cache.enabled (not .Values.cache.persistence.enable) }}
-        - name: cache
-          emptyDir: {}
-        {{- end }}
     {{- with $worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -125,7 +117,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-  {{- if or (and .Values.cache.enabled .Values.cache.persistence.enabled) .Values.spill.enabled }}
+  {{- if or (and .Values.cache.enabled .Values.cache.persistence.enabled) (and .Values.spill.enabled .Values.spill.persistence.enabled) }}
   volumeClaimTemplates:
     {{- include "trino.worker.volumeClaimTemplates" . | nindent 4 }}
   {{- end }}

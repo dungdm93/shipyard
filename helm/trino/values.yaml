@@ -147,6 +147,18 @@ cache:
     storageClass: "-"
     size: 10Gi
 
+spill:
+  enabled: false
+  compression: true
+  encryption: false
+
+  persistence:
+    enabled: false
+    accessModes:
+    - ReadWriteOnce
+    storageClass: "-"
+    size: 10Gi
+
 faultTolerant:
   policy: null # null | QUERY, TASK
 
@@ -198,8 +210,6 @@ metrics:
   port: 9090
   podMonitor:
     enabled: false
-    opa:
-      enabled: false
 
 service:
   type: ClusterIP
@@ -231,11 +241,3 @@ ingress:
   #  - secretName: trino.local-tls
   #    hosts:
   #      - trino.local
-
-spill:
-  enabled: false
-  path: /opt/trino/spill
-  # accessModes:
-  #   - ReadWriteMany
-  # storageClassName: className
-  # size: 100

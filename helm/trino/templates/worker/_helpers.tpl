@@ -46,6 +46,14 @@ Worker volumes
   configMap:
     name: {{ include "trino.fullname" . }}-metrics
 {{- end }}
+{{- if and .Values.cache.enabled (not .Values.cache.persistence.enable) }}
+- name: cache
+  emptyDir: {}
+{{- end }}
+{{- if and .Values.spill.enabled (not .Values.spill.persistence.enable) }}
+- name: spill
+  emptyDir: {}
+{{- end }}
 {{- with $worker.extraVolumes }}
 {{ toYaml . }}
 {{- end }}
@@ -65,9 +73,13 @@ Coordinator volumeMounts
 {{- if .Values.metrics.enabled }}
 {{ include "trino.jmxMounts" . }}
 {{- end }}
+{{- if .Values.cache.enabled }}
+- name: cache
+  mountPath: /opt/trino/cache
+{{- end }}
 {{- if .Values.spill.enabled }}
-- name: trino-spill
-  mountPath: {{ .Values.spill.path }}
+- name: spill
+  mountPath: /opt/trino/spill
 {{- end }}
 {{- with $worker.extraVolumeMounts }}
 {{ toYaml . }}
@@ -99,19 +111,19 @@ Worker volumeClaimTemplates
       requests:
         storage: {{ .Values.cache.persistence.size | quote }}
 {{- end }}
-{{- if .Values.spill.enabled }}
+{{- if and .Values.spill.enabled .Values.spill.persistence.enabled }}
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    name: trino-spill
+    name: spill
   spec:
-    {{- with .Values.spill.accessModes }}
+    {{- with .Values.spill.persistence.accessModes }}
     accessModes:
       {{- toYaml . | nindent 6 }}
     {{- end }}
-    storageClassName: {{ .Values.spill.storageClassName | quote }}
+    storageClassName: {{ .Values.spill.persistence.storageClass | quote }}
     resources:
       requests:
-        storage: {{ .Values.spill.size | quote }}
+        storage: {{ .Values.spill.persistence.size | quote }}
 {{- end }}
 {{- end -}}

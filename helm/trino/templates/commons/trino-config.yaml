@@ -24,7 +24,9 @@
 
 {{- if $spill.enabled }}
   {{- $_ := set $config "spill-enabled" "true" }}
-  {{- $_ := set $config "spiller-spill-path" $spill.path }}
+  {{- $_ := set $config "spiller-spill-path" "/opt/trino/spill" }}
+  {{- $_ := set $config "spill-compression-enabled" $spill.compression }}
+  {{- $_ := set $config "spill-encryption-enabled" $spill.encryption }}
 {{- end }}
 
 {{- $exchangeManager := $faultTolerant.exchangeManager }}
