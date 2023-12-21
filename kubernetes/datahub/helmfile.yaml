@@ -1,0 +1,8 @@
+releases:
+- name: datahub
+  namespace: datahub
+  chart: oci://ghcr.io/dungdm93/helm/datahub
+  version: 0.3.0
+  values:
+  - ./datahub.yaml.gotmpl
+  - fullnameOverride: datahub

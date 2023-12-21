@@ -1,0 +1,122 @@
+gms:
+  replicas: 2
+  env:
+  - name: JAVA_OPTS
+    value: >-
+      -XX:+UseG1GC
+      -XX:+UseStringDeduplication
+      -XX:+ExitOnOutOfMemoryError
+      -XX:+UseContainerSupport
+      -XX:MaxRAMPercentage=99.0
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+frontend:
+  baseUrl: https://datahub.dungdm93.me
+  secretKey: {{ fetchSecretValue "ref+vault://secret/gitops/datahub/frontend#/secret_key" | quote }}
+  replicas: 2
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+actions:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 256m
+      memory: 256Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+entityService:
+  impl: ebean
+
+searchService:
+  enableCache: true
+  cacheImplementation: caffeine
+
+graphService:
+  impl: elasticsearch
+
+ebean:
+  type: postgresql
+  host: infradb.dungdm93.me
+  port: 6432
+  database: datahub
+  username: {{ fetchSecretValue "ref+vault://secret/gitops/datahub/database#/username" | quote }}
+  password: {{ fetchSecretValue "ref+vault://secret/gitops/datahub/database#/password" | quote }}
+
+elasticsearch:
+  host: elasticsearch.elasticsearch.svc
+  port: 9200
+  useSSL: false
+  index:
+    prefix: datahub
+    numShards: 1
+    numReplicas: 2  # 1 primary + 2 replicas
+
+kafka:
+  bootstrapServers: [databus-kafka-bootstrap.kafka.svc:9092]
+  partitions: 6
+  replicationFactor: 3
+  schemaRegistry:
+    type: CONFLUENT
+  confluent:
+    url: http://schema-registry.kafka.svc:8081
+    securityProtocol: PLAINTEXT
+  topics:
+    metadataChangeLogVersioned: datahub.metadata.change_log.versioned.v1
+    metadataChangeLogTimeseries: datahub.metadata.change_log.timeseries.v1
+    metadataChangeProposal: datahub.metadata.change_proposal.v1
+    failedMetadataChangeProposal: datahub.metadata.change_proposal.failed.v1
+    platformEvent: datahub.platform_event.v1
+    metadataAuditEvent: datahub.metadata.audit_event.v4
+    metadataChangeEvent: datahub.metadata.change_event.v4
+    failedMetadataChangeEvent: datahub.metadata.change_event.failed.v4
+    upgradeHistory: datahub.upgrade_history.v1
+    usageEvent: datahub.usage_event.v1
+  consumerGroups:
+    metadataChangeLog: datahub.mcl
+    metadataChangeProposal: datahub.mcp
+    platformEvent: datahub.pe
+    metadataAuditEvent: datahub.mae
+    metadataChangeEvent: datahub.mce
+    usageEvent: datahub.ue
+
+authn:
+  frontend:
+    oidc:
+      enabled: true
+      clientId:     {{ fetchSecretValue "ref+vault://secret/gitops/datahub/auth#/client_id" | quote }}
+      clientSecret: {{ fetchSecretValue "ref+vault://secret/gitops/datahub/auth#/client_secret" | quote }}
+      discoveryUri: https://keycloak.dungdm93.me/realms/kit106/.well-known/openid-configuration
+      userNameClaim: preferred_username
+      extractGroupsEnabled: true
+      groupsClaim: groups
+    jaas:
+      enabled: true
+      user.props:
+      - username: {{ fetchSecretValue "ref+vault://secret/gitops/datahub/admin#/username" | quote }}
+        password: {{ fetchSecretValue "ref+vault://secret/gitops/datahub/admin#/password" | quote }}
+    native:
+      enabled: false
+  gms:
+    enabled: true
+    systemClientId:     {{ fetchSecretValue "ref+vault://secret/gitops/datahub/gms/auth#/client_id" | quote }}
+    systemClientSecret: {{ fetchSecretValue "ref+vault://secret/gitops/datahub/gms/auth#/client_secret" | quote }}
+    tokenService:
+      salt:       {{ fetchSecretValue "ref+vault://secret/gitops/datahub/gms/token_service#/salt" | quote }}
+      signingKey: {{ fetchSecretValue "ref+vault://secret/gitops/datahub/gms/token_service#/signing_key" | quote }}
+
+ingress:
+  enabled: false
