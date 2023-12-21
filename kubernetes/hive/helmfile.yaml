@@ -1,0 +1,8 @@
+releases:
+- name: hive
+  namespace: hive
+  chart: oci://ghcr.io/dungdm93/helm/hive
+  version: 0.3.3
+  values:
+  - ./hive.yaml.gotmpl
+  - fullnameOverride: hive

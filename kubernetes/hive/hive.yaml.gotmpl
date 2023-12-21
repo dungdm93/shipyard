@@ -1,0 +1,65 @@
+image:
+  repository: ghcr.io/dungdm93/docker/hive
+  tag: 3.1.3
+
+hiveConfig:
+  hive-site.xml:
+    datanucleus.connectionPool.maxPoolSize: 4
+    hive.metastore.event.db.notification.api.auth: false
+    # https://prestosql.io/docs/current/connector/hive.html#metastore-configuration-for-avro
+    metastore.storage.schema.reader.impl: org.apache.hadoop.hive.metastore.SerDeStorageSchemaReader
+    # Enable cleaner threads to support Hive transactions
+    # https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=82706483#HiveTransactions-Configuration
+    hive.compactor.initiator.on: true
+    hive.compactor.worker.threads: 1
+
+metastore:
+  replicas: 1
+
+warehouse:
+  dir: s3a://apps-hive/warehouse/
+
+metrics:
+  enabled: true
+  port: 9028
+  podMonitor:
+    enabled: true
+
+filesystem:
+  s3a:
+    enabled: true
+    endpoint:  http://s3.dungdm93.me:7480
+    accessKey: {{ fetchSecretValue "ref+vault://secret/gitops/hive/s3a#/access_key" | quote }}
+    secretKey: {{ fetchSecretValue "ref+vault://secret/gitops/hive/s3a#/secret_key" | quote }}
+
+    buckets:
+      apps-hive:
+        accessKey: {{ fetchSecretValue "ref+vault://secret/gitops/hive/warehouse#/access_key" | quote }}
+        secretKey: {{ fetchSecretValue "ref+vault://secret/gitops/hive/warehouse#/secret_key" | quote }}
+
+postgresql:
+  enabled: false
+
+externalDatabase:
+  type: postgres
+  host: infradb.dungdm93.me
+  port: 6432
+  database: hms
+  username: {{ fetchSecretValue "ref+vault://secret/gitops/hive/database#/username" | quote }}
+  password: {{ fetchSecretValue "ref+vault://secret/gitops/hive/database#/password" | quote }}
+
+commons:
+  env:
+    # Hive server2/metastore/client heap size in Mb
+    - name: HADOOP_HEAPSIZE
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
+          divisor: 1Mi
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+    limits:
+      cpu: "4"
+      memory: "4Gi"
