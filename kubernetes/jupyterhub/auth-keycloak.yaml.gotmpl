@@ -1,0 +1,29 @@
+# https://oauthenticator.readthedocs.io/en/latest/getting-started.html
+# https://oauthenticator.readthedocs.io/en/latest/api/gen/oauthenticator.generic.html
+# https://z2jh.jupyter.org/en/latest/administrator/authentication.html
+
+hub:
+  config:
+    JupyterHub:
+      admin_access: true
+      authenticator_class: generic-oauth
+    Authenticator:
+      auto_login: true
+      enable_auth_state: true
+      admin_users:
+      - dataops@dungdm93.me
+    GenericOAuthenticator:
+      login_service: KeyCloak
+      client_id:     {{ fetchSecretValue "ref+vault://secret/gitops/jupyterhub/auth#/client_id" | quote }}
+      client_secret: {{ fetchSecretValue "ref+vault://secret/gitops/jupyterhub/auth#/client_secret" | quote }}
+      oauth_callback_url: https://jupyter.dungdm93.me/hub/oauth_callback
+      authorize_url: https://keycloak.dungdm93.me/realms/kit106/protocol/openid-connect/auth
+      token_url:     https://keycloak.dungdm93.me/realms/kit106/protocol/openid-connect/token
+      userdata_url:  https://keycloak.dungdm93.me/realms/kit106/protocol/openid-connect/userinfo
+      scope: [openid, profile, email]
+      username_key: preferred_username
+      userdata_params:
+        state: state
+    CryptKeeper:
+      keys:
+      - {{ fetchSecretValue "ref+vault://secret/gitops/jupyterhub/auth_state#/crypto_key" | quote }}

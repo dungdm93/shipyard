@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: jupyterhub
+  namespace: jupyter
+  labels:
+    app: jupyter
+spec:
+  selector:
+    matchLabels:
+      app: jupyterhub
+      component: hub
+      release: jupyterhub
+  endpoints:
+  - targetPort: 8081
+    path: /hub/metrics

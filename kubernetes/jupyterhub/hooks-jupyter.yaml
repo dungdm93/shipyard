@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jupyter-hooks
+  namespace: jupyter
+data:
+  .condarc.template: |
+    channels:
+    - defaults
+    - conda-forge
+
+  pip.conf.template: |
+    [global]
+    user = true
+    timeout = 60
+
+  jupyter-bootstrap-hook.sh: |
+    #!/bin/bash
+    HERE=$(dirname "${BASH_SOURCE[0]}")
+
+    if [[ ! -f /home/jovyan/.bashrc ]]; then
+      sudo -HEu $NB_USER mkdir -p /home/jovyan/work
+      sudo -HEu $NB_USER cp -rT /etc/skel/. /home/jovyan/
+    fi
+
+    cp "${HERE}/.condarc.template" "${CONDA_DIR}/.condarc"
+    cp "${HERE}/pip.conf.template" "${CONDA_DIR}/pip.conf"

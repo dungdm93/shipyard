@@ -1,0 +1,6 @@
+hub:
+  db:
+    type: postgres
+    url:  postgresql://{{ fetchSecretValue "ref+vault://secret/gitops/jupyterhub/database#/username" }}@infradb.dungdm93.me:5432/jupyterhub
+    password: {{ fetchSecretValue "ref+vault://secret/gitops/jupyterhub/database#/password" | quote }}
+    upgrade: true

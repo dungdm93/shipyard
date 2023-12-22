@@ -1,0 +1,84 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spark-hooks
+  namespace: jupyter
+data:
+  spark-defaults.conf.template: |
+    # spark.master=yarn
+    # spark.master=spark://spark.kites.rocks:7077
+    # spark.master=k8s://https://kubernetes.default.svc:443
+    spark.master=local[8]
+    spark.driver.cores=8
+    spark.driver.memory=24g
+    spark.executor.cores=8
+    spark.executor.memory=24g
+    # spark.executor.instances=2
+    spark.env=jupyter
+
+    ##### Iceberg #####
+    spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+    spark.sql.iceberg.handle-timestamp-without-timezone=true
+
+    spark.sql.catalog.datalake=org.apache.iceberg.spark.SparkCatalog
+    spark.sql.catalog.datalake.type=hive
+    spark.sql.catalog.datalake.uri=thrift://hive.hive.svc:9083
+    spark.sql.catalog.datalake.io-impl=org.apache.iceberg.aws.s3.S3FileIO
+    spark.sql.catalog.datalake.s3.endpoint=http://s3.dungdm93.me:7480
+    spark.sql.catalog.datalake.s3.access-key-id=jupyter
+    spark.sql.catalog.datalake.s3.secret-access-key=SuperSecr3t
+    spark.sql.catalog.datalake.s3.path-style-access=true
+
+    ##### S3 #####
+    spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+    spark.hadoop.fs.s3a.endpoint=http://s3.dungdm93.me:7480
+    spark.hadoop.fs.s3a.access.key=jupyter
+    spark.hadoop.fs.s3a.secret.key=SuperSecr3t
+    spark.hadoop.fs.s3a.path.style.access=true
+
+    ##### Apache Hive #####
+    spark.sql.catalogImplementation=hive
+    spark.sql.warehouse.dir=s3a://datawarehouse/.warehouse/
+    spark.hadoop.hive.metastore.uris=thrift://hive.hive.svc:9083
+    spark.sql.sources.partitionOverwriteMode=dynamic
+
+    ##### Apache Arrow #####
+    spark.sql.execution.arrow.pyspark.enabled=true
+    spark.sql.execution.arrow.pyspark.fallback.enabled=true
+    spark.sql.execution.arrow.sparkr.enabled=true
+    spark.sql.execution.arrow.sparkr.fallback.enabled=true
+
+    ##### Tuning Spark IO #####
+    spark.sql.files.maxRecordsPerFile=500000
+    spark.sql.sources.ignoreDataLocality=true
+    spark.sql.datetime.java8API.enabled=true
+    spark.sql.adaptive.enabled=true
+
+  spark-env.sh.template: |
+    #!/usr/bin/env bash
+
+    JAVA_HOME="${JAVA_HOME:-$(readlink -f "$(which java)" | sed "s:/bin/java::")}"
+
+    if [ -n "${HADOOP_HOME}" ] && [ -z "${SPARK_DIST_CLASSPATH}"  ]; then
+      SPARK_DIST_CLASSPATH="$(${HADOOP_HOME}/bin/hadoop classpath)"
+    fi
+
+    # Custom stuff to support 'HADOOP_OPTIONAL_TOOLS' function
+    if [ -z "${HADOOP_HOME}" ] && [ -n "${HADOOP_OPTIONAL_TOOLS}" ] \
+        && [ -x "${SPARK_HOME}/hadoop/bin/hadoop-tools.sh" ]; then
+      SPARK_DIST_CLASSPATH+=":$(${SPARK_HOME}/hadoop/bin/hadoop-tools.sh)"
+    fi
+
+    SPARK_IDENT_STRING="${JUPYTERHUB_USER}"
+    HADOOP_USER_NAME="${JUPYTERHUB_USER}"
+
+  spark-bootstrap-hook.sh: |
+    #!/bin/bash
+    HERE=$(dirname "${BASH_SOURCE[0]}")
+
+    export HADOOP_OPTIONAL_TOOLS=hadoop-aws,hadoop-iceberg-aws
+    export AWS_REGION=aws-global
+
+    envsubst < "${HERE}/spark-defaults.conf.template" > "${SPARK_HOME}/conf/spark-defaults.conf"
+    cp         "${HERE}/spark-env.sh.template"          "${SPARK_HOME}/conf/spark-env.sh"
