@@ -1,0 +1,55 @@
+nameNode:
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: ceph-rbd-ssd
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+
+checkpointNode:
+  enabled: true
+
+dataNode:
+  kind: statefulset
+  statefulset:
+    replicas: 3
+
+  persistence:
+    enabled: true
+    size: 800Gi
+    storageClass: topolvm-ssd
+    accessModes:
+    - ReadWriteOnce
+
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: hdfs
+              app.kubernetes.io/instance: hdfs
+              app.kubernetes.io/component: namenode
+
+hdfsConfig:
+  hdfs-site.xml:
+    dfs.replication.max: 3
+
+serviceMonitor:
+  enabled: true
+  interval: 30s

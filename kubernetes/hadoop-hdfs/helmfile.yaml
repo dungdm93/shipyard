@@ -1,0 +1,8 @@
+releases:
+- name: hdfs
+  namespace: hdfs
+  chart: oci://ghcr.io/dungdm93/helm/hdfs
+  version: 0.3.1
+  values:
+  - ./hdfs.yaml
+  - fullnameOverride: hdfs
