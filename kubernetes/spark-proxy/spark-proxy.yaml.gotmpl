@@ -1,0 +1,50 @@
+image:
+  repository: ghcr.io/dungdm93/docker/spark-proxy
+  tag: v1.0.0
+
+env:
+- name: SPARK_NO_DAEMONIZE # run in foreground
+  value: "true"
+- name: HADOOP_OPTIONAL_TOOLS
+  value: hadoop-aws
+- name: SPARK_HISTORY_OPTS
+  value: -Dfile.encoding=UTF-8
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 5Gi
+
+sparkConfig:
+  ##### S3 #####
+  spark.hadoop.fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+  spark.hadoop.fs.s3a.endpoint: http://s3.dungdm93.me:7480
+  spark.hadoop.fs.s3a.path.style.access: true
+
+  spark.hadoop.fs.s3a.access.key: {{ fetchSecretValue "ref+vault://secret/gitops/spark-history/s3a#/access_key" | quote }}
+  spark.hadoop.fs.s3a.secret.key: {{ fetchSecretValue "ref+vault://secret/gitops/spark-history/s3a#/secret_key" | quote }}
+
+  ##### History Server #####
+  spark.history.ui.port: 18080
+  # spark.history.ui.maxApplications: 5000
+  spark.history.fs.logDirectory: s3a://apps-spark/spark-events/
+  spark.history.fs.cleaner.enabled: true
+  spark.history.fs.cleaner.interval: 1d
+  spark.history.fs.cleaner.maxAge: 15d
+  spark.history.store.serializer: PROTOBUF
+  spark.history.store.hybridStore.enabled: true
+  spark.history.store.hybridStore.diskBackend: ROCKSDB
+  spark.history.store.maxDiskUsage: 8g
+
+sparkProxyConfig:
+  type: kubernetes
+  kubernetes:
+    namespace: spark
+
+persistentStore:
+  enabled: true
+  storageClass: ceph-rbd-ssd
+  size: 10G

@@ -1,0 +1,8 @@
+releases:
+- name: spark-proxy
+  namespace: spark-proxy
+  chart: oci://ghcr.io/dungdm93/helm/spark-proxy
+  version: 1.0.0
+  values:
+  - ./spark-proxy.yaml.gotmpl
+  - fullnameOverride: spark-proxy
