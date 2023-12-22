@@ -1,0 +1,9 @@
+{
+  "Rules": [{
+    "ID": "Removing old objects",
+    "Expiration": {
+      "Days": 7
+    },
+    "Status": "Enabled"
+  }]
+}

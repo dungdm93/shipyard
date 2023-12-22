@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-cli
+  namespace: rook-ceph
+  labels:
+    app: aws-cli
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aws-cli
+  template:
+    metadata:
+      labels:
+        app: aws-cli
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      enableServiceLinks: false
+      containers:
+      - name: aws-cli
+        image: amazon/aws-cli
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash"]
+        stdinOnce: true
+        stdin: true
+        tty: true
+---
+### Setup...
+# aws configure
+# complete -C aws_completer aws
+# alias aws='aws --endpoint-url=http://rook-ceph-rgw-s3.rook-ceph.svc:7480'

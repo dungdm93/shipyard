@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3cmd
+  namespace: rook-ceph
+  labels:
+    app: s3cmd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s3cmd
+  template:
+    metadata:
+      labels:
+        app: s3cmd
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      enableServiceLinks: false
+      containers:
+      - name: s3cmd
+        image: ghcr.io/dungdm93/tools/minio
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash"]
+        stdinOnce: true
+        stdin: true
+        tty: true
+---
+# cat ~/.s3cfg
+# [default]
+# host_base = http://rook-ceph-rgw-s3.rook-ceph.svc:7480
+# host_bucket = http://rook-ceph-rgw-s3.rook-ceph.svc:7480
+# use_https = False
+# signature = s3v4
+# access_key = <rgw_access_key>
+# secret_key = <rgw_secret_key>
