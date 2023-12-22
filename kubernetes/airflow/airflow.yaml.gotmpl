@@ -1,0 +1,116 @@
+fernetKey: {{ fetchSecretValue "ref+vault://secret/gitops/airflow/fernet_key#/value" | quote }}
+
+airflow:
+  core:
+    hide_sensitive_var_conn_fields: false
+    killed_task_cleanup_time: 300
+    max_active_tasks_per_dag: 16
+    max_active_runs_per_dag: 16
+    parallelism: 128
+  webserver:
+    # worker_class: sync (default), eventlet, gevent
+    base_url: https://airflow.dungdm93.me
+    secret_key: {{ fetchSecretValue "ref+vault://secret/gitops/airflow/webserver#/secret_key" | quote }}
+    enable_proxy_fix: true
+    warn_deployment_exposure: false
+  celery:
+    # pool: prefork (default), eventlet, gevent, solo
+    worker_autoscale: 16,2
+  email:
+    default_email_on_retry:  false
+    default_email_on_failure: false
+  smtp:
+    smtp_host: smtp.sendgrid.net
+    smtp_port: 587
+    smtp_starttls: true
+    smtp_user:     {{ fetchSecretValue "ref+vault://secret/gitops/airflow/smtp#/username" | quote }}
+    smtp_password: {{ fetchSecretValue "ref+vault://secret/gitops/airflow/smtp#/password" | quote }}
+    smtp_mail_from: "Airflow service <airflow@dungdm93.me>"
+  scheduler:
+    max_dagruns_to_create_per_loop: 100 # default 10
+    max_dagruns_per_loop_to_schedule: 200 # default 20
+    schedule_after_task_execution: false # https://stackoverflow.com/a/71196200
+    scheduler_idle_sleep_time: 2 # Longer sleep time, less cpu usage
+
+webserver_config: |
+  {{ tpl (readFile "webserver_config.py") . | nindent 2 }}
+
+commons:
+  image:
+    repository: ghcr.io/dungdm93/docker/airflow
+    tag: 2.6.2
+
+scheduler:
+  replicas: 2
+  resources:
+    requests:
+      cpu: "4"
+      memory: 4Gi
+      ephemeral-storage: 1Gi
+    limits:
+      cpu: "8"
+      memory: 8Gi
+      ephemeral-storage: 4Gi
+
+webserver:
+  replicas: 3
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1.5Gi
+      ephemeral-storage: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+      ephemeral-storage: 1Gi
+
+worker:
+  replicas: 3
+  resources:
+    requests:
+      cpu: "2"
+      memory: 4Gi
+      ephemeral-storage: 1Gi
+    limits:
+      cpu: "8"
+      memory: 8Gi
+      ephemeral-storage: 8Gi
+
+dags:
+  fetcher: git
+
+  git:
+    repo:    https://github.com/dungdm93/pipelines.git
+    branch:  master
+
+    auth:
+      username: {{ fetchSecretValue "ref+vault://secret/gitops/airflow/git#/username" | quote }}
+      password: {{ fetchSecretValue "ref+vault://secret/gitops/airflow/git#/password" | quote }}
+
+logs:
+  level: INFO
+  # NOTE: s3ConnId MUST NOT contains `schema`
+  remoteLogConnId: airflow-logs-conn
+  remoteBaseLogFolder: s3://apps-airflow/logs/
+
+ingress:
+  enabled: false
+
+redis:
+  enabled: true
+  architecture: standalone
+  master:
+    persistence:
+      enabled: true
+      size: 16Gi
+      storageClass: "ceph-rbd-ssd"
+
+postgresql:
+  enabled: false
+
+externalDatabase: postgresql://{{ fetchSecretValue "ref+vault://secret/gitops/airflow/database#/username" }}:{{ fetchSecretValue "ref+vault://secret/gitops/airflow/database#/password" }}@infradb.dungdm93.me:5432/airflow
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
