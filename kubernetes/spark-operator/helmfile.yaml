@@ -1,0 +1,12 @@
+repositories:
+- name: spark-operator
+  url:  https://googlecloudplatform.github.io/spark-on-k8s-operator
+
+releases:
+- name: spark-operator
+  namespace: spark-operator
+  chart: spark-operator/spark-operator
+  version: 1.1.26
+  values:
+  - ./spark-operator.yaml
+  - fullnameOverride: spark-operator
