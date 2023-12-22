@@ -294,3 +294,4 @@ override.tf.json
 /helm/*/build
 /helm/**/charts/*.tgz
 /helm/**/Chart.lock
+!terraform/**/.env
