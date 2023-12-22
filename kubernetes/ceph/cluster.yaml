@@ -1,0 +1,102 @@
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: ceph
+  namespace: rook-ceph
+spec:
+  cephVersion:
+    image: quay.io/ceph/ceph:v17.2.5
+    allowUnsupported: false
+  dataDirHostPath: /var/lib/rook
+  skipUpgradeChecks: false
+  continueUpgradeAfterChecksEvenIfNotHealthy: false
+  removeOSDsIfOutAndSafeToRemove: false
+  mon:
+    count: 3
+    allowMultiplePerNode: false
+  mgr:
+    allowMultiplePerNode: false
+    modules:
+    - name: pg_autoscaler
+      enabled: true
+    - name: alerts
+      enabled: true
+  dashboard:
+    enabled: true
+    ssl: false
+  monitoring:
+    enabled: true
+    rulesNamespace: rook-ceph
+  logCollector:
+    enabled: false
+  crashCollector:
+    disable: false
+  network:
+    provider: host
+  placement:
+    mon: &nodeControl
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/controlplane
+              operator: In
+              values: ["true"]
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+      - key: node-role.kubernetes.io/controlplane
+        operator: Exists
+      - key: node-role.kubernetes.io/etcd
+        operator: Exists
+    mgr: *nodeControl
+  storage:
+    # https://github.com/rook/rook/blob/master/pkg/apis/rook.io/v1/types.go
+    config:
+      storeType: bluestore
+
+    useAllDevices: false
+    # deviceFilter: ^sd.
+    # devicePathFilter: ^/dev/disk/by-id/google-hdd-.*
+
+    useAllNodes: false
+    nodes:
+    # SSD
+    - name: storage-data-01
+      deviceFilter: ^sd[a-h]
+      resources:
+        requests:
+          cpu: "2"
+          memory: "3Gi"
+        limits:
+          cpu: "3"
+          memory: "5Gi"
+
+    # HDD + wal/db in SSD
+    - name: storage-data-02
+      resources:
+        requests:
+          cpu: "2"
+          memory: "8Gi"
+        limits:
+          cpu: "6"
+          memory: "10Gi"
+      devices:
+      - name: sdb
+        config:
+          metadataDevice: sdh
+      - name: sdc
+        config:
+          metadataDevice: sdh
+      - name: sdd
+        config:
+          metadataDevice: sdi
+      - name: sde
+        config:
+          metadataDevice: sdj
+      - name: sdf
+        config:
+          metadataDevice: sdk
+      - name: sdg
+        config:
+          metadataDevice: sdk

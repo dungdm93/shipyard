@@ -1,0 +1,591 @@
+Ceph Manual
+===========
+:sectnums:
+
+## Config Ceph Alerts
+```bash
+# Enable alerts module
+ceph mgr module enable alerts
+
+# configure SMTP
+ceph config set mgr mgr/alerts/smtp_host smtp.sendgrid.net
+ceph config set mgr mgr/alerts/smtp_port 587   # default 465
+ceph config set mgr mgr/alerts/smtp_ssl  false # default true (Wrong SSL version)
+ceph config set mgr mgr/alerts/smtp_sender      "ceph@dungdm93.me"
+ceph config set mgr mgr/alerts/smtp_from_name   "Ceph cluster"
+ceph config set mgr mgr/alerts/smtp_destination "dataops@dungdm93.me"
+ceph config set mgr mgr/alerts/smtp_user      <username>
+ceph config set mgr mgr/alerts/smtp_password  <password>
+
+# Test
+ceph alerts send
+```
+
+## Config Ceph Monitoring
+* Config grafana:
++
+  For Ceph <= Nautius, configure Grafana to adapt anonymous mode
++
+```ini
+[auth.anonymous]
+enabled = true
+org_name = Main Org.
+org_role = Viewer
+
+[security]
+cookie_samesite = none
+```
++
+  For Ceph Octopus+, Grafana 6.2+, enable embeded mode via `allow_embedding`
++
+```ini
+[security]
+allow_embedding = true
+cookie_samesite = none
+```
+
+* Integrate ceph w/ grafana
++
+```bash
+# Grafana API url should be public domain
+ceph dashboard set-grafana-api-url        https://grafana.dungdm93.me
+ceph dashboard set-grafana-api-ssl-verify False
+ceph dashboard set-grafana-api-username   api_key
+ceph dashboard set-grafana-api-password   <api-key>
+
+# Push dashboards to Grafana
+ceph dashboard grafana dashboards update
+```
+
+* Integrate ceph w/ prometheus
++
+```bash
+ceph dashboard set-prometheus-api-host   http://metrics.dungdm93.local:9090
+ceph dashboard set-alertmanager-api-host http://alerts.dungdm93.local:9093
+```
+
+.References:
+* https://github.com/ceph/ceph/tree/master/monitoring/grafana/dashboards[dashboards json]
+* https://github.com/ceph/ceph-mixins[ceph-mixins]
+* https://docs.ceph.com/en/latest/mgr/dashboard/#enabling-the-embedding-of-grafana-dashboards[Enabling the embedding of Grafana Dashboards]
+
+## Config Ceph Orchestrator
+```bash
+# enable the Rook orchestrator module
+ceph orch set backend rook
+
+# Check the backend is properly configured
+ceph orch status
+```
+
+## Config `pg_autoscale`
+`pg_autoscale` is enabled that allow `pg_num` can be inc/dec based on size of data.
+If they are not providing the expected/wished results, you can adjust the calculation of the autoscaler by specifying the expected pool size and/or a lower bound on the number of PGs.
+```bash
+ceph osd pool set <pool> pg_num <value>
+ceph osd pool set <pool> pg_num_min <value>
+
+# check
+ceph osd lspools
+ceph osd pool get <pool> <config>
+ceph osd pool autoscale-status
+```
+
+If backfilling too slow, you speed up osd recovery by:
+```bash
+ceph config get osd osd_max_backfills
+ceph config set osd osd_max_backfills <value>
+
+# check status
+ceph pg ls-by-pool <pool>
+```
+
+## Scrubbing
+
+### Configuration
+```bash
+ceph config get osd osd_max_scrubs
+ceph config set osd osd_max_scrubs <value>
+```
+
+### Manual scrubbing
+```bash
+ceph pg scrub <pgid>
+ceph pg deep-scrub <pgid>
+```
+
+### Check status
+```
+ceph pg <pgid> query
+```
+
+## Cache pool
+### Setup a Cache tier
+```bash
+export DATA_POOL=...
+export CACHE_POOL=...
+export CACHE_CRUSHRULE="$CACHE_POOL"
+
+ceph osd crush rule create-replicated $CACHE_CRUSHRULE default host ssd
+ceph osd pool create $CACHE_POOL 128 128 replicated $CACHE_CRUSHRULE
+ceph osd pool set-quota $CACHE_POOL [max_objects {obj-count}] [max_bytes {bytes}]
+
+ceph osd tier add-cache $DATA_POOL $CACHE_POOL $((3 * 1024 ** 4)) # 3TB
+# Above command does:
+# * osd tier add $DATA_POOL $CACHE_POOL
+# * osd tier cache-mode $CACHE_POOL writeback
+# * osd tier set-overlay $DATA_POOL $CACHE_POOL
+# * osd pool set $CACHE_POOL target_max_bytes $((3 * 1024 ** 4))
+# * osd pool set $CACHE_POOL application_metadata rgw
+# * osd pool set $CACHE_POOL hit_set_...
+# * osd pool set $CACHE_POOL min_read_recency_for_promote  1
+# * osd pool set $CACHE_POOL min_write_recency_for_promote 1
+
+## Tunning
+ceph osd pool set $CACHE_POOL min_read_recency_for_promote  0
+ceph osd pool set $CACHE_POOL min_write_recency_for_promote 0
+ceph osd pool set $CACHE_POOL cache_min_flush_age 1800 # 30m
+# ceph osd pool set $CACHE_POOL cache_min_evict_age 1800 # 30m
+```
+
+.References:
+* https://documentation.suse.com/ses/5.5/html/ses-all/cha-ceph-tiered.html[SUSE docs]
+* Ceph docs https://docs.ceph.com/en/latest/dev/cache-pool/[1] & https://docs.ceph.com/en/latest/rados/operations/cache-tiering/[2]
+
+### Removing a Cache tier
+Note: This docs https://docs.ceph.com/en/latest/rados/operations/cache-tiering/#removing-a-cache-tier[here] will not work.
+To remove cache tier:
+```bash
+# Change cache-mode to readproxy
+ceph osd tier cache-mode {cachepool} readproxy
+
+# Check pool details (include number of object and dirty objects)
+ceph df detail
+ceph df detail -f json-pretty | jq '.pools[] | select(.name=="{cachepool}")'
+
+# Check evict/flush/promote speed
+ceph osd pool stats {cachepool}
+
+# To flush objects
+ceph osd pool set {cachepool} cache_target_dirty_ratio 0
+```
+
+### SLOW_OPS
+```
+# See which object & op cause SLOW_OPS
+ceph tell osd.42 dump_ops_in_flight
+```
+
+## Change CRUSH rule
+It's posible to change `failureDomain` or `deviceClass` in Ceph, but you need to do it **manually**.
+
+```bash
+export NEW_CRUSHRULE=...
+
+# for Replicated
+ceph osd crush rule create-replicated $NEW_CRUSHRULE default host ssd
+
+# for Erasure code
+## create new EC profile
+ceph osd erasure-code-profile set <ec_profile> ...
+ceph osd erasure-code-profile get <ec_profile>
+ceph osd crush rule create-erasure $NEW_CRUSHRULE <ec_profile>
+
+# change crush_rule
+ceph osd pool set <pool> crush_rule $NEW_CRUSHRULE
+ceph osd pool get <pool> crush_rule
+```
+
+.References:
+* https://rook.github.io/docs/rook/v1.7/ceph-advanced-configuration.html#change-failure-domain[Rook docs]
+
+## Rebalancing OSD data usage
+Shows OSDs utilized
+
+```bash
+ceph osd df
+
+# or
+ceph osd df tree
+```
+
+Data distribution amog Ceph OSDs can be adjusted *manually* using:
+
+```bash
+ceph osd reweight <id|osd.id> <weight:float>
+```
+
+or *automatically* using:
+
+```bash
+ceph osd reweight-by-utilization [threshold [max_change max_osds]] [--no-increasing]
+```
+
+To determine which and how many PGs and OSDs will be affected by a given invocation you can test before executing.
+
+```bash
+ceph osd test-reweight-by-utilization [threshold [max_change max_osds]] [--no-increasing]
+```
+
+Note that by default the "reweight-by-utilization" command will have the following defaults:
+
+```
+oload 120
+max_change 0.05
+max_change_osds 5
+```
+
+## Config Virtual bucket host name
+add `cname.domain.com` to the list of `hostnames` in your zonegroup configuration
+
+```bash
+radosgw-admin zonegroup get --rgw-zonegroup=vn-hanoi > zg.json
+
+# add `cname.domain.com` to `hostnames`
+radosgw-admin zonegroup set --infile=zg.json
+radosgw-admin period update --commit
+```
+
+.*References*:
+* https://docs.ceph.com/en/quincy/radosgw/s3/commons/#bucket-and-host-name[Bucket and Hostname]
+* https://docs.ceph.com/en/quincy/radosgw/multisite/#set-a-zone-group[Set a Zonegroup]
+
+## Adding/Removing OSD
+### How rook setup OSDs
+* Step 1: Rook operator create `rook-ceph-osd-prepare-<node>` job for each node, which run `/rook/rook ceph osd provision` command
++
+.`ROOK_DATA_DEVICES` envvar example
+[%collapsible]
+====
+```json
+[
+  {
+    "id": "sdb",
+    "storeConfig": {
+      "osdsPerDevice": 1,
+      "metadataDevice": "sdd"
+    }
+  },
+  {
+    "id": "sdc",
+    "storeConfig": {
+      "osdsPerDevice": 1,
+      "metadataDevice": "sdd"
+    }
+  }
+]
+```
+====
+
+* Step 2: `osd-prepare` job use `ceph-volume` to pepare:
++
+```bash
+ceph-volume lvm batch --prepare --yes \
+  --bluestore --osds-per-device 1 \
+  /dev/sdb \
+  /dev/sdc \
+  --db-devices /dev/sdd
+```
+
+* Step 3: `osd-prepare` job report result via `rook-ceph-osd-<node>-status` configmap.
++
+.Report result is look like:
+[%collapsible]
+====
+```json
+{
+  "osds": [
+    {
+      "id": 0,
+      "cluster": "ceph",
+      "uuid": "3d4d83f8-d6c4-436b-beb0-76beb4291866",
+      "device-part-uuid": "",
+      "device-class": "hdd",
+      "lv-path": "/dev/ceph-block-dbs-515cd927-0b7b-4495-b5e3-4ed6e9681c97/osd-block-db-f04e4ffb-3312-42c9-a0f7-218b5a5aed0a",
+      "metadata-path": "",
+      "wal-path": "",
+      "skip-lv-release": false,
+      "location": "root=default host=k8s-w3 region=vn-hanoi zone=vn-hanoi-langha",
+      "lv-backed-pv": false,
+      "lv-mode": "lvm",
+      "store": "bluestore",
+      "topologyAffinity": "topology.kubernetes.io/zone=vn-hanoi-langha"
+    },
+    {
+      "id": 4,
+      "cluster": "ceph",
+      "uuid": "0c089c8f-a5f4-4957-94bb-11b5760d462e",
+      "device-part-uuid": "",
+      "device-class": "hdd",
+      "lv-path": "/dev/ceph-block-dbs-515cd927-0b7b-4495-b5e3-4ed6e9681c97/osd-block-db-2fdda6d6-06f7-4c03-91ab-be4dc303604b",
+      "metadata-path": "",
+      "wal-path": "",
+      "skip-lv-release": false,
+      "location": "root=default host=k8s-w3 region=vn-hanoi zone=vn-hanoi-langha",
+      "lv-backed-pv": false,
+      "lv-mode": "lvm",
+      "store": "bluestore",
+      "topologyAffinity": "topology.kubernetes.io/zone=vn-hanoi-langha"
+    }
+  ],
+  "status": "completed",
+  "pvc-backed-osd": false,
+  "message": ""
+}
+```
+====
+
+* Step 4: Rook operator read `rook-ceph-osd-<node>-status` configmap and create corresponding OSD deployment.
+
+### Adding OSD
+* Step 1: plug new devices into existing node or add new nodes into k8s
+* Step 2: Update your CephCluster CR (`cluster.yaml`) w/ new devices
+
+### Removing OSD
+* Step 1: Update your CephCluster CR
+* Step 2: Stop the Rook Operator
++
+```bash
+kubectl scale deployment/rook-ceph-operator --replicas=0
+```
+
+* Step 3: Delete deployment
++
+```bash
+kubectl delete deployment/rook-ceph-osd-<id>
+```
+
+* Step 4: Purge OSD in Ceph
++
+```bash
+kubectl exec -it deployment/rook-ceph-tools -- bash
+
+# in ceph-tools
+ceph osd purge <id> --yes-i-really-mean-it
+
+# checking
+ceph osd tree
+ceph auth ls
+```
+
+* Step 5: Zap the disk
++
+```bash
+# Remove all lv & vg associate to the disk
+lvremove $VG $LV
+vgremove $VG
+
+DISK="/dev/sdb"
+sgdisk --zap-all $DISK
+
+# Clean hdds with dd
+dd if=/dev/zero of="$DISK" bs=1M count=100 oflag=direct,dsync
+# Clean ssd with blkdiscard
+blkdiscard $DISK
+
+partprobe $DISK
+```
+
+### Replacing OSD
+#### OSD device contains both data & metadata
+Simply remove & add OSD as above
+
+#### OSD metadata in a sperated device
+* Step 1: Remove OSD as in 6.2.
++
+Remmeber, you need to remove metadata lv as well.
+* Step 2*: export `osd-prepare` pod, modify and run in interactive mode.
+* Step 3: Manual create metadata lv
++
+```bash
+export VG_MD=...
+export LV_MD=osd-block-db-$(uuidgen)
+
+lvcreate -l 100%FREE ${VG_MD} -n ${LV_MD}
+```
+
+* Step 4: Customize `ROOK_DATA_DEVICES` envvar & run `rook ceph osd provision`
++
+```bash
+export ROOK_DATA_DEVICES=$(cat <<EOF
+[
+    {
+        "id": "<sdx>",
+        "storeConfig": {
+            "osdsPerDevice": 1,
+            "metadataDevice": "$VG_MD/$LV_MD"
+        }
+    }
+]
+EOF
+)
+
+rook ceph osd provision
+```
+
+* Step 5: Start `rook-ceph-operator`
++
+```bash
+kubectl scale deployment/rook-ceph-operator --replicas=1
+```
+
+.*References*:
+* https://docs.ceph.com/en/latest/rados/operations/add-or-rm-osds/[Ceph adding/removing OSDs]
+* Rook https://rook.io/docs/rook/v1.7/ceph-osd-mgmt.html[Ceph OSD Management]
+* Rook https://rook.io/docs/rook/v1.7/ceph-teardown.html[ceph teardown]
+doc
+
+## Object unfound
+```bash
+ceph pg ls-by-pool <pool> | grep recovery_unfound
+
+ceph pg <pg> list_unfound
+
+ceph pg <pg> mark_unfound_lost delete|revert
+```
+
+## Repairing inconsistent pg
+```bash
+# list of inconsistent PGs
+rados list-inconsistent-pg <pool>
+
+# list of inconsistent RADOS objects
+rados list-inconsistent-obj <pgid>
+
+# list of inconsistent snapsets in a specific PG
+rados list-inconsistent-snapset <pgid>
+
+# To repair a broken PG
+ceph pg repair <pgid>
+```
+
+.*References*:
+* https://docs.ceph.com/en/latest/rados/operations/pg-repair/[Ceph docs]
+
+## Change the IP of k8s & ceph nodes
+### Change etcd IPs
+To change IPs of all nodes, you need to *snapshot and restore* etcd cluster.
+
+* Before change IPs, snapshot etcd
+```bash
+rke etcd snapshot-save
+```
+
+* you can view snapshot data in master node:
+```console
+root@ceph-m1:~# ls -ahl /opt/rke/etcd-snapshots/
+total 5.2M
+drwxr-xr-x 2 root root 4.0K Jun  3 02:51 .
+drwxr-xr-x 3 root root 4.0K Jun  3 02:51 ..
+-rw------- 1 root root 1.5M Jun  3 02:37 2022-05-26T14:25:28Z_etcd.zip
+-rw------- 1 root root 732K Jun  3 02:37 rke_etcd_snapshot_2022-05-26T09:34:30+07:00.zip
+-rw------- 1 root root 3.1M Jun  3 02:37 rke_etcd_snapshot_2022-06-02T16:50:27+07:00.zip
+```
+
+* After change IPs, restore etcd from snapshot
+```bash
+# w/o .zip extention
+rke etcd snapshot-restore --name=rke_etcd_snapshot_2022-06-02T16:50:27+07:00
+```
+
+.*References*:
+* https://rancher.com/docs/rke/latest/en/etcd-snapshots/[RKE: Backups and Disaster Recovery]
+
+### Change Ceph mon IPs
+To change IP of all mons at once, you need to update monmap using `monmaptool`:
+
+1. Stop the operator
++
+```bash
+kubectl -n rook-ceph scale/deployment rook-ceph-operator --replicas=0
+```
+
+2. Edit the Rook configmap and secret
++
+```bash
+kubectl -n rook-ceph edit configmap rook-ceph-mon-endpoints
+
+kubectl ksd get secrets rook-ceph-config -o yaml > rook-ceph-config.yaml
+# modify rook-ceph-config.yaml
+kubectl appy -f rook-ceph-config.yaml
+```
+
+3. Take a backup of the current `rook-ceph-mon-a` deployment
++
+```bash
+kubectl -n rook-ceph get deployment rook-ceph-mon-a -o yaml > rook-ceph-mon-a-deployment.yaml
+```
+
+4. Modify `mon-a` deployment in order to run interactive
++
+```yaml
+# mon-a.patch.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rook-ceph-mon-a
+spec:
+  template:
+    spec:
+      containers:
+        - name: mon
+          command: ["sleep", "infinity"]
+          args: null
+          livenessProbe: null
+          startupProbe: null
+```
++
+then:
++
+```bash
+kubectl patch deploy/rook-ceph-mon-a --patch-file mon-a.patch.yaml
+```
+
+5. Extract `monmap`
++
+```bash
+kubectl exec -it deploy/rook-ceph-mon-a -- bash
+
+# inside mon-a pod
+ceph-mon --id=a --extract-monmap=/tmp/monmap
+
+# review the contents of the monmap
+monmaptool --print /tmp/monmap
+```
+
+6. Change mon IP
++
+```bash
+monmaptool /tmp/monmap --rm a --rm b --rm c
+monmaptool /tmp/monmap \
+  --addv a [v2:10.148.0.113:3300/0,v1:10.148.0.113:6789/0] \
+  --addv b [v2:10.148.0.112:3300/0,v1:10.148.0.112:6789/0] \
+  --addv c [v2:10.148.0.111:3300/0,v1:10.148.0.111:6789/0]
+
+monmaptool --print /tmp/monmap
+```
+
+7. inject the modified monmap into the mon
++
+```bash
+ceph-mon --id=a --inject-monmap=/tmp/monmap
+```
+
+8. restart the mon
++
+```bash
+kubectl replace --force -f rook-ceph-mon-a-deployment.yaml
+# Option --force will delete the deployment and create a new one
+```
++
+Repeat step 3 -> 8 for all mons
+
+9. Restart the operator
++
+```bash
+kubectl -n rook-ceph scale/deployment rook-ceph-operator --replicas=1
+```
+
+.*References*:
+* https://www.rook.io/docs/rook/v1.9/Troubleshooting/disaster-recovery/#inject-a-new-monmap[Rook: Inject a new monmap]
+* https://docs.ceph.com/en/latest/rados/operations/add-or-rm-mons/[Ceph: Add or remove Monitors]

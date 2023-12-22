@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rook-ceph-rgw-s3-loadbalancer
+  namespace: rook-ceph
+  labels:
+    app: rook-ceph-rgw
+    rook_cluster: rook-ceph
+    rook_object_store: s3
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.10.10
+  ports:
+  - name: http
+    port: 7480
+    protocol: TCP
+    targetPort: 7480
+  # - name: https
+  #   port: 7443
+  #   protocol: TCP
+  #   targetPort: 7443
+  selector:
+    app: rook-ceph-rgw
+    rook_cluster: rook-ceph
+    rook_object_store: s3
+  sessionAffinity: None

@@ -1,0 +1,46 @@
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: rbd-hdd
+  namespace: rook-ceph
+spec:
+  failureDomain: host
+  deviceClass: hdd
+  replicated:
+    size: 3
+  enableRBDStats: true
+---
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: rbd-ssd
+  namespace: rook-ceph
+spec:
+  failureDomain: host
+  deviceClass: ssd
+  replicated:
+    size: 3
+  enableRBDStats: true
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ceph-rbd-ssd
+provisioner: rook-ceph.rbd.csi.ceph.com
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+parameters:
+  clusterID: rook-ceph
+  pool: rbd-ssd
+
+  imageFormat: "2"
+  imageFeatures: layering
+
+  # The secrets contain Ceph admin credentials.
+  csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+  csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+  csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+  csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+  csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+  csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+  csi.storage.k8s.io/fstype: xfs

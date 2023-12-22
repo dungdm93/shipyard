@@ -1,0 +1,8 @@
+apiVersion: ceph.rook.io/v1
+kind: CephObjectStoreUser
+metadata:
+  name: readonly
+  namespace: rook-ceph
+spec:
+  store: s3
+  displayName: Read-only User

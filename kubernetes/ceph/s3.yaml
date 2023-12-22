@@ -1,0 +1,67 @@
+apiVersion: ceph.rook.io/v1
+kind: CephObjectRealm
+metadata:
+  name: data
+  namespace: rook-ceph
+---
+apiVersion: ceph.rook.io/v1
+kind: CephObjectZoneGroup
+metadata:
+  name: vn-hanoi
+  namespace: rook-ceph
+spec:
+  realm: data
+---
+apiVersion: ceph.rook.io/v1
+kind: CephObjectZone
+metadata:
+  name: vn-hanoi-1
+  namespace: rook-ceph
+spec:
+  zoneGroup: vn-hanoi
+  metadataPool:
+    failureDomain: host
+    deviceClass: ssd
+    replicated:
+      size: 3
+  dataPool:
+    failureDomain: host
+    deviceClass: hdd # hdd | ssd | nvme
+    compressionMode: none # none | passive | aggressive | force
+    erasureCoded:
+      algorithm: jerasure # jerasure | isa | lrc | shec | clay
+      dataChunks: 4
+      codingChunks: 2
+---
+apiVersion: ceph.rook.io/v1
+kind: CephObjectStore
+metadata:
+  name: s3
+  namespace: rook-ceph
+spec:
+  zone:
+    name: vn-hanoi-1
+  gateway:
+    type: s3
+    instances: 6
+    port: 7480
+    # securePort: 7443
+    # sslCertificateRef:
+    resources:
+      requests:
+        cpu: "3"
+        memory: "6Gi"
+      limits:
+        cpu: "10"
+        memory: "18Gi"
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ceph-s3
+provisioner: rook-ceph.ceph.rook.io/bucket
+reclaimPolicy: Retain
+parameters:
+  objectStoreName: s3
+  objectStoreNamespace: rook-ceph
+  region: vn-hanoi

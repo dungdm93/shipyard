@@ -1,0 +1,35 @@
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: apps-logs
+  namespace: rook-ceph
+spec:
+  bucketName: apps-logs
+  storageClassName: ceph-s3
+---
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: apps-metrics
+  namespace: rook-ceph
+spec:
+  bucketName: apps-metrics
+  storageClassName: ceph-s3
+---
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: apps-traces
+  namespace: rook-ceph
+spec:
+  bucketName: apps-traces
+  storageClassName: ceph-s3
+---
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: apps-audits
+  namespace: rook-ceph
+spec:
+  bucketName: apps-audits
+  storageClassName: ceph-s3
