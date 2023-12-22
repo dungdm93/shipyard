@@ -1,0 +1,127 @@
+# Generate default configs
+# > rke config -e -p
+
+.master: &master
+  role:
+  - etcd
+  - controlplane
+  user: admin
+  labels:
+    topology.kubernetes.io/region: vn-hanoi
+    topology.kubernetes.io/zone: vn-hanoi-1
+  taints: []
+
+.worker: &worker
+  role:
+  - worker
+  user: admin
+  labels:
+    topology.kubernetes.io/region: vn-hanoi
+    topology.kubernetes.io/zone: vn-hanoi-1
+  taints: []
+
+cluster_name: kit106.dungdm93.me
+kubernetes_version: v1.24.6-rancher1-1
+enable_cri_dockerd: false
+
+nodes:
+- <<: *master
+  address: 172.16.0.1
+  hostname_override: serving-master-0-1
+- <<: *master
+  address: 172.16.0.2
+  hostname_override: serving-master-0-2
+- <<: *master
+  address: 172.16.0.3
+  hostname_override: serving-master-0-3
+
+- <<: *worker
+  address: 172.16.0.4
+  hostname_override: serving-worker-0-4
+- <<: *worker
+  address: 172.16.0.5
+  hostname_override: serving-worker-0-5
+- <<: *worker
+  address: 172.16.0.6
+  hostname_override: serving-worker-0-6
+- <<: *worker
+  address: 172.16.0.7
+  hostname_override: serving-worker-0-7
+- <<: *worker
+  address: 172.16.0.8
+  hostname_override: serving-worker-0-8
+- <<: *worker
+  address: 172.16.0.9
+  hostname_override: serving-worker-0-9
+
+# ssh_key_path: ~/.ssh/id_rsa
+# ssh_agent_auth: true
+# bastion_host:
+#   address: 172.16.56.1
+#   user: data
+
+services:
+  etcd:
+    extra_args:
+      # https://etcd.io/docs/current/dev-guide/limit/
+      quota-backend-bytes: 4294967296 # 4GiB, default 2GiB, max 8GiB
+      # https://etcd.io/docs/current/op-guide/maintenance/#auto-compaction
+      auto-compaction-mode: periodic
+      auto-compaction-retention: 6h
+      # default /metrics endpoint require TLS authen
+      listen-metrics-urls: http://0.0.0.0:2381
+  kube-api:
+    service_cluster_ip_range: 10.5.0.0/16
+    extra_args:
+      oidc-issuer-url: https://keycloak.dungdm93.me/realms/kit106
+      oidc-client-id:  kubernetes
+      oidc-username-claim:  email
+      oidc-username-prefix: oidc://
+      oidc-groups-claim:    groups
+      oidc-groups-prefix:   oidc://
+  kube-controller:
+    cluster_cidr:             10.4.0.0/16
+    service_cluster_ip_range: 10.5.0.0/16
+  kubelet:
+    cluster_domain:     cluster.local
+    cluster_dns_server: 10.5.0.10
+    extra_binds:
+    - /opt/containerd:/opt/containerd
+    - /var/lib/containerd:/var/lib/containerd
+    extra_args:
+      container-runtime: remote
+      container-runtime-endpoint: unix:///run/containerd/containerd.sock
+      cgroup-driver: systemd
+      container-log-max-files: 3      # default=5
+      container-log-max-size:  128Mi  # default=10Mi
+      # ref: https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/
+      kube-reserved:   cpu=500m,memory=512Mi,ephemeral-storage=1Gi,pid=1000
+      system-reserved: cpu=500m,memory=512Mi,ephemeral-storage=1Gi,pid=1000
+      # ref: https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/
+      eviction-soft: memory.available<10%
+      eviction-soft-grace-period: memory.available=1m30s
+      eviction-hard: memory.available<5%
+  kubeproxy:
+    extra_args:
+      # Cilium not support kube-proxy in IPVS mode.
+      # https://github.com/cilium/cilium/issues/18610
+      proxy-mode: iptables
+      metrics-bind-address: 0.0.0.0
+
+authentication:
+  strategy: x509
+  sans:
+  - kit106.dungdm93.me
+  webhook: null
+authorization:
+  mode: rbac
+
+addon_job_timeout: 30
+network:
+  plugin: none
+dns:
+  provider: none
+monitoring: # Metrics Server
+  provider: none
+ingress:
+  provider: none
