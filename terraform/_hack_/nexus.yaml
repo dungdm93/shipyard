@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  nexus:
+    image: sonatype/nexus3:3.40.1
+    network_mode: host
+    environment:
+      # default: admin/admin123
+      NEXUS_SECURITY_RANDOMPASSWORD: "false"
+    volumes:
+    - nexus_data:/nexus-data
+
+volumes:
+  nexus_data:
+
+networks:
+  default:
+    name: cogwheel
