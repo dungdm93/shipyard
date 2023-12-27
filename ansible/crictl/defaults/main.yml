@@ -1,0 +1,13 @@
+default_crictl_installer:
+  version: v1.18.0
+  # via Nexus: http://nexus.host/repository/raw-proxy_github.com/
+  download_repo: "https://github.com"
+
+default_crictl:
+  runtime-endpoint: unix:///var/run/dockershim.sock
+  # image-endpoint:   unix:///var/run/dockershim.sock
+  # timeout: 10
+  # debug: true
+
+crictl_installer: {}
+crictl: {}

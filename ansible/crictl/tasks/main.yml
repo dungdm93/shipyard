@@ -1,0 +1,30 @@
+---
+- name: set "crictl_config" var
+  ansible.builtin.set_fact:
+    crictl_config: "{{default_crictl | combine(crictl, recursive=True)}}"
+
+# https://kubernetes.io/docs/tasks/debug-application-cluster/crictl/
+- name: Install crictl
+  vars:
+    installer: "{{default_crictl_installer | combine(crictl_installer, recursive=True)}}"
+  block:
+  - name: Download crictl
+    ansible.builtin.shell:
+      cmd: |
+        set -euxo pipefail
+        curl -L "{{installer.download_repo}}/kubernetes-sigs/cri-tools/releases/download/{{installer.version}}/crictl-{{installer.version}}-linux-amd64.tar.gz" -o "/tmp/crictl.tar.gz"
+        tar -xf "/tmp/crictl.tar.gz" -C "/usr/local/bin/"
+        rm -rf  "/tmp/crictl.tar.gz"
+      executable: /bin/bash
+      creates: /usr/local/bin/crictl
+
+  - name: Install bash completion
+    ansible.builtin.shell:
+      cmd: crictl completion bash > /etc/bash_completion.d/crictl
+      executable: /bin/bash
+      creates: /etc/bash_completion.d/crictl
+
+- name: Config /etc/crictl.yaml
+  ansible.builtin.copy:
+    content: "{{crictl_config | to_nice_yaml(indent=2)}}"
+    dest: /etc/crictl.yaml
