@@ -1,0 +1,16 @@
+---
+- name: apt | Config apt repos
+  ansible.builtin.copy:
+    dest: "{{item.key}}"
+    content: |
+      {% for repo in item.value %}
+        {{- repo | to_apt }}
+      {% endfor %}
+  loop: "{{apt_repos | dict2items}}"
+  loop_control:
+    label: "{{item.key}}"
+
+- name: apt | Install packages
+  ansible.builtin.apt:
+    pkg: "{{apt_packages}}"
+    state: present

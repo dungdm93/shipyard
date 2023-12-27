@@ -1,0 +1,23 @@
+---
+- name: Populate service facts
+  ansible.builtin.service_facts: {}
+
+- ansible.builtin.include_tasks: kernel_modules.yml
+
+- ansible.builtin.include_tasks: sysctl.yml
+
+- ansible.builtin.include_tasks: time.yml
+  when: time.server
+
+- ansible.builtin.include_tasks: domain.yml
+  when: domain.addresses | length > 0
+
+- ansible.builtin.include_tasks: apt.yml
+
+- ansible.builtin.include_tasks: packages.yml
+
+- ansible.builtin.include_tasks: hostname.yml
+
+- ansible.builtin.include_tasks: swap.yml
+
+- ansible.builtin.include_tasks: limits.yml

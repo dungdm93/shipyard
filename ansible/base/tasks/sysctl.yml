@@ -1,0 +1,14 @@
+---
+- name: sysctl | set "sysctl" var
+  ansible.builtin.set_fact:
+    sysctl: "{{default_sysctl | combine(sysctl)}}"
+
+- name: sysctl | Config /etc/sysctl.d/99-kubernetes-cri.conf
+  ansible.posix.sysctl:
+    name:  "{{item.key}}"
+    value: "{{item.value}}"
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+    state: present
+    reload: yes
+    ignoreerrors: yes
+  loop: "{{sysctl | dict2items}}"

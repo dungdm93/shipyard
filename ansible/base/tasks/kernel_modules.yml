@@ -1,0 +1,19 @@
+# Kernel module:
+# * loc: /etc/modules-load.d/
+# * ref: https://docs.ansible.com/ansible/latest/modules/modprobe_module.html
+# Kernel blacklist:
+# * loc: /etc/modprobe.d/
+# * ref: https://docs.ansible.com/ansible/latest/modules/kernel_blacklist_module.html
+---
+- name: kernel-modules | set "kernel_modules" var
+  ansible.builtin.set_fact:
+    kernel_modules: "{{default_kernel_modules + kernel_modules}}"
+
+- name: kernel-modules | Config /etc/modules-load.d/container.conf
+  ansible.builtin.copy:
+    content: "{{kernel_modules | unique | sort | join('\n')}}"
+    dest:    /etc/modules-load.d/container.conf
+  notify: restart_systemd-modules-load
+
+# sysctl require kernel modules to work
+- ansible.builtin.meta: flush_handlers

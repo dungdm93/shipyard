@@ -1,0 +1,6 @@
+---
+- name: limits | Config /etc/security/limits.d/99-kubernetes-cri.conf
+  ansible.builtin.copy:
+    dest:    /etc/security/limits.d/99-kubernetes-cri.conf
+    content: "{{limits}}"
+  when: (limits is defined) and (limits|length > 0)

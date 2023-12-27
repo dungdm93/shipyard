@@ -1,0 +1,40 @@
+# Remove LXC/LXD
+---
+- name: Snap remove lxd
+  community.general.snap:
+    name:  lxd
+    state: absent
+
+- name: APT remove lxd
+  ansible.builtin.apt:
+    package:
+    - lxc
+    - lxc-utils
+    - lxcfs
+    - lxd
+    - lxd-client
+    - lxd-tools
+    state: absent
+    purge: yes
+    autoclean: yes
+    autoremove: yes
+
+- name: Remove lxd data
+  ansible.builtin.file:
+    path: "{{item}}"
+    state: absent
+  loop:
+  - /root/snap/lxd  # and from other users
+  - /var/snap/lxd
+  - /var/lib/lxcfs
+  - /var/lib/lxd
+  - /var/log/lxd
+
+- name: Remove multipath
+  ansible.builtin.apt:
+    package:
+    - multipath-tools
+    state: absent
+    purge: yes
+    autoclean: yes
+    autoremove: yes

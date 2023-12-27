@@ -1,0 +1,57 @@
+default_kernel_modules:
+- overlay
+- br_netfilter
+
+default_sysctl:
+  net.bridge.bridge-nf-call-iptables:   1
+  net.ipv4.ip_forward:                  1
+  net.bridge.bridge-nf-call-ip6tables:  1
+  net.ipv6.conf.all.forwarding:         1
+  net.ipv4.conf.default.rp_filter:      0
+  net.ipv4.conf.all.rp_filter:          0
+  net.ipv4.conf.*.rp_filter:            0
+
+kernel_modules: []
+sysctl: {}
+time:
+  service: # systemd-timesyncd
+  server:  # time.google.com
+domain:
+  addresses: [] # ["8.8.8.8", "1.1.1.1"]
+  search:    [] # [dungdm93.local]
+apt_repos: {}
+#  "/etc/apt/sources.list":
+#   - uri: http://archive.ubuntu.com/ubuntu/
+#     distribution: focal
+#     components: [main, restricted, universe, multiverse]
+#   - uri: http://archive.ubuntu.com/ubuntu/
+#     distribution: focal-updates
+#     components: [main, restricted, universe, multiverse]
+#   - uri: http://archive.ubuntu.com/ubuntu/
+#     distribution: focal-backports
+#     components: [main, restricted, universe, multiverse]
+#   - uri: http://security.ubuntu.com/ubuntu
+#     distribution: focal-security
+#     components: [main, restricted, universe, multiverse]
+#   "/etc/apt/sources.list.d/partner.list":
+#   - uri: http://archive.canonical.com/ubuntu
+#     distribution: focal
+#     components: [partner]
+apt_packages:
+# storage
+- lvm2
+- mdadm
+# network
+- iproute2
+- iptables
+- ipset
+- ipvsadm
+# checking
+- telnet
+- net-tools # netstat
+- dnsutils  # dig
+# monitor
+- nmon
+- htop
+# k8s
+- socat

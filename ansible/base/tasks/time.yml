@@ -1,0 +1,54 @@
+---
+- name: time | Setup systemd-timesyncd
+  block:
+  - name: time > systemd-timesyncd | Config /etc/systemd/timesyncd.conf
+    community.general.ini_file:
+      path:    /etc/systemd/timesyncd.conf
+      section: Time
+      option:  NTP
+      value:   "{{time.server | mandatory}}"
+    notify: restart_time
+    when: time.service == 'systemd-timesyncd'
+
+  - name: time > systemd-timesyncd | Config systemd-timesyncd.service
+    ansible.builtin.systemd:
+      name: systemd-timesyncd.service
+      state: "{{'started' if time.service == 'systemd-timesyncd' else 'stopped'}}"
+      enabled: "{{time.service == 'systemd-timesyncd'}}"
+    when: (ansible_facts.services['systemd-timesyncd.service'] is defined) or (time.service == 'systemd-timesyncd')
+
+- name: time | Setup Chrony
+  block:
+  - name: time > chrony | Config /etc/chrony/chrony.conf
+    ansible.builtin.lineinfile:
+      path:   /etc/chrony/chrony.conf
+      regexp: '^server\s+([\w\.]+)\s+(.*)$'
+      line:   'server {{time.server}} \g<2>'
+      backrefs: yes
+    notify: restart_time
+    when: time.service == 'chrony'
+
+  - name: time > chrony | Config chrony.service
+    ansible.builtin.systemd:
+      name: chrony.service
+      state: "{{'started' if time.service == 'chrony' else 'stopped'}}"
+      enabled: "{{time.service == 'chrony'}}"
+    when: (ansible_facts.services['chrony.service'] is defined) or (time.service == 'chrony')
+
+- name: time | Setup ntpd
+  block:
+  - name: time > ntpd | Config /etc/ntp.conf
+    ansible.builtin.lineinfile:
+      path:   /etc/ntp.conf
+      regexp: '^server\s+([\w\.]+)\s+(.*)$'
+      line:   'server {{time.server}} \g<2>'
+      backrefs: yes
+    notify: restart_time
+    when: time.service == 'ntp'
+
+  - name: time > ntpd | Config ntp.service
+    ansible.builtin.systemd:
+      name: ntp.service
+      state: "{{'started' if time.service == 'ntp' else 'stopped'}}"
+      enabled: "{{time.service == 'ntp'}}"
+    when: (ansible_facts.services['ntp.service'] is defined) or (time.service == 'ntp')

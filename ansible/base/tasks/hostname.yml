@@ -1,0 +1,31 @@
+# ref: https://github.com/ANXS/hostname/blob/master/tasks/main.yml
+---
+- name: hostname | Update /etc/hosts
+  ansible.builtin.lineinfile:
+    path:    /etc/hosts
+    regexp: '^127\.0\.1\.1'
+    line:   '127.0.1.1	{{inventory_hostname}}'
+    insertafter:  '^127\.0\.0\.1'
+    # insertbefore: '^::1'
+
+- name: hostname | Update /etc/hostname
+  ansible.builtin.hostname:
+    name: "{{inventory_hostname}}"
+    use:  systemd
+
+- name: Check file /etc/cloud/cloud.cfg exists
+  ansible.builtin.stat:
+    path: /etc/cloud/cloud.cfg
+  register: cloud_cfg_result
+
+# ref: https://cloudinit.readthedocs.io/en/latest/topics/modules.html#set-hostname
+- name: hostname | Update /etc/cloud/cloud.cfg
+  ansible.builtin.lineinfile:
+    path:   /etc/cloud/cloud.cfg
+    regexp: '^{{item.key}}\s*:'
+    line:   '{{item.key}}: {{item.value}}'
+  with_dict:
+    preserve_hostname: "true"
+    hostname: "{{inventory_hostname}}"
+    # fqdn:
+  when: cloud_cfg_result.stat.exists

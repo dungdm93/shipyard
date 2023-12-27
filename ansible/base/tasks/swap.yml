@@ -1,0 +1,11 @@
+---
+- name: Disable Swap
+  swapoff: {}
+
+- name: Remove swap files
+  ansible.builtin.file:
+    path:  "{{item}}"
+    state: absent
+  loop:
+  - /swapfile
+  - /swap.img
