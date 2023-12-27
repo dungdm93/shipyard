@@ -36,6 +36,12 @@
   environment:
     DOWNLOAD_URL: "{{installer.download_url | default(omit)}}"
 
+- name: Install docker plugins
+  ansible.builtin.apt:
+    pkg: "{{docker_plugins}}"
+    state: present
+  when: docker_plugins
+
 - name: Prevent docker from being upgraded
   ansible.builtin.dpkg_selections:
     name: "{{item}}"

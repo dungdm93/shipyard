@@ -28,5 +28,11 @@ default_containerd:
               SystemdCgroup: true
 
 dockerd: {}
+docker_plugins: []
+  ## thoses plugins pre-installed by get.docker.io script
+  # - docker-compose-plugin
+  # - docker-buildx-plugin
+  # - docker-scan-plugin
+
 containerd: {}
 containerd_cri: {}
