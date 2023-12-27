@@ -1,0 +1,36 @@
+---
+- name: Install nerdctl
+  vars:
+    installer: "{{default_nerdctl_installer | combine(nerdctl_installer, recursive=True)}}"
+  block:
+  - name: Download nerdctl
+    ansible.builtin.shell:
+      cmd: |
+        set -euxo pipefail
+        curl -L "{{installer.download_repo}}/containerd/nerdctl/releases/download/v{{installer.version}}/nerdctl-{{installer.version}}-linux-amd64.tar.gz" -o "/tmp/nerdctl.tar.gz"
+        tar -xf "/tmp/nerdctl.tar.gz" -C "/usr/local/bin/"
+        rm -rf  "/tmp/nerdctl.tar.gz"
+      executable: /bin/bash
+      creates: /usr/local/bin/nerdctl
+
+  - name: Install bash completion
+    ansible.builtin.shell:
+      cmd: nerdctl completion bash > /etc/bash_completion.d/nerdctl
+      executable: /bin/bash
+      creates: /etc/bash_completion.d/nerdctl
+
+- name: Create /etc/nerdctl directory
+  file:
+    path: /etc/nerdctl
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+# https://github.com/containerd/nerdctl/blob/main/docs/config.md
+- name: Config /etc/nerdctl/nerdctl.toml
+  vars:
+    nerdctl_config: "{{default_nerdctl | combine(nerdctl | default({}))}}"
+  ansible.builtin.copy:
+    content: "{{nerdctl_config | to_toml}}"
+    dest: /etc/nerdctl/nerdctl.toml

@@ -1,0 +1,11 @@
+default_nerdctl_installer:
+  version: 1.5.0
+  # via Nexus: http://nexus.host/repository/raw-proxy_github.com/
+  download_repo: "https://github.com"
+
+# https://github.com/containerd/nerdctl/blob/main/docs/config.md
+default_nerdctl:
+  namespace: k8s.io
+
+nerdctl_installer: {}
+nerdctl: {}
