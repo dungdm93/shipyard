@@ -1,0 +1,66 @@
+---
+- name: set "dockerd_config" var
+  ansible.builtin.set_fact:
+    dockerd_config: |
+      {%- set config = default_dockerd -%}
+
+      {%- set mirrors = (config.get('registry-mirrors', []) + dockerd.get('mirrors', [])) | unique -%}
+      {%- set config = config | combine({'registry-mirrors': mirrors}) -%}
+
+      {%- set insecure_mirrors = mirrors | map('regex_search', '^http://.*') | select('string') | list -%}
+      {%- set insecure = (config.get('insecure-registries', []) + insecure_mirrors) | unique -%}
+      {%- set config = config | combine({'insecure-registries': insecure}) -%}
+
+      {{config}}
+
+# https://github.com/containerd/containerd/blob/release/1.6/docs/cri/registry.md
+- name: set "containerd_config" var
+  ansible.builtin.set_fact:
+    containerd_config: |
+      {%- set config = default_containerd | combine(containerd, recursive=True) -%}
+      {%- set cri = config.plugins["io.containerd.grpc.v1.cri"] -%}
+      {%- set _ = cri.update(cri | combine(containerd_cri, recursive=True)) -%}
+
+      {{config}}
+
+# ref: https://docs.docker.com/engine/install/
+- name: Install Docker
+  vars:
+    installer: "{{default_docker_installer | combine(docker_installer | default({}))}}"
+  ansible.builtin.shell:
+    cmd: |
+      set -euxo pipefail
+      curl {{curl_opts | join(' ')}} -sSL {{installer.script_url | quote}} | bash
+    executable: /bin/bash
+    creates: /usr/bin/docker
+  environment:
+    DOWNLOAD_URL: "{{installer.download_url | default(omit)}}"
+
+- name: Prevent docker from being upgraded
+  ansible.builtin.dpkg_selections:
+    name: "{{item}}"
+    selection: hold
+  loop:
+  - docker-ce
+  - containerd.io
+
+- name: Add users to 'docker' group
+  ansible.builtin.user:
+    user:   "{{item}}"
+    groups: "docker"
+    append: yes
+  with_items: "{{docker_users | default(ansible_user)}}"
+
+# ref: https://docs.docker.com/config/daemon/
+- name: Config /etc/docker/daemon.json
+  ansible.builtin.copy:
+    content: "{{dockerd_config | to_nice_json(indent=2)}}"
+    dest: /etc/docker/daemon.json
+  notify: restart_docker
+
+# https://github.com/containerd/containerd/blob/master/docs/man/containerd-config.toml.5.md
+- name: Config /etc/containerd/config.toml
+  ansible.builtin.copy:
+    content: "{{containerd_config | to_toml}}"
+    dest: /etc/containerd/config.toml
+  notify: restart_containerd

@@ -1,0 +1,32 @@
+# https://ec.haxx.se/usingcurl/usingcurl-timeouts
+curl_opts: [--connect-timeout, 3, --speed-time, 15, --speed-limit, 1000]
+
+default_docker_installer:
+  # via Nexus: http://nexus.host/repository/raw-proxy_github.com/docker/docker-install/raw/master/install.sh
+  script_url: https://get.docker.com/
+  # via Nexus: http://nexus.host/repository/apt-proxy_download.docker.com
+  download_url:  null
+
+# https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+default_dockerd:
+  storage-driver: "overlay2"
+  exec-opts: ["native.cgroupdriver=systemd"]
+  log-driver: "json-file"
+  log-opts:
+    max-size: "100m"
+    max-file: "3"
+
+default_containerd:
+  version: 2
+  plugins:
+    io.containerd.grpc.v1.cri:
+      containerd:
+        runtimes:
+          runc:
+            runtime_type: "io.containerd.runc.v2"
+            options:
+              SystemdCgroup: true
+
+dockerd: {}
+containerd: {}
+containerd_cri: {}
