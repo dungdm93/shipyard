@@ -1,0 +1,23 @@
+---
+- hosts: nodes
+  become: true
+  roles:
+  - role: base
+    vars:
+      sysctl:
+        fs.inotify.max_queued_events: 16384
+        fs.inotify.max_user_instances: 8192
+        fs.inotify.max_user_watches: 12288
+        kernel.msgmnb: 65536
+        kernel.msgmax: 65536
+      limits: |
+        * soft nofile 65536
+        * hard nofile 65536
+  - role: docker
+  - role: docker-compose
+  - role: nerdctl
+  - role: crictl
+    vars:
+      crictl:
+        runtime-endpoint: unix:///run/containerd/containerd.sock
+        image-endpoint:   unix:///run/containerd/containerd.sock

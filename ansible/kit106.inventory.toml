@@ -1,0 +1,16 @@
+[all.vars]
+ansible_user = "dungdm93"
+ansible_python_interpreter = "/usr/bin/python3"
+
+[nodes]
+children = ["kit106-master", "kit106-worker"]
+
+[kit106-master.hosts]
+kit106-master-56-121 = { ansible_host = "172.16.0.1" }
+kit106-master-56-122 = { ansible_host = "172.16.0.2" }
+kit106-master-56-123 = { ansible_host = "172.16.0.3" }
+
+[kit106-worker.hosts]
+kit106-worker-56-21 = { ansible_host = "172.16.10.1" }
+kit106-worker-56-22 = { ansible_host = "172.16.10.2" }
+kit106-worker-56-23 = { ansible_host = "172.16.10.3" }
