@@ -1,0 +1,8 @@
+extraVolumeMounts:
+- name: certs
+  readOnly: true
+  mountPath: /certs
+extraVolumes:
+- name: certs
+  secret:
+    secretName: buildkit-daemon-certs

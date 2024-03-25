@@ -83,10 +83,16 @@ spec:
             - mountPath: /home/user/.local/share/buildkit
               name: buildkitd
             {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       volumes:
         {{- if .Values.rootless }}
         - name: buildkitd
           emptyDir: {}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: 30
       serviceAccountName: {{ include "buildkitd.serviceAccountName" . }}

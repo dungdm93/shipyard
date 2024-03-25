@@ -41,6 +41,9 @@ affinity: {}
 tolerations: []
 nodeSelector: {}
 
+extraVolumes: []
+extraVolumeMounts: []
+
 serviceAccount:
   create: true
   annotations: {}
