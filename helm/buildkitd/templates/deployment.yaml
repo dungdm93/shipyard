@@ -25,6 +25,9 @@ spec:
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if .Values.rootless }}
+        container.apparmor.security.beta.kubernetes.io/buildkitd: unconfined
+        {{- end }}
     spec:
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
@@ -35,6 +38,10 @@ spec:
         - name: buildkitd
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- if .Values.rootless }}
+            - --oci-worker-no-process-sandbox
+            {{- end }}
           ports:
             - name: buildkitd
               containerPort: {{ .Values.service.port }}
@@ -58,7 +65,29 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- with .Values.securityContext }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.rootless }}
+            seccompProfile:
+              type: Unconfined
+            runAsUser: 1000
+            runAsGroup: 1000
+            {{- end }}
+          volumeMounts:
+            {{- if .Values.rootless }}
+            # Dockerfile has `VOLUME /home/user/.local/share/buildkit` by default too,
+            # but the default VOLUME does not work with rootless on Google's Container-Optimized OS
+            # as it is mounted with `nosuid,nodev`.
+            # https://github.com/moby/buildkit/issues/879#issuecomment-1240347038
+            - mountPath: /home/user/.local/share/buildkit
+              name: buildkitd
+            {{- end }}
+      volumes:
+        {{- if .Values.rootless }}
+        - name: buildkitd
+          emptyDir: {}
+        {{- end }}
       terminationGracePeriodSeconds: 30
       serviceAccountName: {{ include "buildkitd.serviceAccountName" . }}
       priorityClassName:  {{ .Values.priorityClassName }}

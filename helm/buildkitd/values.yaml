@@ -2,6 +2,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 replicas: 1
+rootless: false
 
 image:
   repository: moby/buildkit
