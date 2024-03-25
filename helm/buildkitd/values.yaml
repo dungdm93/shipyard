@@ -53,3 +53,7 @@ serviceAccount:
 service:
   type: ClusterIP
   port: 1234
+
+# https://github.com/moby/buildkit/blob/v0.13.1/cmd/buildkitd/config/config.go#L8
+# https://docs.docker.com/build/buildkit/toml-configuration/
+config: {}

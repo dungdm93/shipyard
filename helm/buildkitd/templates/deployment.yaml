@@ -39,6 +39,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
+            - --config=/etc/buildkit/buildkitd.toml
             {{- if .Values.rootless }}
             - --oci-worker-no-process-sandbox
             {{- end }}
@@ -75,18 +76,23 @@ spec:
             runAsGroup: 1000
             {{- end }}
           volumeMounts:
+            - name: config
+              mountPath: /etc/buildkit/
             {{- if .Values.rootless }}
             # Dockerfile has `VOLUME /home/user/.local/share/buildkit` by default too,
             # but the default VOLUME does not work with rootless on Google's Container-Optimized OS
             # as it is mounted with `nosuid,nodev`.
             # https://github.com/moby/buildkit/issues/879#issuecomment-1240347038
-            - mountPath: /home/user/.local/share/buildkit
-              name: buildkitd
+            - name: buildkitd
+              mountPath: /home/user/.local/share/buildkit
             {{- end }}
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
       volumes:
+        - name: config
+          configMap:
+            name: {{ include "buildkitd.fullname" . }}
         {{- if .Values.rootless }}
         - name: buildkitd
           emptyDir: {}

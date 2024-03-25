@@ -1,0 +1,16 @@
+{{- $config := .Values.config }}
+{{- $grpc := (dict "grpc" dict | mergeOverwrite $config).grpc }}
+
+{{- $sock := .Values.rootless | ternary "unix:///run/user/1000/buildkit/buildkitd.sock" "unix:///run/buildkit/buildkitd.sock" }}
+{{- $tcp := printf "tcp://:%d" (.Values.service.port | int) }}
+{{- $_ := set $grpc "addr" (list $sock $tcp) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "buildkitd.fullname" . }}
+  labels:
+    {{- include "buildkitd.labels" . | nindent 4 }}
+data:
+  buildkitd.toml: |
+    {{- toToml $config | nindent 4 }}
