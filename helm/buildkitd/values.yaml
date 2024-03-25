@@ -1,0 +1,51 @@
+nameOverride: ""
+fullnameOverride: ""
+
+replicas: 1
+
+image:
+  repository: moby/buildkit
+  tag: ""
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+labels: {}
+podLabels: {}
+annotations: {}
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+schedulerName: null
+runtimeClassName: null
+priorityClassName: null
+
+affinity: {}
+tolerations: []
+nodeSelector: {}
+
+serviceAccount:
+  create: true
+  annotations: {}
+  automount: true
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 1234

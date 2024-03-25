@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "buildkitd.fullname" . }}
+  labels:
+    {{- include "buildkitd.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: buildkitd
+      protocol: TCP
+      name: buildkitd
+  selector:
+    {{- include "buildkitd.selectorLabels" . | nindent 4 }}
